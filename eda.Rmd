@@ -1,0 +1,281 @@
+---
+title: "Exploratory Data Analysis-Argus Data"
+author: "James Wu"
+date: "9/22/2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r,include=FALSE}
+setwd("~/Desktop/Stats Thesis/Dataset/")
+library(plyr)
+library(data.table)
+library(factoextra)
+```
+
+**Reading in Data, Summary Statistics**
+```{r}
+argus = read.csv("argus-anon-20170201.csv")#[1:50000,] 
+summary(argus)
+```
+
+When writing the EDA code I originally used a subset of the data (50000 observations) for faster testing. I ran the code on the entire set for the summary.
+
+**Cleaning Predictors**
+```{r}
+sapply(argus, class)
+argus = transform(argus, 
+                  Sport = as.factor(Sport),
+                  Dport = as.factor(Dport))
+argus = subset(argus, select = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport", 
+                                "SrcPkts", "DstPkts", "SrcBytes", "DstBytes", "State"))
+attach(argus)
+categorical = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport", "State")
+continuous = c("SrcPkts", "DstPkts", "SrcBytes", "DstBytes")
+```
+
+I cast Sport and Dport to factors because R reads them in as ints. I removed Direction and Proto because they are the same value everytime (Direction actually also has unknown values). I also removed StartTime because without an EndTime I don't see how this value can be useful apart from id'ing observations.
+
+**Categorical Features: Unique Categories and Counts**
+```{r}
+sapply(argus, function(x) length(unique(x)))
+#function that returns elements of the feature and their counts in descending order
+element_counts = function(x) {
+  dt = data.table(x)[, .N, keyby = x]
+  dt[order(dt$N, decreasing = TRUE),]
+}
+element_counts(Sport)
+element_counts(Dport)
+element_counts(SrcAddr)
+element_counts(DstAddr)
+element_counts(State)
+```
+
+**Continuous Features: Distributions and Relationships**
+```{r}
+par(mfrow=c(2,2))
+hist(SrcBytes); hist(SrcPkts); hist(DstBytes); hist(DstPkts) #clearly some very large values
+largest_n = function(x, n){
+  head(sort(x, decreasing=TRUE), n)
+}
+largest_n(SrcBytes, 10)
+largest_n(SrcPkts, 10)
+largest_n(DstBytes, 10)
+largest_n(DstPkts, 10)
+```
+
+We see from the histograms and the largest 10 values in each of the continuous variables that is a relatively few amount of large observations skewing the distributions. This is most likely the reason why the earlier model summary has the continuous means much larger than hte medians. Further investigation into these large values is necessary because it may be possible the scanners use very large values. It's also interesting to note that there is a high frequency (up to the first quartile) of destination bytes and packets that equal 0. 
+I will now try understanding the distributions with the largest and smallest 10% of observations removed. We will still need to investigate these small and large values in the future. 
+
+```{r}
+remove_quantiles = function(v, lowerbound, upperbound){
+  return (v[quantile(v,lowerbound) >= v & v <= quantile(v,upperbound)]) 
+}
+SrcBytes.abrev = remove_quantiles(SrcBytes,0.10,0.9)
+SrcPkts.abrev = remove_quantiles(SrcPkts,0.10,0.9)
+DstBytes.abrev = remove_quantiles(DstBytes,0.10,0.9)
+DstPkts.abrev = remove_quantiles(DstPkts,0.10,0.9)
+par(mfrow=c(2,2))
+hist(SrcBytes.abrev); hist(SrcPkts.abrev); hist(DstBytes.abrev); hist(DstPkts.abrev)
+```
+
+The continuous features still seem quite unevenly distributed even with the 20% most extreme values removed. Further investigation into how to deal with these is necessary.
+
+#Correlation Between Features
+```{r}
+cor(SrcBytes, SrcPkts)
+cor(DstBytes, DstPkts)
+cor(SrcBytes, DstBytes)
+cor(SrcPkts, DstPkts)
+```
+
+The plots of the predictors suggest strong linear trends between the predictors, which makes intuitive sense. Further investigation show that DstPkts has a correlation of ~1 with DstBytes and ~0.85 with SrcPkts. Perhaps removing DstPkts as a feature would be useful.
+
+We will now try to investigate whether the largest continuous predictor values correspond to any particular addresses or ports. 
+
+```{r}
+par(mfrow=c(2,2))
+hist(log(SrcBytes)); hist(log(SrcPkts)); hist(log(DstBytes)); hist(log(DstPkts))
+plot(log(SrcPkts), log(SrcBytes)); plot(log(DstPkts), log(DstBytes)) 
+plot(log(SrcBytes), log(DstBytes)); plot(log(SrcPkts), log(DstPkts))
+```
+
+A log transformation for each of the continuous features outputs right-skewed histograms. Skewed features may affect the results of a kernel pca, so we consider other approaches for transformations.
+
+
+#Normal Scores Transformation
+
+```{r}
+normal_transform = function(y){
+  return (qnorm(rank(y, na.last = "keep")/(sum(!is.na(y)) + 1)))
+}
+
+# https://msu.edu/~ashton/research/code/nscore.R
+nscore <- function(x) {
+   # Takes a vector of values x and calculates their normal scores. Returns 
+   # a list with the scores and an ordered table of original values and
+   # scores, which is useful as a back-transform table. See backtr().
+   nscore = qqnorm(x, plot.it = FALSE)$x  # normal score 
+   trn.table = data.frame(x=sort(x),nscore=sort(nscore))
+   return (list(nscore=nscore, trn.table=trn.table))
+}
+
+backtr <- function(scores, nscore, tails='none', draw=TRUE) {
+   # Given a vector of normal scores and a normal score object 
+   # (from nscore), the function returns a vector of back-transformed 
+   # values
+   # 'none' : No extrapolation; more extreme score values will revert 
+   # to the original min and max values. 
+   # 'equal' : Calculate magnitude in std deviations of the scores about 
+   # initial data mean. Extrapolation is linear to these deviations. 
+   # will be based upon deviations from the mean of the original 
+   # hard data - possibly quite dangerous!
+   # 'separate' :  This calculates a separate sd for values 
+   # above and below the mean.
+   
+   if(tails=='separate') { 
+      mean.x <- mean(nscore$trn.table$x)
+      small.x <- nscore$trn.table$x < mean.x
+      large.x <- nscore$trn.table$x > mean.x
+      small.sd <- sqrt(sum((nscore$trn.table$x[small.x]-mean.x)^2)/
+                       (length(nscore$trn.table$x[small.x])-1))
+      large.sd <- sqrt(sum((nscore$trn.table$x[large.x]-mean.x)^2)/
+                       (length(nscore$trn.table$x[large.x])-1))
+      min.x <- mean(nscore$trn.table$x) + (min(scores) * small.sd)
+      max.x <- mean(nscore$trn.table$x) + (max(scores) * large.sd)
+      # check to see if these values are LESS extreme than the
+      # initial data - if so, use the initial data.
+      #print(paste('lg.sd is:',large.sd,'max.x is:',max.x,'max nsc.x is:',max(nscore$trn.table$x)))
+      if(min.x > min(nscore$trn.table$x)) {min.x <- min(nscore$trn.table$x)}
+      if(max.x < max(nscore$trn.table$x)) {max.x <- max(nscore$trn.table$x)}
+   }
+   if(tails=='equal') { # assumes symmetric distribution around the mean
+      mean.x <- mean(nscore$trn.table$x)
+      sd.x <- sd(nscore$trn.table$x)
+      min.x <- mean(nscore$trn.table$x) + (min(scores) * sd.x)
+      max.x <- mean(nscore$trn.table$x) + (max(scores) * sd.x)
+      # check to see if these values are LESS extreme than the
+      # initial data - if so, use the initial data.
+      if(min.x > min(nscore$trn.table$x)) {min.x <- min(nscore$trn.table$x)}
+      if(max.x < max(nscore$trn.table$x)) {max.x <- max(nscore$trn.table$x)}
+   }
+   if(tails=='none') {   # No extrapolation
+      min.x <- min(nscore$trn.table$x)
+      max.x <- max(nscore$trn.table$x)
+   }
+   min.sc <- min(scores)
+   max.sc <- max(scores)
+   x <- c(min.x, nscore$trn.table$x, max.x)
+   nsc <- c(min.sc, nscore$trn.table$nscore, max.sc)
+   
+   if(draw) {plot(nsc,x, main='Transform Function')}
+   back.xf <- approxfun(nsc,x) # Develop the back transform function
+   val <- back.xf(scores)
+   return(val)
+}
+
+SrcBytes_norm = nscore(SrcBytes)$nscore
+SrcBytes_table = nscore(SrcBytes)$trn.table
+
+SrcPkts_norm = nscore(SrcPkts)$nscore
+SrcPkts_table = nscore(SrcPkts)$trn.table
+
+DstBytes_norm = nscore(DstBytes)$nscore
+DstBytes_table = nscore(DstBytes)$trn.table
+
+DstPkts_norm = nscore(DstPkts)$nscore
+DstPkts_table = nscore(DstPkts)$trn.table
+```
+
+
+
+```{r}
+#subsetting the dataset, better way of doing this? Also can I convert the indexing to a function? Not sure how to use the -SrcBytes as a parameter to a function, I want to be able to vary the size of the subset
+max.SrcBytes = argus[with(argus,order(-SrcBytes)),][1:20,]
+max.SrcPkts = argus[with(argus,order(-SrcPkts)),][1:20,]
+max.DstBytes = argus[with(argus,order(-DstBytes)),][1:20,]
+max.DstPkts = argus[with(argus,order(-DstPkts)),][1:20,]
+max.SrcBytes
+max.DstBytes
+```
+
+Source Addresses tend to be repetitive for the largest max bytes/packets, while ports vary. The top 10 largest DstBytes all correspond to SrcAddr 197.0.1.1 and DstAddr 100.0.1.1. Also both max Src and Dst rows correspond to the "* s"" flag. The largest sizes of DstBytes tend to go to Dport 80, which is the port that expects to receive from a web client (http), while the largest SrcBytes go to 31743 (unknown port?). We will implement a systematic way for investigating the relationship between addresses and ports because simply looking at the max rows is difficult.
+
+#Additional Correlation Tests
+
+```{r}
+cor(DstBytes, DstPkts, method = "kendall")
+cor(SrcPkts, DstPkts, method = "kendall")
+cor(DstBytes, DstPkts, method = "spearman")
+cor(SrcPkts, DstPkts, method = "spearman")
+```
+
+Because the original correlation tests relied on the Pearson method, which is susceptible to bias from large values, we conduct further tests to investigate the relationship between DstPkts and the other features. While the correlation is still high, it is no longer 1, so it is less cause for concern.
+
+#Ports Matrix
+
+```{r}
+#set counts
+s_num = 25
+d_num = 25
+combo_num = 25
+#get freqs
+Sport_table = table(Sport)
+Sport_table = Sport_table[order(-Sport_table$value.Freq),]
+top_Sport = (head(Sport_table$value.Sport, s_num))
+
+#get freqs
+Dport_table = table(Dport)
+Dport_table = Dport_table[order(-Dport_table$value.Freq),]
+top_Dport = (head(Dport_table$value.Dport, d_num))
+
+#subset data
+argus_maxes = argus[is.element(Sport, top_Sport) & is.element(Dport, top_Dport), ]
+argus_maxes = transform(argus_maxes, 
+                        Sport = as.numeric(as.character(Sport)),
+                        Dport = as.numeric(as.character(Dport)))
+max_combinations = table(argus_maxes$Sport, argus_maxes$Dport) 
+
+top_combinations = head(max_combinations[order(-max_combinations$value.Freq),], combo_num)
+top_combinations$Sport = top_combinations$value.Var1
+top_combinations$Dport = top_combinations$value.Var2
+top_combinations$value.Var1 = NULL
+top_combinations$value.Var2 = NULL
+top_combinations = transform(top_combinations, 
+                            Sport = as.numeric(as.character(Sport)),
+                            Dport = as.numeric(as.character(Dport)))
+
+extract_intersection = function(sport, dport){
+  argus_subset = argus[Sport == sport & Dport == dport,]
+  return (argus_subset)
+}
+
+generate_combinations_matrix = function(top_combinations){
+  n = dim(top_combinations)[1]
+  combinations = c()
+  for (i in 1:n){
+    sport = as.numeric(top_combinations[i,]$Sport)
+    dport = as.numeric(top_combinations[i,]$Dport)
+    combo = extract_intersection(sport, dport)
+    combinations = c(combinations, list(combo))
+  }
+  return (combinations)
+}
+combinations = generate_combinations_matrix(top_combinations)
+
+```
+
+We now have a matrix built with the most common Sport and Dport combinations. Each entry in the matrix contains all of the observations that correspond to that Sport and Dport combination. We can now perform testing on each group using normal transformations and principal component analysis to see if there are any trends between groups.
+
+#Principal Component Analysis
+```{r}
+#http://www.sthda.com/english/articles/31-principal-component-methods-in-r-practical-guide/118-principal-component-analysis-in-r-prcomp-vs-princomp/#prcomp-and-princomp-functions
+#https://www.r-bloggers.com/computing-and-visualizing-pca-in-r/
+pca_cont_vars = cbind(SrcBytes_norm, SrcPkts_norm, DstBytes_norm, DstPkts_norm)
+cont_pca = prcomp(pca_cont_vars, center = TRUE, scale. = TRUE)
+print(cont_pca)
+fviz_eig(cont_pca) 
+summary(cont_pca)
+```
+
+

@@ -1,0 +1,31 @@
+# Network Dataset
+
+## Features
+The networks dataset contains 13 features, 8 categorical and 5 continuous, and the observations are unlabeled (not specified whether they are considered a scanner). The 13 features are: 
+
+**Continuous:**
+
+- StartTime (Start Time): the time when the observation is logged
+- SrcBytes (Source Bytes): the total number of bytes sent in the observation 
+- SrcPkts (Source Packets): the number of packets sent in the observation
+- DstBytes (Destination Bytes): the total number of bytes received in the observation
+- DstPkts (Destination Packets): the number of packets received in the observation
+Note, the destination packets and bytes features do not have the same values as their source counterparts because the connections are compressed and decompressed into different forms and byte sizes when sent. For instance, it is possible for the number of destination packets to be larger than source packets. It is also possible for information to be lost during the connection.
+
+**Categorical:**
+
+- Flgs (connection flag): flow state flags seen in transaction between the two addresses
+- Proto (network protocol): specifies the rules used for information exchange via network addresses. Transmission Control Protocol (TCP) uses a set of rules to exchange messages with other Internet points at the information packet level, and Internet Protocol (IP) uses a set of rules to send and receive messages at the Internet address level.
+- SrcAddr (Source Address): the IP address of the connection's source 
+- DstAddr (Destination Address): the IP address of the connection's destination
+- Sport (Source Port): the network port number of the connection's source. A port numbers identifies the specific process to which a network message is forwarded when it arrives at a server. 
+- Dport (Destination Port): the network port number of the connection's destination 
+- Dir (direction): the direction of the connection 
+- State (connection state): a categorical assessment of the current phase in the transaction that the timestamp is taken at ???
+
+Note, the addresses have been anonymized for security reasons.
+
+##Argus
+
+Argus is the open source network security tool applied to network transactions that collects the data for the features. The Argus wiki and the OIT manual provides key insights into the structure and nature of the data. Specifically, the sessions are clustered together by address, so the pytes and packets values are accumulative over a set duration and each session has its own start time but does not have a tracked end time. There exist 2-4 million connections on average every 5 minutes. Furthermore the protocol in this dataset is always gathered from TCP protocol and the direction will always be to the right (i.e. Source to Destination). This information supports dropping proto, StartTime, and Direction from the dataset for future analysis because they do not present any information regarding whether an observation can be considered an anomaly. Furthermore, the State feature may not be reliable because Argus occasionally resets the state data statistics during monitoring.
+

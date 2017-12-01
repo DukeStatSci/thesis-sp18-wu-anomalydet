@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Matrix Based Anomaly Detection Techniques Applied to Network Attacks</title>
+  <meta name="description" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
+  
+  
+  
+
+<meta name="author" content="James C. Wu">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="6-additional-correlation-tests.html">
+<link rel="next" href="8-investigating-combinations.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./"></a></li>
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html"><i class="fa fa-check"></i>Preliminary Content</a><ul>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#abstract"><i class="fa fa-check"></i>Abstract</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="1-introduction.html"><a href="1-introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="1-introduction.html"><a href="1-introduction.html#anomaly-detection"><i class="fa fa-check"></i><b>1.1</b> Anomaly Detection</a></li>
+<li class="chapter" data-level="1.2" data-path="1-introduction.html"><a href="1-introduction.html#network-attacks"><i class="fa fa-check"></i><b>1.2</b> Network Attacks</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="1-introduction.html"><a href="1-introduction.html#status-quo-solution"><i class="fa fa-check"></i><b>1.2.1</b> Status Quo Solution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="2-methods-discussion.html"><a href="2-methods-discussion.html"><i class="fa fa-check"></i><b>2</b> Methods Discussion</a><ul>
+<li class="chapter" data-level="2.1" data-path="2-methods-discussion.html"><a href="2-methods-discussion.html#status-quo-solution-1"><i class="fa fa-check"></i><b>2.1</b> Status Quo Solution</a></li>
+<li class="chapter" data-level="2.2" data-path="2-methods-discussion.html"><a href="2-methods-discussion.html#kernel-principal-component-analysis"><i class="fa fa-check"></i><b>2.2</b> Kernel Principal Component Analysis</a></li>
+<li class="chapter" data-level="2.3" data-path="2-methods-discussion.html"><a href="2-methods-discussion.html#matrix-completion-via-singular-value-decomposition"><i class="fa fa-check"></i><b>2.3</b> Matrix Completion via Singular Value Decomposition</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="3-networks-dataset.html"><a href="3-networks-dataset.html"><i class="fa fa-check"></i><b>3</b> Networks Dataset</a><ul>
+<li class="chapter" data-level="3.1" data-path="3-networks-dataset.html"><a href="3-networks-dataset.html#features"><i class="fa fa-check"></i><b>3.1</b> Features</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="3-networks-dataset.html"><a href="3-networks-dataset.html#argus"><i class="fa fa-check"></i><b>3.1.1</b> Argus</a></li>
+<li class="chapter" data-level="3.1.2" data-path="3-networks-dataset.html"><a href="3-networks-dataset.html#categorical-features"><i class="fa fa-check"></i><b>3.1.2</b> Categorical Features</a></li>
+<li class="chapter" data-level="3.1.3" data-path="3-networks-dataset.html"><a href="3-networks-dataset.html#continuous-features"><i class="fa fa-check"></i><b>3.1.3</b> Continuous Features</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="4-correlation-between-features.html"><a href="4-correlation-between-features.html"><i class="fa fa-check"></i><b>4</b> Correlation Between Features</a></li>
+<li class="chapter" data-level="5" data-path="5-normal-scores-transformation.html"><a href="5-normal-scores-transformation.html"><i class="fa fa-check"></i><b>5</b> Normal Scores Transformation</a></li>
+<li class="chapter" data-level="6" data-path="6-additional-correlation-tests.html"><a href="6-additional-correlation-tests.html"><i class="fa fa-check"></i><b>6</b> Additional Correlation Tests</a></li>
+<li class="chapter" data-level="7" data-path="7-matrix-techniques-for-anomaly-detection.html"><a href="7-matrix-techniques-for-anomaly-detection.html"><i class="fa fa-check"></i><b>7</b> Matrix Techniques for Anomaly Detection</a><ul>
+<li class="chapter" data-level="7.1" data-path="7-matrix-techniques-for-anomaly-detection.html"><a href="7-matrix-techniques-for-anomaly-detection.html#ports-combination-matrixtensor"><i class="fa fa-check"></i><b>7.1</b> Ports Combination Matrix/Tensor</a></li>
+<li class="chapter" data-level="7.2" data-path="7-matrix-techniques-for-anomaly-detection.html"><a href="7-matrix-techniques-for-anomaly-detection.html#principal-component-analysis"><i class="fa fa-check"></i><b>7.2</b> Principal Component Analysis</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="8-investigating-combinations.html"><a href="8-investigating-combinations.html"><i class="fa fa-check"></i><b>8</b> Investigating Combinations</a><ul>
+<li class="chapter" data-level="8.1" data-path="8-investigating-combinations.html"><a href="8-investigating-combinations.html#matrix-completion-via-singular-value-decomposition-1"><i class="fa fa-check"></i><b>8.1</b> Matrix Completion via Singular Value Decomposition</a></li>
+</ul></li>
+<li class="chapter" data-level="9" data-path="9-statistical-model.html"><a href="9-statistical-model.html"><i class="fa fa-check"></i><b>9</b> Statistical Model</a><ul>
+<li class="chapter" data-level="9.1" data-path="9-statistical-model.html"><a href="9-statistical-model.html#uneven-variances"><i class="fa fa-check"></i><b>9.1</b> Uneven Variances</a></li>
+<li class="chapter" data-level="9.2" data-path="9-statistical-model.html"><a href="9-statistical-model.html#determined-model"><i class="fa fa-check"></i><b>9.2</b> Determined Model</a></li>
+<li class="chapter" data-level="9.3" data-path="9-statistical-model.html"><a href="9-statistical-model.html#section"><i class="fa fa-check"></i><b>9.3</b> </a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i>Conclusion</a></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li class="chapter" data-level="A" data-path="A-the-first-appendix.html"><a href="A-the-first-appendix.html"><i class="fa fa-check"></i><b>A</b> The First Appendix</a></li>
+<li class="chapter" data-level="B" data-path="B-the-second-appendix-for-fun.html"><a href="B-the-second-appendix-for-fun.html"><i class="fa fa-check"></i><b>B</b> The Second Appendix, for Fun</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Matrix Based Anomaly Detection Techniques Applied to Network Attacks</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="matrix-techniques-for-anomaly-detection" class="section level1">
+<h1><span class="header-section-number">Chapter 7</span> Matrix Techniques for Anomaly Detection</h1>
+<p>MAYBE PUT LIT REVIEW WITH EACH SECTION?</p>
+<div id="ports-combination-matrixtensor" class="section level2">
+<h2><span class="header-section-number">7.1</span> Ports Combination Matrix/Tensor</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#set counts</span>
+s_num =<span class="st"> </span><span class="dv">25</span>
+d_num =<span class="st"> </span><span class="dv">25</span>
+combo_num =<span class="st"> </span><span class="dv">20</span>
+
+<span class="co">#get freqs</span>
+Sport_table =<span class="st"> </span><span class="kw">table</span>(Sport)
+Sport_table =<span class="st"> </span><span class="kw">as.data.frame</span>(Sport_table)
+Sport_table =<span class="st"> </span>Sport_table[<span class="kw">order</span>(-Sport_table$Freq),]
+top_Sport =<span class="st"> </span>(<span class="kw">head</span>(Sport_table$Sport, s_num))
+
+<span class="co">#get freqs</span>
+Dport_table =<span class="st"> </span><span class="kw">table</span>(Dport)
+Dport_table =<span class="st"> </span><span class="kw">as.data.frame</span>(Dport_table)
+Dport_table =<span class="st"> </span>Dport_table[<span class="kw">order</span>(-Dport_table$Freq),]
+top_Dport =<span class="st"> </span>(<span class="kw">head</span>(Dport_table$Dport, d_num))
+
+<span class="co">#subset data</span>
+argus_maxes =<span class="st"> </span>argus[<span class="kw">is.element</span>(Sport, top_Sport) &amp;<span class="st"> </span><span class="kw">is.element</span>(Dport, top_Dport), ]
+argus_maxes =<span class="st"> </span><span class="kw">transform</span>(argus_maxes,
+                        <span class="dt">Sport =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Sport)),
+                        <span class="dt">Dport =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Dport)))
+max_combinations =<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">table</span>(argus_maxes$Sport, argus_maxes$Dport))
+
+top_combinations =<span class="st"> </span><span class="kw">head</span>(max_combinations[<span class="kw">order</span>(-max_combinations$Freq),], combo_num)
+top_combinations$Sport =<span class="st"> </span>top_combinations$Var1
+top_combinations$Dport =<span class="st"> </span>top_combinations$Var2
+top_combinations$Var1 =<span class="st"> </span><span class="ot">NULL</span>
+top_combinations$Var2 =<span class="st"> </span><span class="ot">NULL</span>
+top_combinations =<span class="st"> </span><span class="kw">transform</span>(top_combinations,
+                             <span class="dt">Sport =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Sport)),
+                             <span class="dt">Dport =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Dport)))
+
+extract_intersection =<span class="st"> </span>function(sport, dport){
+  argus_subset =<span class="st"> </span>argus[Sport ==<span class="st"> </span>sport &amp;<span class="st"> </span>Dport ==<span class="st"> </span>dport,]
+  <span class="kw">return</span> (argus_subset)
+}
+
+generate_combinations_matrix =<span class="st"> </span>function(top_combinations){
+  n =<span class="st"> </span><span class="kw">dim</span>(top_combinations)[<span class="dv">1</span>]
+  combinations =<span class="st"> </span><span class="kw">c</span>()
+  for (i in <span class="dv">1</span>:n){
+    sport =<span class="st"> </span><span class="kw">as.numeric</span>(top_combinations[i,]$Sport)
+    dport =<span class="st"> </span><span class="kw">as.numeric</span>(top_combinations[i,]$Dport)
+    combo =<span class="st"> </span><span class="kw">extract_intersection</span>(sport, dport)
+    combinations =<span class="st"> </span><span class="kw">c</span>(combinations, <span class="kw">list</span>(combo))
+  }
+  <span class="kw">return</span> (combinations)
+}
+combinations =<span class="st"> </span><span class="kw">generate_combinations_matrix</span>(top_combinations)</code></pre></div>
+<p>We now have a matrix built with the most common Sport and Dport combinations. Each entry in the matrix contains all of the observations that correspond to that Sport and Dport combination. We can now perform testing on each group using normal transformations and principal component analysis to see if there are any trends between groups.</p>
+</div>
+<div id="principal-component-analysis" class="section level2">
+<h2><span class="header-section-number">7.2</span> Principal Component Analysis</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pca_analysis =<span class="st"> </span>function(SrcBytes, SrcPkts, DstBytes, DstPkts){
+  pca_cont_vars =<span class="st"> </span><span class="kw">cbind</span>(SrcBytes, SrcPkts, DstBytes, DstPkts)
+  pca =<span class="st"> </span><span class="kw">prcomp</span>(pca_cont_vars, <span class="dt">center =</span> <span class="ot">TRUE</span>, <span class="dt">scale. =</span> <span class="ot">TRUE</span>)
+  <span class="kw">print</span>(pca$rotation)
+  <span class="kw">print</span>((<span class="kw">summary</span>(pca)))
+  <span class="co">#screeplot(pca, type=&quot;lines&quot;,col=3)</span>
+  g =<span class="st"> </span><span class="kw">ggbiplot</span>(pca, <span class="dt">obs.scale =</span> <span class="dv">1</span>, <span class="dt">var.scale =</span> <span class="dv">1</span>,
+                <span class="dt">ellipse =</span> <span class="ot">TRUE</span>,
+                <span class="dt">circle =</span> <span class="ot">TRUE</span>)
+  g =<span class="st"> </span>g +<span class="st"> </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&#39;&#39;</span>)
+  g =<span class="st"> </span>g +<span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.direction =</span> <span class="st">&#39;horizontal&#39;</span>,
+                 <span class="dt">legend.position =</span> <span class="st">&#39;top&#39;</span>)
+  <span class="kw">print</span>(g)
+  <span class="kw">return</span>(pca$rotation)
+}</code></pre></div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="6-additional-correlation-tests.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="8-investigating-combinations.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": ["thesis.pdf"],
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

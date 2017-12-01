@@ -1,3 +1,2 @@
-The preface pretty much says it all.  \par
-
-Second paragraph of abstract starts here.
+<!-- ## Abstract {-} -->
+The goal of this project is to identify novel methods for detecting anomalies in network IP data. The space is represented as a 3-dimensional tensor of the continuous features (source bytes, destination bytes, source packets, destination packets) divided by their respective source port and destination port combinations. This project implements and assesses the validity of principal component analysis and matrix completion via singular value decomposition (more methods pending) in determining anomalous entries in the tensor.

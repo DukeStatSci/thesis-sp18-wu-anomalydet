@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Matrix Based Anomaly Detection Techniques Applied to Network Attacks</title>
+  <meta name="description" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
+  
+  
+  
+
+<meta name="author" content="James C. Wu">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="2-networks-dataset.html">
+<link rel="next" href="4-matrix-techniques-for-anomaly-detection.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./"></a></li>
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html"><i class="fa fa-check"></i>Preliminary Content</a><ul>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#abstract"><i class="fa fa-check"></i>Abstract</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="1-introduction.html"><a href="1-introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="1-introduction.html"><a href="1-introduction.html#anomaly-detection"><i class="fa fa-check"></i><b>1.1</b> Anomaly Detection</a></li>
+<li class="chapter" data-level="1.2" data-path="1-introduction.html"><a href="1-introduction.html#network-attacks"><i class="fa fa-check"></i><b>1.2</b> Network Attacks</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="1-introduction.html"><a href="1-introduction.html#status-quo-solution"><i class="fa fa-check"></i><b>1.2.1</b> Status Quo Solution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html"><i class="fa fa-check"></i><b>2</b> Networks Dataset</a><ul>
+<li class="chapter" data-level="2.1" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html#features"><i class="fa fa-check"></i><b>2.1</b> Features</a></li>
+<li class="chapter" data-level="2.2" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html#argus-and-data-nuances"><i class="fa fa-check"></i><b>2.2</b> Argus and Data Nuances</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html"><i class="fa fa-check"></i><b>3</b> Networks Dataset</a><ul>
+<li class="chapter" data-level="3.1" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html#features-1"><i class="fa fa-check"></i><b>3.1</b> Features</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html#argus-and-data-nuances-1"><i class="fa fa-check"></i><b>3.1.1</b> Argus and Data Nuances</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>3.2</b> Exploratory Data Analysis</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html#cleaning-predictors"><i class="fa fa-check"></i><b>3.2.1</b> Cleaning Predictors</a></li>
+<li class="chapter" data-level="3.2.2" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html#categorical-features-unique-categories-and-counts"><i class="fa fa-check"></i><b>3.2.2</b> Categorical Features: Unique Categories and Counts</a></li>
+<li class="chapter" data-level="3.2.3" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html#continuous-features-distributions-and-relationships"><i class="fa fa-check"></i><b>3.2.3</b> Continuous Features: Distributions and Relationships</a></li>
+<li class="chapter" data-level="3.2.4" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html#correlation-between-features"><i class="fa fa-check"></i><b>3.2.4</b> Correlation Between Features</a></li>
+<li class="chapter" data-level="3.2.5" data-path="3-networks-dataset-1.html"><a href="3-networks-dataset-1.html#transformations-on-the-data"><i class="fa fa-check"></i><b>3.2.5</b> Transformations on the Data</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html"><i class="fa fa-check"></i><b>4</b> Matrix Techniques for Anomaly Detection</a><ul>
+<li class="chapter" data-level="4.1" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#ports-combination-matrixtensor"><i class="fa fa-check"></i><b>4.1</b> Ports Combination Matrix/Tensor</a></li>
+<li class="chapter" data-level="4.2" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#principal-component-analysis"><i class="fa fa-check"></i><b>4.2</b> Principal Component Analysis</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#investigating-combinations"><i class="fa fa-check"></i><b>4.2.1</b> Investigating Combinations</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#matrix-completion-via-singular-value-decomposition"><i class="fa fa-check"></i><b>4.3</b> Matrix Completion via Singular Value Decomposition</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="5-statistical-model.html"><a href="5-statistical-model.html"><i class="fa fa-check"></i><b>5</b> Statistical Model</a><ul>
+<li class="chapter" data-level="5.1" data-path="5-statistical-model.html"><a href="5-statistical-model.html#uneven-variances"><i class="fa fa-check"></i><b>5.1</b> Uneven Variances</a></li>
+<li class="chapter" data-level="5.2" data-path="5-statistical-model.html"><a href="5-statistical-model.html#determined-model"><i class="fa fa-check"></i><b>5.2</b> Determined Model</a></li>
+<li class="chapter" data-level="5.3" data-path="5-statistical-model.html"><a href="5-statistical-model.html#section"><i class="fa fa-check"></i><b>5.3</b> </a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i>Conclusion</a></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li class="chapter" data-level="A" data-path="A-the-first-appendix.html"><a href="A-the-first-appendix.html"><i class="fa fa-check"></i><b>A</b> The First Appendix</a></li>
+<li class="chapter" data-level="B" data-path="B-the-second-appendix-for-fun.html"><a href="B-the-second-appendix-for-fun.html"><i class="fa fa-check"></i><b>B</b> The Second Appendix, for Fun</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Matrix Based Anomaly Detection Techniques Applied to Network Attacks</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="networks-dataset-1" class="section level1">
+<h1><span class="header-section-number">Chapter 3</span> Networks Dataset</h1>
+<div id="features-1" class="section level2">
+<h2><span class="header-section-number">3.1</span> Features</h2>
+<p>The networks dataset contains 13 features, 8 categorical and 5 continuous, and the observations are unlabeled (not specified whether they are considered a scanner). The 13 features are:</p>
+<p><strong>Continuous:</strong></p>
+<ul>
+<li>StartTime (Start Time): the time when the observation is logged</li>
+<li>SrcBytes (Source Bytes): the total number of bytes sent in the observation</li>
+<li>SrcPkts (Source Packets): the number of packets sent in the observation</li>
+<li>DstBytes (Destination Bytes): the total number of bytes received in the observation</li>
+<li>DstPkts (Destination Packets): the number of packets received in the observation Note, the destination packets and bytes features do not have the same values as their source counterparts because the connections are compressed and decompressed into different forms and byte sizes when sent. For instance, it is possible for the number of destination packets to be larger than source packets. It is also possible for information to be lost during the connection.</li>
+</ul>
+<p>Categorical:</p>
+<ul>
+<li>Flgs (connection flag): flow state flags seen in transaction between the two addresses</li>
+<li>Proto (network protocol): specifies the rules used for information exchange via network addresses. Transmission Control Protocol (TCP) uses a set of rules to exchange messages with other Internet points at the information packet level, and Internet Protocol (IP) uses a set of rules to send and receive messages at the Internet address level.</li>
+<li>SrcAddr (Source Address): the IP address of the connection’s source</li>
+<li>DstAddr (Destination Address): the IP address of the connection’s destination</li>
+<li>Sport (Source Port): the network port number of the connection’s source. A port numbers identifies the specific process to which a network message is forwarded when it arrives at a server.</li>
+<li>Dport (Destination Port): the network port number of the connection’s destination</li>
+<li>Dir (direction): the direction of the connection</li>
+<li>State (connection state): a categorical assessment of the current phase in the transaction that the timestamp is taken at ???</li>
+</ul>
+<p>Note, the addresses have been anonymized for security reasons.</p>
+<div id="argus-and-data-nuances-1" class="section level3">
+<h3><span class="header-section-number">3.1.1</span> Argus and Data Nuances</h3>
+<p>Argus is the open source network security tool applied to network transactions that collects the data for the features. The Argus wiki and the OIT manual provides key insights into the structure and nature of the data. Specifically, the sessions are clustered together by address, so the pytes and packets values are accumulative over a set duration and each session has its own start time but does not have a tracked end time. There exist 2-4 million connections on average every 5 minutes. Furthermore the protocol in this dataset is always gathered from TCP protocol and the direction will always be to the right (i.e. Source to Destination). This information supports dropping proto, StartTime, and Direction from the dataset for future analysis because they do not present any information regarding whether an observation can be considered an anomaly. Furthermore, the State feature may not be reliable because Argus occasionally resets the state data statistics during monitoring.</p>
+</div>
+</div>
+<div id="exploratory-data-analysis" class="section level2">
+<h2><span class="header-section-number">3.2</span> Exploratory Data Analysis</h2>
+<div id="cleaning-predictors" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Cleaning Predictors</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">argus =<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/argus-anon-20170201.csv&quot;</span>)
+<span class="kw">summary</span>(argus)</code></pre></div>
+<pre><code>   StartTime               Flgs        Proto                 SrcAddr      
+ 11:05.6:   2611    *        :794933   tcp:1048575   197.0.31.231: 35440  
+ 11:05.5:   2431    * s      :126442                 1.0.11.96   :  8717  
+ 11:06.5:   2420    * g      : 31665                 100.0.7.149 :  8526  
+ 11:05.7:   2404    * d      : 21247                 197.0.9.1   :  5536  
+ 11:04.7:   2152    * r      : 17413                 1.0.85.103  :  4976  
+ 11:06.4:   2079    * i      : 10514                 100.0.20.135:  3971  
+ (Other):1034478   (Other)   : 46361                 (Other)     :981409  
+     Sport          Dir                 DstAddr           Dport      
+ Min.   :    0      -&gt;:1036027   100.0.1.9  : 64508   Min.   :    1  
+ 1st Qu.:13398      ?&gt;:   1730   100.0.1.2  : 62681   1st Qu.:   25  
+ Median :25860     &lt;? :   3706   100.0.1.28 : 25780   Median :  443  
+ Mean   :29049     &lt;?&gt;:   7112   100.0.1.55 : 25641   Mean   :10396  
+ 3rd Qu.:43950                   100.0.18.93: 20766   3rd Qu.:29784  
+ Max.   :65535                   100.0.18.99: 20509   Max.   :65535  
+                                 (Other)    :828690                  
+    SrcPkts             DstPkts            SrcBytes        
+ Min.   :      0.0   Min.   :0.00e+00   Min.   :        0  
+ 1st Qu.:      1.0   1st Qu.:0.00e+00   1st Qu.:       64  
+ Median :      2.0   Median :0.00e+00   Median :      136  
+ Mean   :     33.1   Mean   :5.78e+01   Mean   :     8943  
+ 3rd Qu.:      6.0   3rd Qu.:5.00e+00   3rd Qu.:      676  
+ Max.   :1008233.0   Max.   :1.24e+06   Max.   :118257047  
+                                                           
+    DstBytes         State       
+ Min.   :0.000e+00   ACC: 16815  
+ 1st Qu.:0.000e+00   CLO:    98  
+ Median :0.000e+00   CON: 17146  
+ Mean   :7.526e+04   FIN:307337  
+ 3rd Qu.:5.960e+02   REQ:571899  
+ Max.   :1.851e+09   RST:135280  
+                                 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sapply</span>(argus, class)</code></pre></div>
+<pre><code>StartTime      Flgs     Proto   SrcAddr     Sport       Dir   DstAddr 
+ &quot;factor&quot;  &quot;factor&quot;  &quot;factor&quot;  &quot;factor&quot; &quot;integer&quot;  &quot;factor&quot;  &quot;factor&quot; 
+    Dport   SrcPkts   DstPkts  SrcBytes  DstBytes     State 
+&quot;integer&quot; &quot;integer&quot; &quot;integer&quot; &quot;integer&quot; &quot;integer&quot;  &quot;factor&quot; </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">argus =<span class="st"> </span><span class="kw">transform</span>(argus,
+                  <span class="dt">Sport =</span> <span class="kw">as.factor</span>(Sport),
+                  <span class="dt">Dport =</span> <span class="kw">as.factor</span>(Dport))
+argus =<span class="st"> </span><span class="kw">subset</span>(argus, <span class="dt">select =</span> <span class="kw">c</span>(<span class="st">&quot;Flgs&quot;</span>, <span class="st">&quot;SrcAddr&quot;</span>, <span class="st">&quot;Sport&quot;</span>, <span class="st">&quot;DstAddr&quot;</span>, <span class="st">&quot;Dport&quot;</span>,
+                                <span class="st">&quot;SrcPkts&quot;</span>, <span class="st">&quot;DstPkts&quot;</span>, <span class="st">&quot;SrcBytes&quot;</span>, <span class="st">&quot;DstBytes&quot;</span>, <span class="st">&quot;State&quot;</span>))
+<span class="kw">attach</span>(argus)
+categorical =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Flgs&quot;</span>, <span class="st">&quot;SrcAddr&quot;</span>, <span class="st">&quot;Sport&quot;</span>, <span class="st">&quot;DstAddr&quot;</span>, <span class="st">&quot;Dport&quot;</span>, <span class="st">&quot;State&quot;</span>)
+continuous =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;SrcPkts&quot;</span>, <span class="st">&quot;DstPkts&quot;</span>, <span class="st">&quot;SrcBytes&quot;</span>, <span class="st">&quot;DstBytes&quot;</span>)</code></pre></div>
+<p>This code casts the features to their corresponding class classifications (numeric and factor), and removes Proto, StartTime, and Diretion from the dataset.</p>
+</div>
+<div id="categorical-features-unique-categories-and-counts" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Categorical Features: Unique Categories and Counts</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sapply</span>(argus, function(x) <span class="kw">length</span>(<span class="kw">unique</span>(x)))</code></pre></div>
+<pre><code>    Flgs  SrcAddr    Sport  DstAddr    Dport  SrcPkts  DstPkts SrcBytes 
+      70    65113    64486    41903    17537     2790     3633    44075 
+DstBytes    State 
+   64549        6 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#function that returns elements of the feature and their counts in descending order</span>
+element_counts =<span class="st"> </span>function(x) {
+  dt =<span class="st"> </span><span class="kw">data.table</span>(x)[, .N, keyby =<span class="st"> </span>x]
+  dt[<span class="kw">order</span>(dt$N, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>),]
+}
+<span class="kw">element_counts</span>(Sport)</code></pre></div>
+<pre><code>           x     N
+    1: 33461 35683
+    2:  4263  8541
+    3:    80  8346
+    4:  4165  4988
+    5: 48468  3023
+   ---            
+64482: 57904     1
+64483: 58242     1
+64484: 59051     1
+64485: 59315     1
+64486: 60116     1</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">element_counts</span>(Dport)</code></pre></div>
+<pre><code>           x      N
+    1:    23 235616
+    2:    80 204128
+    3:   443 137360
+    4: 32819 102166
+    5:    25  53167
+   ---             
+17533: 65515      1
+17534: 65528      1
+17535: 65529      1
+17536: 65532      1
+17537: 65533      1</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">element_counts</span>(SrcAddr)</code></pre></div>
+<pre><code>                  x     N
+    1: 197.0.31.231 35440
+    2:    1.0.11.96  8717
+    3:  100.0.7.149  8526
+    4:    197.0.9.1  5536
+    5:   1.0.85.103  4976
+   ---                   
+65109:   197.0.55.5     1
+65110:   197.0.55.6     1
+65111:   197.0.55.7     1
+65112:   197.0.55.8     1
+65113:   197.0.55.9     1</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">element_counts</span>(DstAddr)</code></pre></div>
+<pre><code>                  x     N
+    1:    100.0.1.9 64508
+    2:    100.0.1.2 62681
+    3:   100.0.1.28 25780
+    4:   100.0.1.55 25641
+    5:  100.0.18.93 20766
+   ---                   
+41899:  100.0.6.179     1
+41900:  100.0.7.173     1
+41901: 100.0.77.113     1
+41902: 100.0.77.147     1
+41903: 100.0.88.111     1</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">element_counts</span>(State)</code></pre></div>
+<pre><code>     x      N
+1: REQ 571899
+2: FIN 307337
+3: RST 135280
+4: CON  17146
+5: ACC  16815
+6: CLO     98</code></pre>
+</div>
+<div id="continuous-features-distributions-and-relationships" class="section level3">
+<h3><span class="header-section-number">3.2.3</span> Continuous Features: Distributions and Relationships</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))
+<span class="kw">hist</span>(SrcBytes); <span class="kw">hist</span>(SrcPkts); <span class="kw">hist</span>(DstBytes); <span class="kw">hist</span>(DstPkts) <span class="co">#clearly some very large values</span></code></pre></div>
+<p><img src="thesis_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">largest_n =<span class="st"> </span>function(x, n){
+  <span class="kw">head</span>(<span class="kw">sort</span>(x, <span class="dt">decreasing=</span><span class="ot">TRUE</span>), n)
+}
+<span class="kw">largest_n</span>(SrcBytes, <span class="dv">10</span>)</code></pre></div>
+<pre><code> [1] 118257047 116615879 112673526 108933442 105793666  73376579  72839115
+ [8]  70001807  56206409  55359912</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">largest_n</span>(SrcPkts, <span class="dv">10</span>)</code></pre></div>
+<pre><code> [1] 1008233 1000971  771590  492361  458603  437296  408530  407973
+ [9]  371976  371251</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">largest_n</span>(DstBytes, <span class="dv">10</span>)</code></pre></div>
+<pre><code> [1] 1850817751 1713055847 1690162763 1524781880 1491609296 1340922625
+ [7] 1304668214 1206594243 1163954979 1145323438</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">largest_n</span>(DstPkts, <span class="dv">10</span>)</code></pre></div>
+<pre><code> [1] 1239611 1223485 1219276 1004471  982931  942827  883354  795120
+ [9]  766776  754831</code></pre>
+<p>The histograms and the largest 10 values in each of the continuous variables show that there are a relatively few amount of large observations skewing the distributions. This explains the model summary containing means much larger than their medians. It’s not possible to remove the large values as outliers because they may be scanner observations to detect. Also there is a high frequency (up to the first quartile) of destination bytes and packets that equal 0.</p>
+<p>We will now try to investigate whether the largest continuous predictor values correspond to any particular addresses or ports.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">max.SrcBytes =<span class="st"> </span>argus[<span class="kw">with</span>(argus,<span class="kw">order</span>(-SrcBytes)),][<span class="dv">1</span>:<span class="dv">20</span>,]
+max.SrcPkts =<span class="st"> </span>argus[<span class="kw">with</span>(argus,<span class="kw">order</span>(-SrcPkts)),][<span class="dv">1</span>:<span class="dv">20</span>,]
+max.DstBytes =<span class="st"> </span>argus[<span class="kw">with</span>(argus,<span class="kw">order</span>(-DstBytes)),][<span class="dv">1</span>:<span class="dv">20</span>,]
+max.DstPkts =<span class="st"> </span>argus[<span class="kw">with</span>(argus,<span class="kw">order</span>(-DstPkts)),][<span class="dv">1</span>:<span class="dv">20</span>,]
+<span class="kw">head</span>(max.SrcBytes)</code></pre></div>
+<pre><code>             Flgs   SrcAddr Sport    DstAddr Dport SrcPkts DstPkts
+282859  * s        1.0.12.1 18086  100.0.1.8 31743  208339  104886
+282841  * s        1.0.12.1 18086  100.0.1.8 31743  204912   99688
+282832  * s        1.0.12.1 18086  100.0.1.8 31743  198007   94621
+282853  * s        1.0.12.1 18086  100.0.1.8 31743  191443   95892
+282823  * s        1.0.12.1 18086  100.0.1.8 31743  186228   84342
+724162  * *       100.0.4.9 37901 100.0.2.67    22 1008233 1239611
+        SrcBytes   DstBytes State
+282859 118257047    7514403   CON
+282841 116615879    7146182   CON
+282832 112673526    6801146   CON
+282853 108933442    6857053   CON
+282823 105793666    6048529   CON
+724162  73376579 1713055847   CON</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(max.DstBytes)</code></pre></div>
+<pre><code>             Flgs   SrcAddr Sport    DstAddr Dport SrcPkts DstPkts
+2162    * d       197.0.1.1 62030  100.0.1.1    80  371251 1219276
+724162  * *       100.0.4.9 37901 100.0.2.67    22 1008233 1239611
+724106  * *       100.0.4.9 37901 100.0.2.67    22 1000971 1223485
+2212    * d       197.0.1.1 62034  100.0.1.1    80  280593 1004471
+78245   * d         1.0.2.1 11210  100.0.1.2    80  158194  982931
+2185    * d       197.0.1.1 62033  100.0.1.1    80  268402  883354
+       SrcBytes   DstBytes State
+2162   26430322 1850817751   CON
+724162 73376579 1713055847   CON
+724106 72839115 1690162763   CON
+2212   20037592 1524781880   FIN
+78245  11294111 1491609296   CON
+2185   19137354 1340922625   FIN</code></pre>
+<p>Source Addresses tend to be repetitive for the largest max bytes/packets, while ports vary. The top 10 largest DstBytes all correspond to SrcAddr 197.0.1.1 and DstAddr 100.0.1.1. Also both max Src and Dst rows correspond to the “* s”&quot; flag. The largest sizes of DstBytes tend to go to Dport 80, which is the port that expects to receive from a web client (http), while the largest SrcBytes go to 31743. The next section implements a systematic way for investigating the relationship between addresses and ports because simply looking at the max rows is difficult.</p>
+</div>
+<div id="correlation-between-features" class="section level3">
+<h3><span class="header-section-number">3.2.4</span> Correlation Between Features</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cor</span>(SrcBytes, SrcPkts)</code></pre></div>
+<pre><code>[1] 0.5732968</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cor</span>(DstBytes, DstPkts)</code></pre></div>
+<pre><code>[1] 0.996775</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cor</span>(SrcBytes, DstBytes)</code></pre></div>
+<pre><code>[1] 0.3331221</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cor</span>(SrcPkts, DstPkts)</code></pre></div>
+<pre><code>[1] 0.8448269</code></pre>
+<p>The plots of the predictors suggest strong linear trends between the predictors, which makes intuitive sense given the domain matter. Further investigations show that DstPkts has a correlation of ~1 with DstBytes and ~0.85 with SrcPkts. Perhaps removing DstPkts as a feature would be useful.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">cor</span>(DstBytes, DstPkts, <span class="dt">method =</span> <span class="st">&quot;kendall&quot;</span>)
+<span class="kw">cor</span>(SrcPkts, DstPkts, <span class="dt">method =</span> <span class="st">&quot;kendall&quot;</span>)
+<span class="kw">cor</span>(DstBytes, DstPkts, <span class="dt">method =</span> <span class="st">&quot;spearman&quot;</span>)
+<span class="kw">cor</span>(SrcPkts, DstPkts, <span class="dt">method =</span> <span class="st">&quot;spearman&quot;</span>)</code></pre></div>
+<p>Because the original correlation tests relied on the Pearson method, which is susceptible to bias from large values, we conduct further tests to investigate the relationship between DstPkts and the other features. While the correlation is still high, it is no longer 1, so it is less cause for concern.</p>
+</div>
+<div id="transformations-on-the-data" class="section level3">
+<h3><span class="header-section-number">3.2.5</span> Transformations on the Data</h3>
+<div id="removing-quantiles" class="section level4">
+<h4><span class="header-section-number">3.2.5.1</span> Removing Quantiles</h4>
+<p>To get a better sense of the unskewed distribution, the below plots visualize the continuous features with the largest and smallest 10% of observations removed. The removed values will be readded to the dataset when investigating for anomalies.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">remove_quantiles =<span class="st"> </span>function(v, lowerbound, upperbound){
+  <span class="kw">return</span> (v[<span class="kw">quantile</span>(v,lowerbound) &gt;=<span class="st"> </span>v &amp;<span class="st"> </span>v &lt;=<span class="st"> </span><span class="kw">quantile</span>(v,upperbound)])
+}
+SrcBytes.abrev =<span class="st"> </span><span class="kw">remove_quantiles</span>(SrcBytes,<span class="fl">0.10</span>,<span class="fl">0.9</span>)
+SrcPkts.abrev =<span class="st"> </span><span class="kw">remove_quantiles</span>(SrcPkts,<span class="fl">0.10</span>,<span class="fl">0.9</span>)
+DstBytes.abrev =<span class="st"> </span><span class="kw">remove_quantiles</span>(DstBytes,<span class="fl">0.10</span>,<span class="fl">0.9</span>)
+DstPkts.abrev =<span class="st"> </span><span class="kw">remove_quantiles</span>(DstPkts,<span class="fl">0.10</span>,<span class="fl">0.9</span>)
+<span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))
+<span class="kw">hist</span>(SrcBytes.abrev); <span class="kw">hist</span>(SrcPkts.abrev); <span class="kw">hist</span>(DstBytes.abrev); <span class="kw">hist</span>(DstPkts.abrev)</code></pre></div>
+<p><img src="thesis_files/figure-html/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The continuous features are still unevenly distributed even with the 20% most extreme values removed.</p>
+</div>
+<div id="log-transformation" class="section level4">
+<h4><span class="header-section-number">3.2.5.2</span> Log Transformation</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))
+<span class="kw">hist</span>(<span class="kw">log</span>(SrcBytes)); <span class="kw">hist</span>(<span class="kw">log</span>(SrcPkts)); <span class="kw">hist</span>(<span class="kw">log</span>(DstBytes)); <span class="kw">hist</span>(<span class="kw">log</span>(DstPkts))
+<span class="kw">plot</span>(<span class="kw">log</span>(SrcPkts), <span class="kw">log</span>(SrcBytes)); <span class="kw">plot</span>(<span class="kw">log</span>(DstPkts), <span class="kw">log</span>(DstBytes))
+<span class="kw">plot</span>(<span class="kw">log</span>(SrcBytes), <span class="kw">log</span>(DstBytes)); <span class="kw">plot</span>(<span class="kw">log</span>(SrcPkts), <span class="kw">log</span>(DstPkts))</code></pre></div>
+<p>A log transformation for each of the continuous features outputs right-skewed histograms. Skewed features may affect the results of a kernel pca, so we consider other approaches for transformations.</p>
+</div>
+<div id="normal-scores-transformation" class="section level4">
+<h4><span class="header-section-number">3.2.5.3</span> Normal Scores Transformation</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">nscore =<span class="st"> </span>function(x) {
+   <span class="co"># Takes a vector of values x and calculates their normal scores. Returns </span>
+   <span class="co"># a list with the scores and an ordered table of original values and</span>
+   <span class="co"># scores, which is useful as a back-transform table. See backtr().</span>
+   nscore =<span class="st"> </span><span class="kw">qqnorm</span>(x, <span class="dt">plot.it =</span> <span class="ot">FALSE</span>)$x  <span class="co"># normal score </span>
+   trn.table =<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x=</span><span class="kw">sort</span>(x),<span class="dt">nscore=</span><span class="kw">sort</span>(nscore))
+   <span class="kw">return</span> (<span class="kw">list</span>(<span class="dt">nscore=</span>nscore, <span class="dt">trn.table=</span>trn.table))
+}
+
+backtr =<span class="st"> </span>function(scores, nscore, <span class="dt">tails=</span><span class="st">&#39;none&#39;</span>, <span class="dt">draw=</span><span class="ot">TRUE</span>) {
+   <span class="co"># Given a vector of normal scores and a normal score object </span>
+   <span class="co"># (from nscore), the function returns a vector of back-transformed </span>
+   <span class="co"># values</span>
+   <span class="co"># &#39;none&#39; : No extrapolation; more extreme score values will revert </span>
+   <span class="co"># to the original min and max values. </span>
+   <span class="co"># &#39;equal&#39; : Calculate magnitude in std deviations of the scores about </span>
+   <span class="co"># initial data mean. Extrapolation is linear to these deviations. </span>
+   <span class="co"># will be based upon deviations from the mean of the original </span>
+   <span class="co"># hard data - possibly quite dangerous!</span>
+   <span class="co"># &#39;separate&#39; :  This calculates a separate sd for values </span>
+   <span class="co"># above and below the mean.</span>
+   if(tails==<span class="st">&#39;separate&#39;</span>) { 
+      mean.x &lt;-<span class="st"> </span><span class="kw">mean</span>(nscore$trn.table$x)
+      small.x &lt;-<span class="st"> </span>nscore$trn.table$x &lt;<span class="st"> </span>mean.x
+      large.x &lt;-<span class="st"> </span>nscore$trn.table$x &gt;<span class="st"> </span>mean.x
+      small.sd &lt;-<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">sum</span>((nscore$trn.table$x[small.x]-mean.x)^<span class="dv">2</span>)/
+<span class="st">                       </span>(<span class="kw">length</span>(nscore$trn.table$x[small.x])-<span class="dv">1</span>))
+      large.sd &lt;-<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">sum</span>((nscore$trn.table$x[large.x]-mean.x)^<span class="dv">2</span>)/
+<span class="st">                       </span>(<span class="kw">length</span>(nscore$trn.table$x[large.x])-<span class="dv">1</span>))
+      min.x &lt;-<span class="st"> </span><span class="kw">mean</span>(nscore$trn.table$x) +<span class="st"> </span>(<span class="kw">min</span>(scores) *<span class="st"> </span>small.sd)
+      max.x &lt;-<span class="st"> </span><span class="kw">mean</span>(nscore$trn.table$x) +<span class="st"> </span>(<span class="kw">max</span>(scores) *<span class="st"> </span>large.sd)
+      <span class="co"># check to see if these values are LESS extreme than the</span>
+      <span class="co"># initial data - if so, use the initial data.</span>
+      <span class="co">#print(paste(&#39;lg.sd is:&#39;,large.sd,&#39;max.x is:&#39;,max.x,&#39;max nsc.x</span>
+      <span class="co">#     is:&#39;,max(nscore$trn.table$x)))</span>
+      if(min.x &gt;<span class="st"> </span><span class="kw">min</span>(nscore$trn.table$x)) {min.x &lt;-<span class="st"> </span><span class="kw">min</span>(nscore$trn.table$x)}
+      if(max.x &lt;<span class="st"> </span><span class="kw">max</span>(nscore$trn.table$x)) {max.x &lt;-<span class="st"> </span><span class="kw">max</span>(nscore$trn.table$x)}
+   }
+   if(tails==<span class="st">&#39;equal&#39;</span>) { <span class="co"># assumes symmetric distribution around the mean</span>
+      mean.x &lt;-<span class="st"> </span><span class="kw">mean</span>(nscore$trn.table$x)
+      sd.x &lt;-<span class="st"> </span><span class="kw">sd</span>(nscore$trn.table$x)
+      min.x &lt;-<span class="st"> </span><span class="kw">mean</span>(nscore$trn.table$x) +<span class="st"> </span>(<span class="kw">min</span>(scores) *<span class="st"> </span>sd.x)
+      max.x &lt;-<span class="st"> </span><span class="kw">mean</span>(nscore$trn.table$x) +<span class="st"> </span>(<span class="kw">max</span>(scores) *<span class="st"> </span>sd.x)
+      <span class="co"># check to see if these values are LESS extreme than the</span>
+      <span class="co"># initial data - if so, use the initial data.</span>
+      if(min.x &gt;<span class="st"> </span><span class="kw">min</span>(nscore$trn.table$x)) {min.x &lt;-<span class="st"> </span><span class="kw">min</span>(nscore$trn.table$x)}
+      if(max.x &lt;<span class="st"> </span><span class="kw">max</span>(nscore$trn.table$x)) {max.x &lt;-<span class="st"> </span><span class="kw">max</span>(nscore$trn.table$x)}
+   }
+   if(tails==<span class="st">&#39;none&#39;</span>) {   <span class="co"># No extrapolation</span>
+      min.x &lt;-<span class="st"> </span><span class="kw">min</span>(nscore$trn.table$x)
+      max.x &lt;-<span class="st"> </span><span class="kw">max</span>(nscore$trn.table$x)
+   }
+   min.sc &lt;-<span class="st"> </span><span class="kw">min</span>(scores)
+   max.sc &lt;-<span class="st"> </span><span class="kw">max</span>(scores)
+   x &lt;-<span class="st"> </span><span class="kw">c</span>(min.x, nscore$trn.table$x, max.x)
+   nsc &lt;-<span class="st"> </span><span class="kw">c</span>(min.sc, nscore$trn.table$nscore, max.sc)
+   
+   if(draw) {<span class="kw">plot</span>(nsc,x, <span class="dt">main=</span><span class="st">&#39;Transform Function&#39;</span>)}
+   back.xf &lt;-<span class="st"> </span><span class="kw">approxfun</span>(nsc,x) <span class="co"># Develop the back transform function</span>
+   val &lt;-<span class="st"> </span><span class="kw">back.xf</span>(scores)
+   <span class="kw">return</span>(val)
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">SrcBytes_norm =<span class="st"> </span><span class="kw">nscore</span>(SrcBytes)$nscore
+SrcBytes_table =<span class="st"> </span><span class="kw">nscore</span>(SrcBytes)$trn.table
+
+SrcPkts_norm =<span class="st"> </span><span class="kw">nscore</span>(SrcPkts)$nscore
+SrcPkts_table =<span class="st"> </span><span class="kw">nscore</span>(SrcPkts)$trn.table
+
+DstBytes_norm =<span class="st"> </span><span class="kw">nscore</span>(DstBytes)$nscore
+DstBytes_table =<span class="st"> </span><span class="kw">nscore</span>(DstBytes)$trn.table
+
+DstPkts_norm =<span class="st"> </span><span class="kw">nscore</span>(DstPkts)$nscore
+DstPkts_table =<span class="st"> </span><span class="kw">nscore</span>(DstPkts)$trn.table</code></pre></div>
+
+</div>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="2-networks-dataset.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="4-matrix-techniques-for-anomaly-detection.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": ["thesis.pdf"],
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

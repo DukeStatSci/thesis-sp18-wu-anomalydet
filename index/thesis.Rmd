@@ -1,0 +1,1011 @@
+---
+author: 'James C. Wu'
+date: 'May 2018'
+institution: 'Duke University'
+division: 'Trinity College of Arts and Sciences'
+advisor: 'Peter D. Hoff'
+
+committeememberone: 'Committeemember O. Name'
+committeemembertwo: 'Committeemember T. Name'
+dus: 'Mine Cetinkaya-Rundel'
+department: 'Department of Statistical Science'
+degree: 'Bachelor of Science in Statistical Science'
+title: 'Matrix Based Anomaly Detection Techniques Applied to Network Attacks'
+knit: "bookdown::render_book"
+site: bookdown::bookdown_site
+output: 
+  #thesisdowndss::thesis_pdf: default
+  thesisdowndss::thesis_gitbook: default
+#  thesisdowndss::thesis_word: default
+#  thesisdowndss::thesis_epub: default
+# If you are creating a PDF you'll need to write your preliminary content here or
+# use code similar to line 20 for the files.  If you are producing in a different
+# format than PDF, you can delete or ignore lines 20-31 in this YAML header.
+# abstract: |
+#   `r if(knitr:::is_latex_output()) paste(readLines("00-abstract.Rmd"), collapse = '\n  ')`
+# # If you'd rather include the preliminary content in files instead of inline
+# # like below, use a command like that for the abstract above.  Note that a tab is 
+# # needed on the line after the |.
+# acknowledgements: |
+#   I want to thank a few people.
+# dedication: |
+#   You can have a dedication here if you wish. 
+# preface: |
+#   This is an example of a thesis setup to use the reed thesis document class
+#   (for LaTeX) and the R bookdown package, in general.
+bibliography: bib/thesis.bib
+# Refer to your specific bibliography file in the line above.
+csl: csl/apa.csl
+# Download your specific csl file and refer to it in the line above.
+# lot: true #TABLES
+# lof: true #FIGURES
+space_between_paragraphs: true
+# Delete the # at the beginning of the previous line if you'd like
+# to have a blank new line between each paragraph
+#header-includes:
+#- \usepackage{tikz}
+---
+
+<!--
+Above is the YAML (YAML Ain't Markup Language) header that includes a lot of metadata used to produce the document.  Be careful with spacing in this header!
+
+If you'd prefer to not include a Dedication, for example, simply delete lines 17 and 18 above or add a # before them to comment them out.  If you have other LaTeX packages you would like to include, delete the # before header-includes and list the packages after hyphens on new lines.
+
+If you'd like to include a comment that won't be produced in your resulting file enclose it in a block like this.
+-->
+
+<!--
+If you receive a duplicate label error after knitting, make sure to delete the index.Rmd file and then knit again.
+-->
+
+```{r include_packages, include = FALSE}
+# This chunk ensures that the thesisdowndss package is
+# installed and loaded. This thesisdowndss package includes
+# the template files for the thesis.
+if(!require(devtools))
+  install.packages("devtools", repos = "http://cran.rstudio.com")
+if(!require(thesisdowndss))
+  devtools::install_github("mine-cetinkaya-rundel/thesisdowndss")
+library(thesisdowndss)
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index")
+library(plyr)
+library(data.table)
+library(factoextra)
+library(ggbiplot)
+library(gridExtra)
+library(softImpute)
+
+argus = read.csv("data/argus-anon-20170201.csv")
+# argus = readRDS("/data/argus_complete.rds")
+# combinations = readRDS("/data/combinations.rds")
+```
+
+<!-- You'll need to include the order that you'd like Rmd files to appear in the _bookdown.yml file for
+PDF files and also delete the # before rmd_files: there.  You'll want to not include 00(two-hyphens)prelim.Rmd
+and 00-abstract.Rmd since they are handled in the YAML above differently for the PDF version.
+-->
+
+<!-- The {.unnumbered} option here means that the introduction will be "Chapter 0." You can also use {-} for no numbers
+on chapters.
+-->
+
+
+
+<!--chapter:end:index.Rmd-->
+
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Preliminary Content {-}
+
+## Acknowledgements {-}
+
+I thank my Advisor, Professor Peter Hoff, and the Director of Undergraduate Studies, Professor Mine Cetinkaya-Rundel, for their guidance in this project. I also thank Duke University's Statistics Department and Office of Information Technology, especially my dataset contact at OIT, Eric Hope, for making this project possible. Most of all I thank my parents for their continued unwavering support in all my endeavors. 
+
+<!-- ## Abstract {-} -->
+
+<!-- ## Preface {-} -->
+
+<!-- This is an example of a thesis setup to use the reed thesis document class -->
+<!-- (for LaTeX) and the R bookdown package, in general. -->
+
+<!-- ## Dedication {-} -->
+
+<!-- You can have a dedication here if you wish.  -->
+
+`r if(!knitr:::is_latex_output()) '## Abstract {-}'`
+
+<!--chapter:end:00--prelim.Rmd-->
+
+<!-- ## Abstract {-} -->
+The goal of this project is to identify novel methods for detecting anomalies in network IP data. The space is represented as a 3-dimensional tensor of the continuous features (source bytes, destination bytes, source packets, destination packets) divided by their respective source port and destination port combinations. This project implements and assesses the validity of principal component analysis and matrix completion via singular value decomposition (more methods pending) in determining anomalous entries in the tensor.
+
+<!--chapter:end:00-abstract.Rmd-->
+
+#Introduction
+
+##Anomaly Detection
+
+  Anomaly detection is a technique used to identify unusual patterns that do not conform to expected behavior, called outliers. It has many applications in business, from intrusion detection (identifying strange patterns in network traffic that could signal a hack) to system health monitoring (spotting a malignant tumor in an MRI scan), and from fraud detection in credit card transactions to fault detection in operating environments.
+
+Anomalies can be broadly categorized as:
+
+Point anomalies: A single instance of data is anomalous if it's too far off from the rest. Business use case: Detecting credit card fraud based on "amount spent."
+
+Contextual anomalies: The abnormality is context specific. This type of anomaly is common in time-series data. Business use case: Spending $100 on food every day during the holiday season is normal, but may be odd otherwise.
+
+Collective anomalies: A set of data instances collectively helps in detecting anomalies. Business use case: Someone is trying to copy data form a remote machine to a local host unexpectedly, an anomaly that would be flagged as a potential cyber attack. 
+
+  Anomaly detection is similar to — but not entirely the same as — noise removal and novelty detection. Novelty detection is concerned with identifying an unobserved pattern in new observations not included in training data — like a sudden interest in a new channel on YouTube during Christmas, for instance. Noise removal (NR) is the process of immunizing analysis from the occurrence of unwanted observations; in other words, removing noise from an otherwise meaningful signal. 
+
+##Network Attacks 
+  Network security is becoming increasingly relevant as the flow of data, bandwith of transactions, and user dependency on hosted networks increase. As entire networks grow in nodes and complexity, attackers gain easier entry points of access to the network. The most benign of attackers attempt to shutdown networks (e.g. causing a website to shutdown with repeated pings to its server), while more malicious attempts involve hijacking the server to publish the attacker's own content or stealing unsecured data from the server, thus compromising the privacy of the network's users.
+
+  Attackers follow a specific three step strategy when gathering intelligence on a network, the most important component of which is scanning. Network scanning is a procedure for identifying active hosts on a network, the attacker uses it to find information about the specific IP addresses that can be accessed over the Internet, their target's operating systems, system architecture, and the services running on each node/computer in the network. Scanning procedures, such as ping sweeps and port scans, return information about which IP addresses map to live hosts that are active on the Internet and what services they offer. Another scanning method, inverse mapping, returns information about what IP addresses do not map to live hosts; this enables an attacker to make assumptions about viable addresses.
+
+  All three of these scanning methods leave digital signatures in the networks they evaluate because they apply specific pings that are then stored in the network logs. Most scanners use a specific combination of bytes, packets, flags (in TCP protocol), and ports in a sequence of pings to a network. Identifying a scanner's often many IP addresses from the set of pings available in the network's logs is thus an anomaly detection problem. In particular, because the data is unlabeled, meaning it is unclear which observations are actually scanners and which are just standard user behavior, unsupervised approaches are necessary for tackling the problem.
+  
+  This particular dataset is from Duke University's Office of Information Technology (OIT), and it covers all observations in their network traffic during a five minute period in February 2017.
+
+###Status Quo Solution
+  OIT's current solution for detecting scanners relies on specific domain knowledge gathered from diagnostics programs and data analysis completed on previous data. They prevent scanners by blocking IP addresses that fit certain rules they have constructed to run on every network transaction as it occurs. The specific checks in these rules are private for security reasons, but they belong to the nature of evaluating the size of transactions, repeated connections between particular ports, many pings from the same address, and combinations of these particular behaviors.
+
+  While this solution presents a methodical way for banning IP addresses and its method of rule checking is essentially removing what OIT considers outliers for network transactions-any observation that does not fit within the constraints specified by the rules is classified as an outleir and its source IP is blocked-it is inflexible, prone to detecting false negatives, and fails to detect  observations that may be within the parameter constraints of the rules but are anomalous with respect to other parameters or parameter constraints.
+  
+  
+  
+
+<!--chapter:end:01-intro.Rmd-->
+
+# Networks Dataset
+
+## Features
+The networks dataset contains 13 features, 8 categorical and 5 continuous, and the observations are unlabeled (not specified whether they are considered a scanner). The 13 features are: 
+
+**Continuous:**
+
+- StartTime (Start Time): the time when the observation is logged
+- SrcBytes (Source Bytes): the total number of bytes sent in the observation 
+- SrcPkts (Source Packets): the number of packets sent in the observation
+- DstBytes (Destination Bytes): the total number of bytes received in the observation
+- DstPkts (Destination Packets): the number of packets received in the observation
+Note, the destination packets and bytes features do not have the same values as their source counterparts because the connections are compressed and decompressed into different forms and byte sizes when sent. For instance, it is possible for the number of destination packets to be larger than source packets. It is also possible for information to be lost during the connection.
+
+**Categorical:**
+
+- Flgs (connection flag): flow state flags seen in transaction between the two addresses
+- Proto (network protocol): specifies the rules used for information exchange via network addresses. Transmission Control Protocol (TCP) uses a set of rules to exchange messages with other Internet points at the information packet level, and Internet Protocol (IP) uses a set of rules to send and receive messages at the Internet address level.
+- SrcAddr (Source Address): the IP address of the connection's source 
+- DstAddr (Destination Address): the IP address of the connection's destination
+- Sport (Source Port): the network port number of the connection's source. A port numbers identifies the specific process to which a network message is forwarded when it arrives at a server. 
+- Dport (Destination Port): the network port number of the connection's destination 
+- Dir (direction): the direction of the connection 
+- State (connection state): a categorical assessment of the current phase in the transaction that the timestamp is taken at ???
+
+Note, the addresses have been anonymized for security reasons.
+
+##Argus and Data Nuances
+
+Argus is the open source network security tool applied to network transactions that collects the data for the features. The Argus wiki and the OIT manual provides key insights into the structure and nature of the data. Specifically, the sessions are clustered together by address, so the pytes and packets values are accumulative over a set duration and each session has its own start time but does not have a tracked end time. There exist 2-4 million connections on average every 5 minutes. Furthermore the protocol in this dataset is always gathered from TCP protocol and the direction will always be to the right (i.e. Source to Destination). This information supports dropping proto, StartTime, and Direction from the dataset for future analysis because they do not present any information regarding whether an observation can be considered an anomaly. Furthermore, the State feature may not be reliable because Argus occasionally resets the state data statistics during monitoring.
+
+
+<!--chapter:end:02-data.Rmd-->
+
+# Preliminary Data Investigation
+## Exploratory Data Analysis
+### Cleaning Predictors
+```{r}
+sapply(argus, class)
+argus = transform(argus,
+                  Sport = as.factor(Sport),
+                  Dport = as.factor(Dport))
+argus = subset(argus, select = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport",
+                                "SrcPkts", "DstPkts", "SrcBytes", "DstBytes", "State"))
+attach(argus)
+categorical = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport", "State")
+continuous = c("SrcPkts", "DstPkts", "SrcBytes", "DstBytes")
+```
+
+This code casts the features to their corresponding class classifications (numeric and factor), and removes Proto, StartTime, and Diretion from the dataset.
+
+### Categorical Features: Unique Categories and Counts
+```{r}
+sapply(argus, function(x) length(unique(x)))
+#function that returns elements of the feature and their counts in descending order
+element_counts = function(x) {
+  dt = data.table(x)[, .N, keyby = x]
+  dt[order(dt$N, decreasing = TRUE),]
+}
+element_counts(Sport)
+element_counts(Dport)
+element_counts(SrcAddr)
+element_counts(DstAddr)
+element_counts(State)
+```
+
+### Continuous Features: Distributions and Relationships
+```{r}
+par(mfrow=c(2,2))
+hist(SrcBytes); hist(SrcPkts); hist(DstBytes); hist(DstPkts) #clearly some very large values
+largest_n = function(x, n){
+  head(sort(x, decreasing=TRUE), n)
+}
+largest_n(SrcBytes, 10)
+largest_n(SrcPkts, 10)
+largest_n(DstBytes, 10)
+largest_n(DstPkts, 10)
+```
+
+The histograms and the largest 10 values in each of the continuous variables show that there are a relatively few amount of large observations skewing the distributions. This explains the model summary containing means much larger than their medians. It's not possible to remove the large values as outliers because they may be scanner observations to detect. Also there is a high frequency (up to the first quartile) of destination bytes and packets that equal 0. 
+
+We will now try to investigate whether the largest continuous predictor values correspond to any particular addresses or ports. 
+
+```{r}
+max.SrcBytes = argus[with(argus,order(-SrcBytes)),][1:20,]
+max.SrcPkts = argus[with(argus,order(-SrcPkts)),][1:20,]
+max.DstBytes = argus[with(argus,order(-DstBytes)),][1:20,]
+max.DstPkts = argus[with(argus,order(-DstPkts)),][1:20,]
+head(max.SrcBytes)
+head(max.DstBytes)
+```
+
+Source Addresses tend to be repetitive for the largest max bytes/packets, while ports vary. The top 10 largest DstBytes all correspond to SrcAddr 197.0.1.1 and DstAddr 100.0.1.1. Also both max Src and Dst rows correspond to the "* s"" flag. The largest sizes of DstBytes tend to go to Dport 80, which is the port that expects to receive from a web client (http), while the largest SrcBytes go to 31743. The next section implements a systematic way for investigating the relationship between addresses and ports because simply looking at the max rows is difficult.
+
+
+### Correlation Between Features
+```{r}
+cor(SrcBytes, SrcPkts)
+cor(DstBytes, DstPkts)
+cor(SrcBytes, DstBytes)
+cor(SrcPkts, DstPkts)
+```
+
+The plots of the predictors suggest strong linear trends between the predictors, which makes intuitive sense given the domain matter. Further investigations show that DstPkts has a correlation of ~1 with DstBytes and ~0.85 with SrcPkts.
+
+```{r, eval=FALSE}
+cor(DstBytes, DstPkts, method = "kendall")
+cor(SrcPkts, DstPkts, method = "kendall")
+cor(DstBytes, DstPkts, method = "spearman")
+cor(SrcPkts, DstPkts, method = "spearman")
+```
+
+Because the original correlation tests relied on the Pearson method, which is susceptible to bias from large values, further tests investigate the relationship between DstPkts and the other features. While the correlation is still high for Kendall-Tau and Spearman's correlation coefficients, it is less cause for concern when compared to the skewed response from the Pearson method.
+
+## Transformations on the Data
+### Removing Quantiles 
+
+To get a better sense of the unskewed distribution, the below plots visualize the continuous features with the largest and smallest 10% of observations removed. The removed values will be readded to the dataset when investigating for anomalies.
+
+```{r}
+remove_quantiles = function(v, lowerbound, upperbound){
+  return (v[quantile(v,lowerbound) >= v & v <= quantile(v,upperbound)])
+}
+SrcBytes.abrev = remove_quantiles(SrcBytes,0.10,0.9)
+SrcPkts.abrev = remove_quantiles(SrcPkts,0.10,0.9)
+DstBytes.abrev = remove_quantiles(DstBytes,0.10,0.9)
+DstPkts.abrev = remove_quantiles(DstPkts,0.10,0.9)
+par(mfrow=c(2,2))
+hist(SrcBytes.abrev); hist(SrcPkts.abrev); hist(DstBytes.abrev); hist(DstPkts.abrev)
+```
+
+The continuous features are still unevenly distributed even with the 20% most extreme values removed.
+
+### Log Transformation
+
+```{r,eval=FALSE}
+par(mfrow=c(2,2))
+hist(log(SrcBytes)); hist(log(SrcPkts)); hist(log(DstBytes)); hist(log(DstPkts))
+plot(log(SrcPkts), log(SrcBytes)); plot(log(DstPkts), log(DstBytes))
+plot(log(SrcBytes), log(DstBytes)); plot(log(SrcPkts), log(DstPkts))
+```
+
+A log transformation for each of the continuous features outputs right-skewed histograms. Skewed features may affect the results of a kernel pca, so we consider other approaches for transformations.
+
+### Normal Scores Transformation
+
+```{r}
+nscore = function(x) {
+   # Takes a vector of values x and calculates their normal scores. Returns 
+   # a list with the scores and an ordered table of original values and
+   # scores, which is useful as a back-transform table. See backtr().
+   nscore = qqnorm(x, plot.it = FALSE)$x  # normal score 
+   trn.table = data.frame(x=sort(x),nscore=sort(nscore))
+   return (list(nscore=nscore, trn.table=trn.table))
+}
+
+backtr = function(scores, nscore, tails='none', draw=TRUE) {
+   # Given a vector of normal scores and a normal score object 
+   # (from nscore), the function returns a vector of back-transformed 
+   # values
+   # 'none' : No extrapolation; more extreme score values will revert 
+   # to the original min and max values. 
+   # 'equal' : Calculate magnitude in std deviations of the scores about 
+   # initial data mean. Extrapolation is linear to these deviations. 
+   # will be based upon deviations from the mean of the original 
+   # hard data - possibly quite dangerous!
+   # 'separate' :  This calculates a separate sd for values 
+   # above and below the mean.
+   if(tails=='separate') { 
+      mean.x <- mean(nscore$trn.table$x)
+      small.x <- nscore$trn.table$x < mean.x
+      large.x <- nscore$trn.table$x > mean.x
+      small.sd <- sqrt(sum((nscore$trn.table$x[small.x]-mean.x)^2)/
+                       (length(nscore$trn.table$x[small.x])-1))
+      large.sd <- sqrt(sum((nscore$trn.table$x[large.x]-mean.x)^2)/
+                       (length(nscore$trn.table$x[large.x])-1))
+      min.x <- mean(nscore$trn.table$x) + (min(scores) * small.sd)
+      max.x <- mean(nscore$trn.table$x) + (max(scores) * large.sd)
+      # check to see if these values are LESS extreme than the
+      # initial data - if so, use the initial data.
+      #print(paste('lg.sd is:',large.sd,'max.x is:',max.x,'max nsc.x
+      #     is:',max(nscore$trn.table$x)))
+      if(min.x > min(nscore$trn.table$x)) {min.x <- min(nscore$trn.table$x)}
+      if(max.x < max(nscore$trn.table$x)) {max.x <- max(nscore$trn.table$x)}
+   }
+   if(tails=='equal') { # assumes symmetric distribution around the mean
+      mean.x <- mean(nscore$trn.table$x)
+      sd.x <- sd(nscore$trn.table$x)
+      min.x <- mean(nscore$trn.table$x) + (min(scores) * sd.x)
+      max.x <- mean(nscore$trn.table$x) + (max(scores) * sd.x)
+      # check to see if these values are LESS extreme than the
+      # initial data - if so, use the initial data.
+      if(min.x > min(nscore$trn.table$x)) {min.x <- min(nscore$trn.table$x)}
+      if(max.x < max(nscore$trn.table$x)) {max.x <- max(nscore$trn.table$x)}
+   }
+   if(tails=='none') {   # No extrapolation
+      min.x <- min(nscore$trn.table$x)
+      max.x <- max(nscore$trn.table$x)
+   }
+   min.sc <- min(scores)
+   max.sc <- max(scores)
+   x <- c(min.x, nscore$trn.table$x, max.x)
+   nsc <- c(min.sc, nscore$trn.table$nscore, max.sc)
+   
+   if(draw) {plot(nsc,x, main='Transform Function')}
+   back.xf <- approxfun(nsc,x) # Develop the back transform function
+   val <- back.xf(scores)
+   return(val)
+}
+
+SrcBytes_norm = nscore(SrcBytes)$nscore
+SrcBytes_table = nscore(SrcBytes)$trn.table
+
+SrcPkts_norm = nscore(SrcPkts)$nscore
+SrcPkts_table = nscore(SrcPkts)$trn.table
+
+DstBytes_norm = nscore(DstBytes)$nscore
+DstBytes_table = nscore(DstBytes)$trn.table
+
+DstPkts_norm = nscore(DstPkts)$nscore
+DstPkts_table = nscore(DstPkts)$trn.table
+```
+
+
+
+<!--chapter:end:03-eda.Rmd-->
+
+#Matrix Techniques for Anomaly Detection
+MAYBE PUT LIT REVIEW WITH EACH SECTION?
+
+##Ports Combination Matrix/Tensor
+
+```{r}
+#set counts
+s_num = 25
+d_num = 25
+combo_num = 20
+
+#get freqs
+Sport_table = table(Sport)
+Sport_table = as.data.frame(Sport_table)
+Sport_table = Sport_table[order(-Sport_table$Freq),]
+top_Sport = (head(Sport_table$Sport, s_num))
+
+#get freqs
+Dport_table = table(Dport)
+Dport_table = as.data.frame(Dport_table)
+Dport_table = Dport_table[order(-Dport_table$Freq),]
+top_Dport = (head(Dport_table$Dport, d_num))
+
+#subset data
+argus_maxes = argus[is.element(Sport, top_Sport) & is.element(Dport, top_Dport), ]
+argus_maxes = transform(argus_maxes,
+                        Sport = as.numeric(as.character(Sport)),
+                        Dport = as.numeric(as.character(Dport)))
+max_combinations = as.data.frame(table(argus_maxes$Sport, argus_maxes$Dport))
+
+top_combinations = head(max_combinations[order(-max_combinations$Freq),], combo_num)
+top_combinations$Sport = top_combinations$Var1
+top_combinations$Dport = top_combinations$Var2
+top_combinations$Var1 = NULL
+top_combinations$Var2 = NULL
+top_combinations = transform(top_combinations,
+                             Sport = as.numeric(as.character(Sport)),
+                             Dport = as.numeric(as.character(Dport)))
+
+extract_intersection = function(sport, dport){
+  argus_subset = argus[Sport == sport & Dport == dport,]
+  return (argus_subset)
+}
+
+generate_combinations_matrix = function(top_combinations){
+  n = dim(top_combinations)[1]
+  combinations = c()
+  for (i in 1:n){
+    sport = as.numeric(top_combinations[i,]$Sport)
+    dport = as.numeric(top_combinations[i,]$Dport)
+    combo = extract_intersection(sport, dport)
+    combinations = c(combinations, list(combo))
+  }
+  return (combinations)
+}
+combinations = generate_combinations_matrix(top_combinations)
+```
+
+```{r,include=FALSE}
+# combinations = readRDS("data/combinations.rds")
+```
+
+We now have a matrix built with the most common Sport and Dport combinations. Each entry in the matrix contains all of the observations that correspond to that Sport and Dport combination. We can now perform testing on each group using normal transformations and principal component analysis to see if there are any trends between groups.
+
+##Principal Component Analysis
+```{r}
+pca_analysis = function(SrcBytes, SrcPkts, DstBytes, DstPkts){
+  pca_cont_vars = cbind(SrcBytes, SrcPkts, DstBytes, DstPkts)
+  pca = prcomp(pca_cont_vars, center = TRUE, scale. = TRUE)
+  print(pca$rotation)
+  print((summary(pca)))
+  #screeplot(pca, type="lines",col=3)
+  g = ggbiplot(pca, obs.scale = 1, var.scale = 1,
+                ellipse = TRUE,
+                circle = TRUE)
+  g = g + scale_color_discrete(name = '')
+  g = g + theme(legend.direction = 'horizontal',
+                 legend.position = 'top')
+  print(g)
+  return(pca$rotation)
+}
+```
+
+### Investigating Combinations
+```{r}
+combo_num = 10
+for (i in 1:combo_num){
+  combo_table = combinations[i]
+  combo_table = transform(combo_table,
+                          SrcBytes = as.numeric(SrcBytes),
+                          SrcPkts = as.numeric(SrcPkts),
+                          DstBytes = as.numeric(DstBytes),
+                          DstPkts = as.numeric(DstPkts))
+  cat("Sport:", combo_table$Sport[1],"\t")
+  cat("Dport:", combo_table$Dport[1],"\n")
+  SrcBytes_norm =  nscore(combo_table$SrcBytes)$nscore
+  SrcPkts_norm =  nscore(combo_table$SrcPkts)$nscore
+  DstBytes_norm =  nscore(combo_table$DstBytes)$nscore
+  DstPkts_norm =  nscore(combo_table$DstPkts)$nscore
+  pca_analysis(SrcBytes_norm, SrcPkts_norm, DstBytes_norm, DstPkts_norm)
+}
+```
+
+Zeroes in the dataset causing the patterns in the 2nd principal component. Normal scores dont work very well if there are ties in the data.
+
+## Matrix Completion via Singular Value Decomposition
+
+There are $m$ source ports and $n$ destination ports. $Y \in {\rm I\!R}^{m \times n}$, is the matrix that stores the means of the combinations of source ports and destination ports. $Y$ has a lot of missingness because not every source port interacts with every destination port. $F \in {\rm I\!R}^{m \times n}$ is a sparse matrix that represents the frequencies of combinations, i.e $F[32242,12312]$ represents the number of observations for the 32242 12312 port interaction. $M \in {\rm I\!R}^{m \times n}$ represents a boolean matrix of whether the corresponding $Y$ values are missing. $Y[M]$ represents all of the missing values of $Y$.
+
+There are multiple steps to the matrix completion process:
+Impute the initial values for the missing $y_{i,j}$ observations $1 \leq i \leq m, 1 \leq j \leq n$: In general an additive model is applicable: $$y_{i,j} = \mu + a_i + b_j + \epsilon_{i,j}$$ where $\epsilon \in N(0,\sigma^2)$, $\mu$ is the overall mean, $a_i$ is the row mean, and $b_j$ is column mean. An analysis of variance (ANOVA) imputation is used to fill in the initial values, $y_{i,j}$. Ignoring the missing values for now, let $y_{..}$ denote the empirical overall mean, $y_{i.}$ denote the empirical row mean, and $y_{.j}$ denote the column mean. $$y_{i,j} = y_{..} + (y_{i.}-y{..}) + (y_{.j}-y_{..}) = y_{i.} + y_{.j} - y{..}$$
+
+The repeated imputation procedure solves $Y^{(s)}[M] = R_k(Y^{(s-1)})[M]$ where $R_k$ is the best rank-k approximation for the $s$-th step. For each step $(s)$ use singular value decomposition to decompose $$Y^{(s)} =  U^{(s)}DV^{T(s)}$$ where $D$ is a diagonal matrix of the singular values, $U$ is the left singular vectors of $Y$ and $V$ is the right singular vectors of $Y$. 
+
+The Eckart-Young-Mirsky (EYM) Theorem provides the best rank-k approximation for the missing values in $Y^{(s+1)}$. Recall $Y[M]$ represents all of the missing values of $Y$. Applying the EYM theorem:  $$Y^{(s+1)}[M] = (U[,1:k]^{(s)}D[,1:k]V[,1:k]^{T(s)})[M]$$. Eliminate (s), (s+1)
+
+Where $U[,1:k]$ represents the first $k$ columns of $U$. 
+
+The EYM rank approximation is repeated until the relative difference between $Y^{(s+1)}$ and $Y^{(s)}$ falls below a set threshold, $T$. The relative difference threshold is expressed: $$\|Y^{(s+1)}-Y^{(s)}\|_2 < T$$ divide by current value of Y^({s}). Make criteria invariate to a scale change, multiplyng by 20 doesnt change convergence criteria. Frobenius norm? L2 norm? 
+
+To assess the quality of the imputation, Leave-One-Out Cross Validation (LOOCV) is used to generate a prediction error. LOOCV requires taking an observed value, setting it to NA (missing), and then performing the described imputation process. The prediction error can then be calculated as some function of the difference between the imputed value and the true value, $\hat y_{i,j} - y_{i,j}$.
+
+Least squares estimate with gaussian error model, for the same variance assumption between cells.
+
+What would a good statistical model be for variable frequency
+
+AMMI Model, $$y_{ijk}`sim .mu + a_i + b_j + u_i^TDv_j+\sigma_{ij}\epsilon_{ij}$$ epsilon is standard normal so it turns the whole term to having variance i,j
+
+```{r,eval=FALSE}
+#matrix parameters
+n_Sport = 20
+n_Dport = 20
+
+#get freqs
+Sport_table = as.data.frame(table(argus$Sport))
+Sport_table = Sport_table[order(-Sport_table$Freq),]
+top_Sport = (head(Sport_table$Var1, n_Sport))
+
+#get freqs
+Dport_table = as.data.frame(table(argus$Dport))
+Dport_table = Dport_table[order(-Dport_table$Freq),]
+top_Dport = (head(Dport_table$Var1, n_Dport))
+
+#create starting matrices
+ports_combo_matrix = matrix(list(), nrow = n_Sport, ncol = n_Dport)
+dimnames(ports_combo_matrix) = list(top_Sport, top_Dport)
+
+ports_freq_matrix = matrix(0, nrow = n_Sport, ncol = n_Dport)
+dimnames(ports_freq_matrix) = list(top_Sport, top_Dport)
+
+nscore = function(x) {
+  nscore = qqnorm(x, plot.it = FALSE)$x  # normal score 
+  trn.table = data.frame(x=sort(x),nscore=sort(nscore))
+  return (list(nscore=nscore, trn.table=trn.table))
+}
+
+#fill the ports_combo_matrix and ports_freq_matrix
+for (s in 1:n_Sport){
+  for (d in 1:n_Dport){
+    combination = argus[is.element(argus$Sport, top_Sport[s])
+                        & is.element(argus$Dport, top_Dport[d]),]
+    obs = combination$SrcBytes
+    n_obs = length(obs) #ignores NA values
+    if (n_obs > 0){
+      #obs = nscore(obs)$nscore #normal transformation
+      for (i in 1:n_obs){
+        ports_combo_matrix[[s,d]] = c(ports_combo_matrix[[s,d]],obs[i]) 
+        #O(1) time to append values to a list?
+        ports_freq_matrix[s,d] = ports_freq_matrix[s,d] + 1
+      }
+    }
+  }
+}
+
+#create mean and variance matrix
+ports_mean_matrix = matrix(NA, nrow = n_Sport, ncol = n_Dport)
+dimnames(ports_mean_matrix) = list(top_Sport, top_Dport)
+
+ports_variance_matrix = matrix(NA, nrow = n_Sport, ncol = n_Dport)
+dimnames(ports_variance_matrix) = list(top_Sport, top_Dport)
+
+#fill mean and variance matrix
+for (s in 1:n_Sport){
+  for (d in 1:n_Dport){
+    if (ports_freq_matrix[s,d] == 1){
+      ports_mean_matrix[s,d] = ports_combo_matrix[[s,d]]
+      ports_variance_matrix[s,d] = 0
+    }
+    else if (ports_freq_matrix[s,d] > 1){
+      ports_mean_matrix[s,d] = mean(ports_combo_matrix[[s,d]])
+      ports_variance_matrix[s,d] = var(ports_combo_matrix[[s,d]])
+    }
+  }
+}
+
+#untuned ALS using softimpute
+fit = softImpute(ports_mean_matrix,rank.max=2,lambda=0.9,trace=TRUE,type="als")
+fit$d
+filled = complete(ports_mean_matrix, fit)
+plot(ports_mean_matrix[!is.na(ports_mean_matrix)], filled[!is.na(ports_mean_matrix)])
+plot(ports_mean_matrix[!is.na(ports_mean_matrix)], filled[!is.na(ports_mean_matrix)], 
+     xlim = c(0,5000), ylim = c(0,5000))
+
+
+####Eckhart Young Theorem Implementation, Best Rank k Approximation####
+S = 1000
+k = 2
+Y = ports_mean_matrix
+
+#calculate overall mean
+n = 0
+sum = 0
+for (s in 1:n_Sport){
+  for (d in 1:n_Dport){
+    if (ports_freq_matrix[s,d] != 0){
+      sum = sum + ports_mean_matrix[s,d]
+      n = n + ports_freq_matrix[s,d]
+    }
+  }
+}
+overall_mean = sum/n
+#calculate row means and col means
+row_means = rowMeans(ports_mean_matrix, na.rm = TRUE)
+col_means = colMeans(ports_mean_matrix, na.rm = TRUE)
+
+#Fill in missing values in Y with ANOVA
+for (s in 1:n_Sport){
+  for (d in 1:n_Dport){
+    if (ports_freq_matrix[s,d] == 0){
+      Y[s,d] = row_means[s] + col_means[d] - overall_mean
+    }
+  }
+}
+
+for (i in 1:S){
+  #extract SVD
+  svd_Y = svd(Y)
+  D = diag(svd_Y$d)
+  U = svd_Y$u
+  V = svd_Y$v
+  #EYM theorem
+  EYM = U[,1:k] %*% D[,1:k] %*% V[,1:k]
+  #replace imputed values with new values 
+  for (s in 1:n_Sport){
+    for (d in 1:n_Dport){
+      if (ports_freq_matrix[s,d] == 0){
+        Y[s,d] = EYM[s,d]
+      }
+    }
+  }
+}
+```
+
+
+<!-- ```{r include_packages_2, include = FALSE} -->
+<!-- # This chunk ensures that the thesisdowndss package is -->
+<!-- # installed and loaded. This thesisdowndss package includes -->
+<!-- # the template files for the thesis and also two functions -->
+<!-- # used for labeling and referencing -->
+<!-- if(!require(devtools)) -->
+<!--   install.packages("devtools", repos = "http://cran.rstudio.com") -->
+<!-- if(!require(dplyr)) -->
+<!--     install.packages("dplyr", repos = "http://cran.rstudio.com") -->
+<!-- if(!require(ggplot2)) -->
+<!--     install.packages("ggplot2", repos = "http://cran.rstudio.com") -->
+<!-- if(!require(ggplot2)) -->
+<!--     install.packages("bookdown", repos = "http://cran.rstudio.com") -->
+<!-- if(!require(thesisdowndss)){ -->
+<!--   library(devtools) -->
+<!--   devtools::install_github("mine-cetinkaya-rundel/thesisdowndss") -->
+<!--   } -->
+<!-- library(thesisdowndss) -->
+<!-- flights <- read.csv("data/flights.csv") -->
+<!-- ``` -->
+
+
+<!-- # Tables, Graphics, References, and Labels {#ref-labels} -->
+
+<!-- ## Tables -->
+
+<!-- In addition to the tables that can be automatically generated from a data frame in **R** that you saw in [R Markdown Basics] using the `kable` function, you can also create tables using _pandoc_. (More information is available at <http://pandoc.org/README.html#tables>.)  This might be useful if you don't have values specifically stored in **R**, but you'd like to display them in table form.  Below is an example.  Pay careful attention to the alignment in the table and hyphens to create the rows and columns. -->
+
+<!-- ---------------------------------------------------------------------------------- -->
+<!--   Factors                    Correlation between Parents & Child      Inherited -->
+<!-- ------------------------- ----------------------------------------- -------------- -->
+<!--   Education                                -0.49                         Yes -->
+
+<!--   Socio-Economic Status                     0.28                        Slight    -->
+
+<!--   Income                                    0.08                          No -->
+
+<!--   Family Size                               0.18                        Slight -->
+
+<!--   Occupational Prestige                     0.21                        Slight -->
+<!-- ------------------------- ----------------------------------------- -------------- -->
+<!-- Table: (\#tab:inher) Correlation of Inheritance Factors for Parents and Child  -->
+
+<!-- We can also create a link to the table by doing the following: Table \@ref(tab:inher).  If you go back to [Loading and exploring data] and look at the `kable` table, we can create a reference to this max delays table too: Table \@ref(tab:maxdelays). The addition of the `(\#tab:inher)` option to the end of the table caption allows us to then make a reference to Table `\@ref(tab:label)`. Note that this reference could appear anywhere throughout the document after the table has appeared.   -->
+
+<!-- <!-- We will next explore ways to create this label-ref link using figures. --> -->
+
+<!-- \clearpage -->
+
+<!-- <!-- clearpage ends the page, and also dumps out all floats. -->
+<!--   Floats are things like tables and figures. --> -->
+
+
+<!-- ## Figures -->
+
+<!-- If your thesis has a lot of figures, _R Markdown_ might behave better for you than that other word processor.  One perk is that it will automatically number the figures accordingly in each chapter.    You'll also be able to create a label for each figure, add a caption, and then reference the figure in a way similar to what we saw with tables earlier.  If you label your figures, you can move the figures around and _R Markdown_ will automatically adjust the numbering for you.  No need for you to remember!  So that you don't have to get too far into LaTeX to do this, a couple **R** functions have been created for you to assist.  You'll see their use below. -->
+
+<!-- <!-- -->
+<!-- One thing that may be annoying is the way _R Markdown_ handles "floats" like tables and figures (it's really \LaTeX's fault). \LaTeX\ will try to find the best place to put your object based on the text around it and until you're really, truly done writing you should just leave it where it lies. There are some optional arguments specified in the options parameter of the `label` function.  If you need to shift your figure around, it might be good to look here on tweaking the options argument:  <https://en.wikibooks.org/wiki/LaTeX/Floats,_Figures_and_Captions> -->
+
+<!-- If you need a graphic or tabular material to be part of the text, you can just put it inline. If you need it to appear in the list of figures or tables, it should be placed in a code chunk. -->
+<!-- --> -->
+
+
+<!-- In the **R** chunk below, we will load in a picture stored as `duke.png` in our main directory.  We then give it the caption of "Duke logo", the label of "dukelogo", and specify that this is a figure.  Make note of the different **R** chunk options that are given in the R Markdown file (not shown in the knitted document). -->
+
+<!-- ```{r dukelogo, fig.cap="Duke logo"} -->
+<!-- include_graphics(path = "figure/duke.png") -->
+<!-- ``` -->
+
+<!-- Here is a reference to the Duke logo: Figure \@ref(fig:dukelogo).  Note the use of the `fig:` code here.  By naming the **R** chunk that contains the figure, we can then reference that figure later as done in the first sentence here.  We can also specify the caption for the figure via the R chunk option `fig.cap`. -->
+
+<!-- \clearpage  -->
+
+<!-- <!-- starts a new page and stops trying to place floats such as tables and figures --> -->
+
+<!-- Below we will investigate how to save the output of an **R** plot and label it in a way similar to that done above.  Recall the `flights` dataset from Chapter \@ref(rmd-basics).  (Note that we've shown a different way to reference a section or chapter here.)  We will next explore a bar graph with the mean flight departure delays by airline from Portland for 2014.  Note also the use of the `scale` parameter which is discussed on the next page. -->
+
+<!-- ```{r delaysboxplot, warnings=FALSE, messages=FALSE, fig.cap="Mean Delays by Airline", fig.width=6} -->
+<!-- flights %>% group_by(carrier) %>% -->
+<!--   summarize(mean_dep_delay = mean(dep_delay)) %>% -->
+<!--   ggplot(aes(x = carrier, y = mean_dep_delay)) + -->
+<!--   geom_bar(position = "identity", stat = "identity", fill = "red") -->
+<!-- ``` -->
+
+<!-- Here is a reference to this image: Figure \@ref(fig:delaysboxplot). -->
+
+<!-- A table linking these carrier codes to airline names is available at <https://github.com/ismayc/pnwflights14/blob/master/data/airlines.csv>. -->
+
+<!-- \clearpage -->
+
+<!-- Next, we will explore the use of the `out.extra` chunk option, which can be used to shrink or expand an image loaded from a file by specifying `"scale= "`. Here we use the mathematical graph stored in the "subdivision.pdf" file. -->
+
+<!-- ```{r subd, results="asis", echo=FALSE, fig.cap="Subdiv. graph", out.extra="scale=0.75"} -->
+<!-- include_graphics("figure/subdivision.pdf") -->
+<!-- ``` -->
+
+<!-- Here is a reference to this image: Figure \@ref(fig:subd).  Note that `echo=FALSE` is specified so that the **R** code is hidden in the document. -->
+
+<!-- **More Figure Stuff** -->
+
+<!-- Lastly, we will explore how to rotate and enlarge figures using the `out.extra` chunk option.  (Currently this only works in the PDF version of the book.) -->
+
+<!-- ```{r subd2, results="asis", echo=FALSE, out.extra="angle=180, scale=1.1", fig.cap="A Larger Figure, Flipped Upside Down"} -->
+<!-- include_graphics("figure/subdivision.pdf") -->
+<!-- ``` -->
+
+<!-- As another example, here is a reference: Figure \@ref(fig:subd2).   -->
+
+<!-- ## Footnotes and Endnotes -->
+
+<!-- You might want to footnote something. ^[footnote text] The footnote will be in a smaller font and placed appropriately. Endnotes work in much the same way. -->
+
+<!-- ## Bibliographies -->
+
+<!-- Of course you will need to cite things, and you will probably accumulate an armful of sources. There are a variety of tools available for creating a bibliography database (stored with the .bib extension).  In addition to BibTeX suggested below, you may want to consider using the free and easy-to-use tool called Zotero.  The Duke librarians have created Zotero documentation at <https://library.duke.edu/research/zotero>.  In addition, a tutorial is available from Middlebury College at <http://sites.middlebury.edu/zoteromiddlebury/>. -->
+
+<!-- _R Markdown_ uses _pandoc_ (<http://pandoc.org/>) to build its bibliographies.  One nice caveat of this is that you won't have to do a second compile to load in references as standard LaTeX requires. To cite references in your thesis (after creating your bibliography database), place the reference name inside square brackets and precede it by the "at" symbol.  For example, here's a reference to a book about worrying:  [@Molina1994].  This `Molina1994` entry appears in a file called `thesis.bib` in the `bib` folder.  This bibliography database file was created by a program called BibTeX.  You can call this file something else if you like (look at the YAML header in the main .Rmd file) and, by default, is to placed in the `bib` folder.   -->
+
+<!-- For more information about BibTeX and bibliographies, see the following documentation from Reed College at (<http://web.reed.edu/cis/help/latex/index.html>)^[@reedweb2007]. There are three pages on this topic:  _bibtex_ (which talks about using BibTeX, at <http://web.reed.edu/cis/help/latex/bibtex.html>), _bibtexstyles_ (about how to find and use the bibliography style that best suits your needs, at <http://web.reed.edu/cis/help/latex/bibtexstyles.html>) and _bibman_ (which covers how to make and maintain a bibliography by hand, without BibTeX, at <http://web.reed.edu/cis/help/latex/bibman.html>). The last page will not be useful unless you have only a few sources. -->
+
+<!-- If you look at the YAML header at the top of the main .Rmd file you can see that we can specify the style of the bibliography by referencing the appropriate csl file.  You can download a variety of different style files at <https://www.zotero.org/styles>.  Make sure to download the file into the csl folder. -->
+
+<!-- **Tips for Bibliographies** -->
+
+<!-- - Like with thesis formatting, the sooner you start compiling your bibliography for something as large as thesis, the better. Typing in source after source is mind-numbing enough; do you really want to do it for hours on end in late April? Think of it as procrastination. -->
+<!-- - The cite key (a citation's label) needs to be unique from the other entries. -->
+<!-- - When you have more than one author or editor, you need to separate each author's name by the word "and" e.g. `Author = {Noble, Sam and Youngberg, Jessica},`. -->
+<!-- - Bibliographies made using BibTeX (whether manually or using a manager) accept LaTeX markup, so you can italicize and add symbols as necessary. -->
+<!-- - To force capitalization in an article title or where all lowercase is generally used, bracket the capital letter in curly braces. -->
+
+<!-- ## Anything else? -->
+
+<!-- If you'd like to see examples of other things in this template, please contact Mine Cetinkaya-Rundel (email <mine@stat.duke.edu>) with your suggestions. We love to see people using _R Markdown_ for their theses, and are happy to help. -->
+
+<!--chapter:end:04-matrix.Rmd-->
+
+#Statistical Model
+
+##Uneven Variances 
+Discuss AMMI model
+
+##Determined Model
+
+##
+
+<!-- ```{r include_packages_2, include = FALSE} -->
+<!-- # This chunk ensures that the thesisdowndss package is -->
+<!-- # installed and loaded. This thesisdowndss package includes -->
+<!-- # the template files for the thesis and also two functions -->
+<!-- # used for labeling and referencing -->
+<!-- if(!require(devtools)) -->
+<!--   install.packages("devtools", repos = "http://cran.rstudio.com") -->
+<!-- if(!require(dplyr)) -->
+<!--     install.packages("dplyr", repos = "http://cran.rstudio.com") -->
+<!-- if(!require(ggplot2)) -->
+<!--     install.packages("ggplot2", repos = "http://cran.rstudio.com") -->
+<!-- if(!require(ggplot2)) -->
+<!--     install.packages("bookdown", repos = "http://cran.rstudio.com") -->
+<!-- if(!require(thesisdowndss)){ -->
+<!--   library(devtools) -->
+<!--   devtools::install_github("mine-cetinkaya-rundel/thesisdowndss") -->
+<!--   } -->
+<!-- library(thesisdowndss) -->
+<!-- flights <- read.csv("data/flights.csv") -->
+<!-- ``` -->
+
+
+<!-- # Tables, Graphics, References, and Labels {#ref-labels} -->
+
+<!-- ## Tables -->
+
+<!-- In addition to the tables that can be automatically generated from a data frame in **R** that you saw in [R Markdown Basics] using the `kable` function, you can also create tables using _pandoc_. (More information is available at <http://pandoc.org/README.html#tables>.)  This might be useful if you don't have values specifically stored in **R**, but you'd like to display them in table form.  Below is an example.  Pay careful attention to the alignment in the table and hyphens to create the rows and columns. -->
+
+<!-- ---------------------------------------------------------------------------------- -->
+<!--   Factors                    Correlation between Parents & Child      Inherited -->
+<!-- ------------------------- ----------------------------------------- -------------- -->
+<!--   Education                                -0.49                         Yes -->
+
+<!--   Socio-Economic Status                     0.28                        Slight    -->
+
+<!--   Income                                    0.08                          No -->
+
+<!--   Family Size                               0.18                        Slight -->
+
+<!--   Occupational Prestige                     0.21                        Slight -->
+<!-- ------------------------- ----------------------------------------- -------------- -->
+<!-- Table: (\#tab:inher) Correlation of Inheritance Factors for Parents and Child  -->
+
+<!-- We can also create a link to the table by doing the following: Table \@ref(tab:inher).  If you go back to [Loading and exploring data] and look at the `kable` table, we can create a reference to this max delays table too: Table \@ref(tab:maxdelays). The addition of the `(\#tab:inher)` option to the end of the table caption allows us to then make a reference to Table `\@ref(tab:label)`. Note that this reference could appear anywhere throughout the document after the table has appeared.   -->
+
+<!-- <!-- We will next explore ways to create this label-ref link using figures. --> -->
+
+<!-- \clearpage -->
+
+<!-- <!-- clearpage ends the page, and also dumps out all floats. -->
+<!--   Floats are things like tables and figures. --> -->
+
+
+<!-- ## Figures -->
+
+<!-- If your thesis has a lot of figures, _R Markdown_ might behave better for you than that other word processor.  One perk is that it will automatically number the figures accordingly in each chapter.    You'll also be able to create a label for each figure, add a caption, and then reference the figure in a way similar to what we saw with tables earlier.  If you label your figures, you can move the figures around and _R Markdown_ will automatically adjust the numbering for you.  No need for you to remember!  So that you don't have to get too far into LaTeX to do this, a couple **R** functions have been created for you to assist.  You'll see their use below. -->
+
+<!-- <!-- -->
+<!-- One thing that may be annoying is the way _R Markdown_ handles "floats" like tables and figures (it's really \LaTeX's fault). \LaTeX\ will try to find the best place to put your object based on the text around it and until you're really, truly done writing you should just leave it where it lies. There are some optional arguments specified in the options parameter of the `label` function.  If you need to shift your figure around, it might be good to look here on tweaking the options argument:  <https://en.wikibooks.org/wiki/LaTeX/Floats,_Figures_and_Captions> -->
+
+<!-- If you need a graphic or tabular material to be part of the text, you can just put it inline. If you need it to appear in the list of figures or tables, it should be placed in a code chunk. -->
+<!-- --> -->
+
+
+<!-- In the **R** chunk below, we will load in a picture stored as `duke.png` in our main directory.  We then give it the caption of "Duke logo", the label of "dukelogo", and specify that this is a figure.  Make note of the different **R** chunk options that are given in the R Markdown file (not shown in the knitted document). -->
+
+<!-- ```{r dukelogo, fig.cap="Duke logo"} -->
+<!-- include_graphics(path = "figure/duke.png") -->
+<!-- ``` -->
+
+<!-- Here is a reference to the Duke logo: Figure \@ref(fig:dukelogo).  Note the use of the `fig:` code here.  By naming the **R** chunk that contains the figure, we can then reference that figure later as done in the first sentence here.  We can also specify the caption for the figure via the R chunk option `fig.cap`. -->
+
+<!-- \clearpage  -->
+
+<!-- <!-- starts a new page and stops trying to place floats such as tables and figures --> -->
+
+<!-- Below we will investigate how to save the output of an **R** plot and label it in a way similar to that done above.  Recall the `flights` dataset from Chapter \@ref(rmd-basics).  (Note that we've shown a different way to reference a section or chapter here.)  We will next explore a bar graph with the mean flight departure delays by airline from Portland for 2014.  Note also the use of the `scale` parameter which is discussed on the next page. -->
+
+<!-- ```{r delaysboxplot, warnings=FALSE, messages=FALSE, fig.cap="Mean Delays by Airline", fig.width=6} -->
+<!-- flights %>% group_by(carrier) %>% -->
+<!--   summarize(mean_dep_delay = mean(dep_delay)) %>% -->
+<!--   ggplot(aes(x = carrier, y = mean_dep_delay)) + -->
+<!--   geom_bar(position = "identity", stat = "identity", fill = "red") -->
+<!-- ``` -->
+
+<!-- Here is a reference to this image: Figure \@ref(fig:delaysboxplot). -->
+
+<!-- A table linking these carrier codes to airline names is available at <https://github.com/ismayc/pnwflights14/blob/master/data/airlines.csv>. -->
+
+<!-- \clearpage -->
+
+<!-- Next, we will explore the use of the `out.extra` chunk option, which can be used to shrink or expand an image loaded from a file by specifying `"scale= "`. Here we use the mathematical graph stored in the "subdivision.pdf" file. -->
+
+<!-- ```{r subd, results="asis", echo=FALSE, fig.cap="Subdiv. graph", out.extra="scale=0.75"} -->
+<!-- include_graphics("figure/subdivision.pdf") -->
+<!-- ``` -->
+
+<!-- Here is a reference to this image: Figure \@ref(fig:subd).  Note that `echo=FALSE` is specified so that the **R** code is hidden in the document. -->
+
+<!-- **More Figure Stuff** -->
+
+<!-- Lastly, we will explore how to rotate and enlarge figures using the `out.extra` chunk option.  (Currently this only works in the PDF version of the book.) -->
+
+<!-- ```{r subd2, results="asis", echo=FALSE, out.extra="angle=180, scale=1.1", fig.cap="A Larger Figure, Flipped Upside Down"} -->
+<!-- include_graphics("figure/subdivision.pdf") -->
+<!-- ``` -->
+
+<!-- As another example, here is a reference: Figure \@ref(fig:subd2).   -->
+
+<!-- ## Footnotes and Endnotes -->
+
+<!-- You might want to footnote something. ^[footnote text] The footnote will be in a smaller font and placed appropriately. Endnotes work in much the same way. -->
+
+<!-- ## Bibliographies -->
+
+<!-- Of course you will need to cite things, and you will probably accumulate an armful of sources. There are a variety of tools available for creating a bibliography database (stored with the .bib extension).  In addition to BibTeX suggested below, you may want to consider using the free and easy-to-use tool called Zotero.  The Duke librarians have created Zotero documentation at <https://library.duke.edu/research/zotero>.  In addition, a tutorial is available from Middlebury College at <http://sites.middlebury.edu/zoteromiddlebury/>. -->
+
+<!-- _R Markdown_ uses _pandoc_ (<http://pandoc.org/>) to build its bibliographies.  One nice caveat of this is that you won't have to do a second compile to load in references as standard LaTeX requires. To cite references in your thesis (after creating your bibliography database), place the reference name inside square brackets and precede it by the "at" symbol.  For example, here's a reference to a book about worrying:  [@Molina1994].  This `Molina1994` entry appears in a file called `thesis.bib` in the `bib` folder.  This bibliography database file was created by a program called BibTeX.  You can call this file something else if you like (look at the YAML header in the main .Rmd file) and, by default, is to placed in the `bib` folder.   -->
+
+<!-- For more information about BibTeX and bibliographies, see the following documentation from Reed College at (<http://web.reed.edu/cis/help/latex/index.html>)^[@reedweb2007]. There are three pages on this topic:  _bibtex_ (which talks about using BibTeX, at <http://web.reed.edu/cis/help/latex/bibtex.html>), _bibtexstyles_ (about how to find and use the bibliography style that best suits your needs, at <http://web.reed.edu/cis/help/latex/bibtexstyles.html>) and _bibman_ (which covers how to make and maintain a bibliography by hand, without BibTeX, at <http://web.reed.edu/cis/help/latex/bibman.html>). The last page will not be useful unless you have only a few sources. -->
+
+<!-- If you look at the YAML header at the top of the main .Rmd file you can see that we can specify the style of the bibliography by referencing the appropriate csl file.  You can download a variety of different style files at <https://www.zotero.org/styles>.  Make sure to download the file into the csl folder. -->
+
+<!-- **Tips for Bibliographies** -->
+
+<!-- - Like with thesis formatting, the sooner you start compiling your bibliography for something as large as thesis, the better. Typing in source after source is mind-numbing enough; do you really want to do it for hours on end in late April? Think of it as procrastination. -->
+<!-- - The cite key (a citation's label) needs to be unique from the other entries. -->
+<!-- - When you have more than one author or editor, you need to separate each author's name by the word "and" e.g. `Author = {Noble, Sam and Youngberg, Jessica},`. -->
+<!-- - Bibliographies made using BibTeX (whether manually or using a manager) accept LaTeX markup, so you can italicize and add symbols as necessary. -->
+<!-- - To force capitalization in an article title or where all lowercase is generally used, bracket the capital letter in curly braces. -->
+
+<!-- ## Anything else? -->
+
+<!-- If you'd like to see examples of other things in this template, please contact Mine Cetinkaya-Rundel (email <mine@stat.duke.edu>) with your suggestions. We love to see people using _R Markdown_ for their theses, and are happy to help. -->
+
+<!--chapter:end:05-stat.Rmd-->
+
+# Conclusion {-}
+
+If we don't want Conclusion to have a chapter number next to it, we can add the `{-}` attribute.
+
+**More info**
+
+And here's some other random info: the first paragraph after a chapter title or section head _shouldn't be_ indented, because indents are to tell the reader that you're starting a new paragraph. Since that's obvious after a chapter or section title, proper typesetting doesn't add an indent there.
+
+
+<!--chapter:end:06-conclusion.Rmd-->
+
+`r if(knitr:::is_latex_output()) '\\appendix'`
+
+`r if(!knitr:::is_latex_output()) '# (APPENDIX) Appendix {-}'` 
+
+<!--
+If you feel it necessary to include an appendix, it goes here.
+-->
+
+
+# The First Appendix
+
+This first appendix includes all of the R chunks of code that were hidden throughout the document (using the `include = FALSE` chunk tag) to help with readibility and/or setup.
+
+**In the main Rmd file**
+
+```{r ref.label='include_packages', results='hide', echo = TRUE}
+```
+
+**In Chapter \@ref(ref-labels):**
+
+```{r ref.label='include_packages_2', results='hide', echo = TRUE}
+```
+
+# The Second Appendix, for Fun
+
+<!--chapter:end:07-appendix.Rmd-->
+
+<!--
+The bib chunk below must go last in this document according to how R Markdown renders.  More info is at http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html
+-->
+
+\backmatter
+
+<!-- 
+If you'd like to change the name of the bibliography to something else,
+delete "References" and replace it.
+-->
+
+# References {-}
+<!--
+This manually sets the header for this unnumbered chapter.
+-->
+\markboth{References}{References}
+<!--
+To remove the indentation of the first entry.
+-->
+\noindent
+
+<!--
+To create a hanging indent and spacing between entries.  These three lines may need to be removed for styles that don't require the hanging indent.
+-->
+
+\setlength{\parindent}{-0.20in}
+\setlength{\leftskip}{0.20in}
+\setlength{\parskip}{8pt}
+
+
+<!--
+This is just for testing with more citations for the bibliography at the end.  Add other entries into the list here if you'd like them to appear in the bibliography even if they weren't explicitly cited in the document.
+-->
+
+---
+nocite: | 
+  @angel2000, @angel2001, @angel2002a
+...
+
+<!--chapter:end:99-references.Rmd-->
+

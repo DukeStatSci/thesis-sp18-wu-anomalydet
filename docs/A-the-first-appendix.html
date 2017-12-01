@@ -5,11 +5,11 @@
 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Kernel PCA Approach for Anomaly Detection in Networks</title>
-  <meta name="description" content="Kernel PCA Approach for Anomaly Detection in Networks">
+  <title>Matrix Based Anomaly Detection Techniques Applied to Network Attacks</title>
+  <meta name="description" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks">
   <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
 
-  <meta property="og:title" content="Kernel PCA Approach for Anomaly Detection in Networks" />
+  <meta property="og:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
   <meta property="og:type" content="book" />
   
   
@@ -17,7 +17,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Kernel PCA Approach for Anomaly Detection in Networks" />
+  <meta name="twitter:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
   
   
   
@@ -100,27 +100,45 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul class="summary">
 <li><a href="./"></a></li>
 <li class="divider"></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="1" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html"><i class="fa fa-check"></i><b>1</b> R Markdown Basics</a><ul>
-<li class="chapter" data-level="1.1" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#lists"><i class="fa fa-check"></i><b>1.1</b> Lists</a></li>
-<li class="chapter" data-level="1.2" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#line-breaks"><i class="fa fa-check"></i><b>1.2</b> Line breaks</a></li>
-<li class="chapter" data-level="1.3" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#r-chunks"><i class="fa fa-check"></i><b>1.3</b> R chunks</a></li>
-<li class="chapter" data-level="1.4" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#inline-code"><i class="fa fa-check"></i><b>1.4</b> Inline code</a></li>
-<li class="chapter" data-level="1.5" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#including-plots"><i class="fa fa-check"></i><b>1.5</b> Including plots</a></li>
-<li class="chapter" data-level="1.6" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#loading-and-exploring-data"><i class="fa fa-check"></i><b>1.6</b> Loading and exploring data</a></li>
-<li class="chapter" data-level="1.7" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#additional-resources"><i class="fa fa-check"></i><b>1.7</b> Additional resources</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html"><i class="fa fa-check"></i>Preliminary Content</a><ul>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#abstract"><i class="fa fa-check"></i>Abstract</a></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="2-math.html"><a href="2-math.html"><i class="fa fa-check"></i><b>2</b> Math typesetting</a><ul>
-<li class="chapter" data-level="2.1" data-path="2-math.html"><a href="2-math.html#math"><i class="fa fa-check"></i><b>2.1</b> Math</a></li>
+<li class="chapter" data-level="1" data-path="1-introduction.html"><a href="1-introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="1-introduction.html"><a href="1-introduction.html#anomaly-detection"><i class="fa fa-check"></i><b>1.1</b> Anomaly Detection</a></li>
+<li class="chapter" data-level="1.2" data-path="1-introduction.html"><a href="1-introduction.html#network-attacks"><i class="fa fa-check"></i><b>1.2</b> Network Attacks</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="1-introduction.html"><a href="1-introduction.html#status-quo-solution"><i class="fa fa-check"></i><b>1.2.1</b> Status Quo Solution</a></li>
 </ul></li>
-<li class="chapter" data-level="3" data-path="3-ref-labels.html"><a href="3-ref-labels.html"><i class="fa fa-check"></i><b>3</b> Tables, Graphics, References, and Labels</a><ul>
-<li class="chapter" data-level="3.1" data-path="3-ref-labels.html"><a href="3-ref-labels.html#tables"><i class="fa fa-check"></i><b>3.1</b> Tables</a></li>
-<li class="chapter" data-level="3.2" data-path="3-ref-labels.html"><a href="3-ref-labels.html#figures"><i class="fa fa-check"></i><b>3.2</b> Figures</a></li>
-<li class="chapter" data-level="3.3" data-path="3-ref-labels.html"><a href="3-ref-labels.html#footnotes-and-endnotes"><i class="fa fa-check"></i><b>3.3</b> Footnotes and Endnotes</a></li>
-<li class="chapter" data-level="3.4" data-path="3-ref-labels.html"><a href="3-ref-labels.html#bibliographies"><i class="fa fa-check"></i><b>3.4</b> Bibliographies</a></li>
-<li class="chapter" data-level="3.5" data-path="3-ref-labels.html"><a href="3-ref-labels.html#anything-else"><i class="fa fa-check"></i><b>3.5</b> Anything else?</a></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="4-organization.html"><a href="4-organization.html"><i class="fa fa-check"></i><b>4</b> Organization</a></li>
+<li class="chapter" data-level="2" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html"><i class="fa fa-check"></i><b>2</b> Networks Dataset</a><ul>
+<li class="chapter" data-level="2.1" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html#features"><i class="fa fa-check"></i><b>2.1</b> Features</a></li>
+<li class="chapter" data-level="2.2" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html#argus-and-data-nuances"><i class="fa fa-check"></i><b>2.2</b> Argus and Data Nuances</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html"><i class="fa fa-check"></i><b>3</b> Preliminary Data Investigation</a><ul>
+<li class="chapter" data-level="3.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>3.1</b> Exploratory Data Analysis</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#cleaning-predictors"><i class="fa fa-check"></i><b>3.1.1</b> Cleaning Predictors</a></li>
+<li class="chapter" data-level="3.1.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#categorical-features-unique-categories-and-counts"><i class="fa fa-check"></i><b>3.1.2</b> Categorical Features: Unique Categories and Counts</a></li>
+<li class="chapter" data-level="3.1.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#continuous-features-distributions-and-relationships"><i class="fa fa-check"></i><b>3.1.3</b> Continuous Features: Distributions and Relationships</a></li>
+<li class="chapter" data-level="3.1.4" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#correlation-between-features"><i class="fa fa-check"></i><b>3.1.4</b> Correlation Between Features</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#transformations-on-the-data"><i class="fa fa-check"></i><b>3.2</b> Transformations on the Data</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#removing-quantiles"><i class="fa fa-check"></i><b>3.2.1</b> Removing Quantiles</a></li>
+<li class="chapter" data-level="3.2.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#log-transformation"><i class="fa fa-check"></i><b>3.2.2</b> Log Transformation</a></li>
+<li class="chapter" data-level="3.2.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#normal-scores-transformation"><i class="fa fa-check"></i><b>3.2.3</b> Normal Scores Transformation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html"><i class="fa fa-check"></i><b>4</b> Matrix Techniques for Anomaly Detection</a><ul>
+<li class="chapter" data-level="4.1" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#ports-combination-matrixtensor"><i class="fa fa-check"></i><b>4.1</b> Ports Combination Matrix/Tensor</a></li>
+<li class="chapter" data-level="4.2" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#principal-component-analysis"><i class="fa fa-check"></i><b>4.2</b> Principal Component Analysis</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#investigating-combinations"><i class="fa fa-check"></i><b>4.2.1</b> Investigating Combinations</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#matrix-completion-via-singular-value-decomposition"><i class="fa fa-check"></i><b>4.3</b> Matrix Completion via Singular Value Decomposition</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="5-statistical-model.html"><a href="5-statistical-model.html"><i class="fa fa-check"></i><b>5</b> Statistical Model</a><ul>
+<li class="chapter" data-level="5.1" data-path="5-statistical-model.html"><a href="5-statistical-model.html#uneven-variances"><i class="fa fa-check"></i><b>5.1</b> Uneven Variances</a></li>
+<li class="chapter" data-level="5.2" data-path="5-statistical-model.html"><a href="5-statistical-model.html#determined-model"><i class="fa fa-check"></i><b>5.2</b> Determined Model</a></li>
+<li class="chapter" data-level="5.3" data-path="5-statistical-model.html"><a href="5-statistical-model.html#section"><i class="fa fa-check"></i><b>5.3</b> </a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i>Conclusion</a></li>
 <li class="appendix"><span><b>Appendix</b></span></li>
 <li class="chapter" data-level="A" data-path="A-the-first-appendix.html"><a href="A-the-first-appendix.html"><i class="fa fa-check"></i><b>A</b> The First Appendix</a></li>
@@ -137,7 +155,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Kernel PCA Approach for Anomaly Detection in Networks</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Matrix Based Anomaly Detection Techniques Applied to Network Attacks</a>
           </h1>
         </div>
 
@@ -157,25 +175,7 @@ if(!<span class="kw">require</span>(devtools))
 if(!<span class="kw">require</span>(thesisdowndss))
   devtools::<span class="kw">install_github</span>(<span class="st">&quot;mine-cetinkaya-rundel/thesisdowndss&quot;</span>)
 <span class="kw">library</span>(thesisdowndss)</code></pre></div>
-<p><strong>In Chapter <a href="3-ref-labels.html#ref-labels">3</a>:</strong></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This chunk ensures that the thesisdowndss package is</span>
-<span class="co"># installed and loaded. This thesisdowndss package includes</span>
-<span class="co"># the template files for the thesis and also two functions</span>
-<span class="co"># used for labeling and referencing</span>
-if(!<span class="kw">require</span>(devtools))
-  <span class="kw">install.packages</span>(<span class="st">&quot;devtools&quot;</span>, <span class="dt">repos =</span> <span class="st">&quot;http://cran.rstudio.com&quot;</span>)
-if(!<span class="kw">require</span>(dplyr))
-    <span class="kw">install.packages</span>(<span class="st">&quot;dplyr&quot;</span>, <span class="dt">repos =</span> <span class="st">&quot;http://cran.rstudio.com&quot;</span>)
-if(!<span class="kw">require</span>(ggplot2))
-    <span class="kw">install.packages</span>(<span class="st">&quot;ggplot2&quot;</span>, <span class="dt">repos =</span> <span class="st">&quot;http://cran.rstudio.com&quot;</span>)
-if(!<span class="kw">require</span>(ggplot2))
-    <span class="kw">install.packages</span>(<span class="st">&quot;bookdown&quot;</span>, <span class="dt">repos =</span> <span class="st">&quot;http://cran.rstudio.com&quot;</span>)
-if(!<span class="kw">require</span>(thesisdowndss)){
-  <span class="kw">library</span>(devtools)
-  devtools::<span class="kw">install_github</span>(<span class="st">&quot;mine-cetinkaya-rundel/thesisdowndss&quot;</span>)
-  }
-<span class="kw">library</span>(thesisdowndss)
-flights &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/flights.csv&quot;</span>)</code></pre></div>
+<p><strong>In Chapter <a href="#ref-labels"><strong>??</strong></a>:</strong></p>
 </div>
             </section>
 
@@ -215,7 +215,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": [["thesis.pdf", "PDF"], ["thesis.epub", "EPUB"], ["thesis.docx", "Word"]],
+"download": ["thesis.pdf"],
 "toc": {
 "collapse": "section"
 }

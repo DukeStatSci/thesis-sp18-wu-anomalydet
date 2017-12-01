@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Matrix Based Anomaly Detection Techniques Applied to Network Attacks</title>
+  <meta name="description" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
+  
+  
+  
+
+<meta name="author" content="James C. Wu">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="1-introduction.html">
+<link rel="next" href="3-preliminary-data-investigation.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./"></a></li>
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html"><i class="fa fa-check"></i>Preliminary Content</a><ul>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#abstract"><i class="fa fa-check"></i>Abstract</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="1-introduction.html"><a href="1-introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="1-introduction.html"><a href="1-introduction.html#anomaly-detection"><i class="fa fa-check"></i><b>1.1</b> Anomaly Detection</a></li>
+<li class="chapter" data-level="1.2" data-path="1-introduction.html"><a href="1-introduction.html#network-attacks"><i class="fa fa-check"></i><b>1.2</b> Network Attacks</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="1-introduction.html"><a href="1-introduction.html#status-quo-solution"><i class="fa fa-check"></i><b>1.2.1</b> Status Quo Solution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html"><i class="fa fa-check"></i><b>2</b> Networks Dataset</a><ul>
+<li class="chapter" data-level="2.1" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html#features"><i class="fa fa-check"></i><b>2.1</b> Features</a></li>
+<li class="chapter" data-level="2.2" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html#argus-and-data-nuances"><i class="fa fa-check"></i><b>2.2</b> Argus and Data Nuances</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html"><i class="fa fa-check"></i><b>3</b> Preliminary Data Investigation</a><ul>
+<li class="chapter" data-level="3.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>3.1</b> Exploratory Data Analysis</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#cleaning-predictors"><i class="fa fa-check"></i><b>3.1.1</b> Cleaning Predictors</a></li>
+<li class="chapter" data-level="3.1.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#categorical-features-unique-categories-and-counts"><i class="fa fa-check"></i><b>3.1.2</b> Categorical Features: Unique Categories and Counts</a></li>
+<li class="chapter" data-level="3.1.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#continuous-features-distributions-and-relationships"><i class="fa fa-check"></i><b>3.1.3</b> Continuous Features: Distributions and Relationships</a></li>
+<li class="chapter" data-level="3.1.4" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#correlation-between-features"><i class="fa fa-check"></i><b>3.1.4</b> Correlation Between Features</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#transformations-on-the-data"><i class="fa fa-check"></i><b>3.2</b> Transformations on the Data</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#removing-quantiles"><i class="fa fa-check"></i><b>3.2.1</b> Removing Quantiles</a></li>
+<li class="chapter" data-level="3.2.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#log-transformation"><i class="fa fa-check"></i><b>3.2.2</b> Log Transformation</a></li>
+<li class="chapter" data-level="3.2.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#normal-scores-transformation"><i class="fa fa-check"></i><b>3.2.3</b> Normal Scores Transformation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html"><i class="fa fa-check"></i><b>4</b> Matrix Techniques for Anomaly Detection</a><ul>
+<li class="chapter" data-level="4.1" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#ports-combination-matrixtensor"><i class="fa fa-check"></i><b>4.1</b> Ports Combination Matrix/Tensor</a></li>
+<li class="chapter" data-level="4.2" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#principal-component-analysis"><i class="fa fa-check"></i><b>4.2</b> Principal Component Analysis</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#investigating-combinations"><i class="fa fa-check"></i><b>4.2.1</b> Investigating Combinations</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#matrix-completion-via-singular-value-decomposition"><i class="fa fa-check"></i><b>4.3</b> Matrix Completion via Singular Value Decomposition</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="5-statistical-model.html"><a href="5-statistical-model.html"><i class="fa fa-check"></i><b>5</b> Statistical Model</a><ul>
+<li class="chapter" data-level="5.1" data-path="5-statistical-model.html"><a href="5-statistical-model.html#uneven-variances"><i class="fa fa-check"></i><b>5.1</b> Uneven Variances</a></li>
+<li class="chapter" data-level="5.2" data-path="5-statistical-model.html"><a href="5-statistical-model.html#determined-model"><i class="fa fa-check"></i><b>5.2</b> Determined Model</a></li>
+<li class="chapter" data-level="5.3" data-path="5-statistical-model.html"><a href="5-statistical-model.html#section"><i class="fa fa-check"></i><b>5.3</b> </a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i>Conclusion</a></li>
+<li class="appendix"><span><b>Appendix</b></span></li>
+<li class="chapter" data-level="A" data-path="A-the-first-appendix.html"><a href="A-the-first-appendix.html"><i class="fa fa-check"></i><b>A</b> The First Appendix</a></li>
+<li class="chapter" data-level="B" data-path="B-the-second-appendix-for-fun.html"><a href="B-the-second-appendix-for-fun.html"><i class="fa fa-check"></i><b>B</b> The Second Appendix, for Fun</a></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Matrix Based Anomaly Detection Techniques Applied to Network Attacks</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="networks-dataset" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> Networks Dataset</h1>
+<div id="features" class="section level2">
+<h2><span class="header-section-number">2.1</span> Features</h2>
+<p>The networks dataset contains 13 features, 8 categorical and 5 continuous, and the observations are unlabeled (not specified whether they are considered a scanner). The 13 features are:</p>
+<p><strong>Continuous:</strong></p>
+<ul>
+<li>StartTime (Start Time): the time when the observation is logged</li>
+<li>SrcBytes (Source Bytes): the total number of bytes sent in the observation</li>
+<li>SrcPkts (Source Packets): the number of packets sent in the observation</li>
+<li>DstBytes (Destination Bytes): the total number of bytes received in the observation</li>
+<li>DstPkts (Destination Packets): the number of packets received in the observation Note, the destination packets and bytes features do not have the same values as their source counterparts because the connections are compressed and decompressed into different forms and byte sizes when sent. For instance, it is possible for the number of destination packets to be larger than source packets. It is also possible for information to be lost during the connection.</li>
+</ul>
+<p><strong>Categorical:</strong></p>
+<ul>
+<li>Flgs (connection flag): flow state flags seen in transaction between the two addresses</li>
+<li>Proto (network protocol): specifies the rules used for information exchange via network addresses. Transmission Control Protocol (TCP) uses a set of rules to exchange messages with other Internet points at the information packet level, and Internet Protocol (IP) uses a set of rules to send and receive messages at the Internet address level.</li>
+<li>SrcAddr (Source Address): the IP address of the connection’s source</li>
+<li>DstAddr (Destination Address): the IP address of the connection’s destination</li>
+<li>Sport (Source Port): the network port number of the connection’s source. A port numbers identifies the specific process to which a network message is forwarded when it arrives at a server.</li>
+<li>Dport (Destination Port): the network port number of the connection’s destination</li>
+<li>Dir (direction): the direction of the connection</li>
+<li>State (connection state): a categorical assessment of the current phase in the transaction that the timestamp is taken at ???</li>
+</ul>
+<p>Note, the addresses have been anonymized for security reasons.</p>
+</div>
+<div id="argus-and-data-nuances" class="section level2">
+<h2><span class="header-section-number">2.2</span> Argus and Data Nuances</h2>
+<p>Argus is the open source network security tool applied to network transactions that collects the data for the features. The Argus wiki and the OIT manual provides key insights into the structure and nature of the data. Specifically, the sessions are clustered together by address, so the pytes and packets values are accumulative over a set duration and each session has its own start time but does not have a tracked end time. There exist 2-4 million connections on average every 5 minutes. Furthermore the protocol in this dataset is always gathered from TCP protocol and the direction will always be to the right (i.e. Source to Destination). This information supports dropping proto, StartTime, and Direction from the dataset for future analysis because they do not present any information regarding whether an observation can be considered an anomaly. Furthermore, the State feature may not be reliable because Argus occasionally resets the state data statistics during monitoring.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="1-introduction.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="3-preliminary-data-investigation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": ["thesis.pdf"],
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

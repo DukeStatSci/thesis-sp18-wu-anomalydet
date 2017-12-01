@@ -5,11 +5,11 @@
 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Kernel PCA Approach for Anomaly Detection in Networks</title>
-  <meta name="description" content="Kernel PCA Approach for Anomaly Detection in Networks">
+  <title>Matrix Based Anomaly Detection Techniques Applied to Network Attacks</title>
+  <meta name="description" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks">
   <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
 
-  <meta property="og:title" content="Kernel PCA Approach for Anomaly Detection in Networks" />
+  <meta property="og:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
   <meta property="og:type" content="book" />
   
   
@@ -17,7 +17,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Kernel PCA Approach for Anomaly Detection in Networks" />
+  <meta name="twitter:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
   
   
   
@@ -31,7 +31,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="1-rmd-basics.html">
+<link rel="prev" href="1-introduction.html">
 <link rel="next" href="3-ref-labels.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -100,15 +100,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <ul class="summary">
 <li><a href="./"></a></li>
 <li class="divider"></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
-<li class="chapter" data-level="1" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html"><i class="fa fa-check"></i><b>1</b> R Markdown Basics</a><ul>
-<li class="chapter" data-level="1.1" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#lists"><i class="fa fa-check"></i><b>1.1</b> Lists</a></li>
-<li class="chapter" data-level="1.2" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#line-breaks"><i class="fa fa-check"></i><b>1.2</b> Line breaks</a></li>
-<li class="chapter" data-level="1.3" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#r-chunks"><i class="fa fa-check"></i><b>1.3</b> R chunks</a></li>
-<li class="chapter" data-level="1.4" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#inline-code"><i class="fa fa-check"></i><b>1.4</b> Inline code</a></li>
-<li class="chapter" data-level="1.5" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#including-plots"><i class="fa fa-check"></i><b>1.5</b> Including plots</a></li>
-<li class="chapter" data-level="1.6" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#loading-and-exploring-data"><i class="fa fa-check"></i><b>1.6</b> Loading and exploring data</a></li>
-<li class="chapter" data-level="1.7" data-path="1-rmd-basics.html"><a href="1-rmd-basics.html#additional-resources"><i class="fa fa-check"></i><b>1.7</b> Additional resources</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html"><i class="fa fa-check"></i>Preliminary Content</a><ul>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#abstract"><i class="fa fa-check"></i>Abstract</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="1-introduction.html"><a href="1-introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="1-introduction.html"><a href="1-introduction.html#anomaly-detection"><i class="fa fa-check"></i><b>1.1</b> Anomaly Detection</a></li>
+<li class="chapter" data-level="1.2" data-path="1-introduction.html"><a href="1-introduction.html#network-attacks-data"><i class="fa fa-check"></i><b>1.2</b> Network Attacks Data</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="1-introduction.html"><a href="1-introduction.html#features"><i class="fa fa-check"></i><b>1.2.1</b> Features</a></li>
+<li class="chapter" data-level="1.2.2" data-path="1-introduction.html"><a href="1-introduction.html#current-methods"><i class="fa fa-check"></i><b>1.2.2</b> Current Methods</a></li>
+</ul></li>
+<li class="chapter" data-level="1.3" data-path="1-introduction.html"><a href="1-introduction.html#relevant-data"><i class="fa fa-check"></i><b>1.3</b> Relevant Data</a></li>
 </ul></li>
 <li class="chapter" data-level="2" data-path="2-math.html"><a href="2-math.html"><i class="fa fa-check"></i><b>2</b> Math typesetting</a><ul>
 <li class="chapter" data-level="2.1" data-path="2-math.html"><a href="2-math.html#math"><i class="fa fa-check"></i><b>2.1</b> Math</a></li>
@@ -137,7 +139,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Kernel PCA Approach for Anomaly Detection in Networks</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Matrix Based Anomaly Detection Techniques Applied to Network Attacks</a>
           </h1>
         </div>
 
@@ -201,7 +203,7 @@ c_n&amp;c_{n+1}\hfill&amp;c_{n+2}\hfill&amp;\ldots&amp;c_{2n}\hfill\cr
           </div>
         </div>
       </div>
-<a href="1-rmd-basics.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="1-introduction.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 <a href="3-ref-labels.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>

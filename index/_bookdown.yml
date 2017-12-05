@@ -6,10 +6,11 @@ rmd_files: ["index.Rmd",
             "01-intro.Rmd", 
             "02-data.Rmd",
             "03-eda.Rmd", 
-            "04-matrix.Rmd", 
-            "05-stat.Rmd", 
-            "06-conclusion.Rmd", 
-            "07-appendix.Rmd", 
+            "04-pca.Rmd", 
+            "05-als.Rmd",
+            "06-ammi.Rmd", 
+#            "07-conclusion.Rmd", 
+#            "08-appendix.Rmd", 
             "99-references.Rmd"]
 #download: [["thesis.pdf", "PDF"], ["thesis.epub", "EPUB"], ["thesis.docx", "Word"]]
 output_dir: "../docs"

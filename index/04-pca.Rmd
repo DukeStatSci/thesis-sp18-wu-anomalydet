@@ -1,12 +1,24 @@
 # Modeling Port Relationships 
 
-## Purpose
+## Motivation
 
-Previous exploratory data analysis signaled that there may exist trends between different port combinations. For instance, a particular source and destination port may frequently contain large byte transactions in their connections. Devising a systematic way to identify these combinations may present outliers that can be further investigated for scanner behavior. This requires the creation of a combination matrix
+Previous exploratory data analysis signaled that there may exist trends between different port combinations. For instance, a particular source and destination port may frequently contain large byte transactions in their connections. Devising a systematic way to identify these combinations may present outliers that can be further investigated for scanner behavior. 
 
-## Method 
+Beginning the investigation requires the creation of a 2-dimensional matrix of the most common source and destination port combinations. Each cell in this matrix is of variable length and holds all of the data observations involving that particular source and destination port pairing. Following the creation of this matrix, principal component analysis may be applied to the combinations present in each cell to investigate the behavior of that specific connection.
 
+## Principal Component Analysis
 
+<!-- DEFINE NOTATION Let $X \in {\rm I\!R}^{m \times n}$  --> 
+
+Principal component analysis represents data in terms of its principal components rather than relying on traditional Cartesian axes. Principal components contain the underlying structure in data by representing the directions that contain the most variance. 
+
+<!-- ### Algorithm -->
+
+<!-- <!-- DEFINE IN TERMS OF MATH --> -->
+
+### Application
+
+In this problem, Principal Component Anaylsis is applied to each source-destination port grouping of observed data to understand the underlying structure of the data partition's continuous features: source bytes and packets and destination bytes and packets. In particular the amount of variance explained by the generated principal components and their relative directions will signal whether specific trends in connection behavior occur at certain ports, and whether the size of each of the continuous features affects port behavior as well as the other features.
 
 ## Implementation
 
@@ -18,19 +30,18 @@ s_num = 25
 d_num = 25
 combo_num = 20
 
-#get freqs
+#get top sport and dport values
 Sport_table = table(Sport)
 Sport_table = as.data.frame(Sport_table)
 Sport_table = Sport_table[order(-Sport_table$Freq),]
 top_Sport = (head(Sport_table$Sport, s_num))
 
-#get freqs
 Dport_table = table(Dport)
 Dport_table = as.data.frame(Dport_table)
 Dport_table = Dport_table[order(-Dport_table$Freq),]
 top_Dport = (head(Dport_table$Dport, d_num))
 
-#subset data
+#subset data for the combinations
 argus_maxes = argus[is.element(Sport, top_Sport) & is.element(Dport, top_Dport), ]
 argus_maxes = transform(argus_maxes,
                         Sport = as.numeric(as.character(Sport)),
@@ -46,11 +57,11 @@ top_combinations = transform(top_combinations,
                              Sport = as.numeric(as.character(Sport)),
                              Dport = as.numeric(as.character(Dport)))
 
+#generate the combinations matrix of ports
 extract_intersection = function(sport, dport){
   argus_subset = argus[Sport == sport & Dport == dport,]
   return (argus_subset)
 }
-
 generate_combinations_matrix = function(top_combinations){
   n = dim(top_combinations)[1]
   combinations = c()
@@ -69,10 +80,9 @@ combinations = generate_combinations_matrix(top_combinations)
 # combinations = readRDS("data/combinations.rds")
 ```
 
-We now have a matrix built with the most common Sport and Dport combinations. Each entry in the matrix contains all of the observations that correspond to that Sport and Dport combination. We can now perform testing on each group using normal transformations and principal component analysis to see if there are any trends between groups.
-
 ### Investigating Combinations
 ```{r}
+#principal component analysis and visualizing results
 pca_analysis = function(SrcBytes, SrcPkts, DstBytes, DstPkts){
   pca_cont_vars = cbind(SrcBytes, SrcPkts, DstBytes, DstPkts)
   pca = prcomp(pca_cont_vars, center = TRUE, scale. = TRUE)
@@ -88,6 +98,7 @@ pca_analysis = function(SrcBytes, SrcPkts, DstBytes, DstPkts){
   print(g)
   return(pca$rotation)
 }
+#apply pca to the data partitions on the top 10 port combinations 
 combo_num = 10
 for (i in 1:combo_num){
   combo_table = combinations[i]
@@ -106,7 +117,10 @@ for (i in 1:combo_num){
 }
 ```
 
-Zeroes in the dataset causing the patterns in the 2nd principal component. Normal scores dont work very well if there are ties in the data.
+### Interpretation 
+
+In general the first two principal components explained most of the variance (~90%) for each of the port combinations. The scatterplots of the principal components show clear horizontal patterns in the 2nd principal component. This similar behavior, mirrored throughout the top 10 most frequent ports, may be caused by the high frequency of zeroes in the dataset. Recall, the first quartile of observations for destination bytes and packets were all 0. This high frequency of the same value (0) yields ties when performing the normal scores transformation applied to the data, which may also cause the horizontal behavior exhibited in every principal component analysis. 
+
 
 <!-- ```{r include_packages_2, include = FALSE} -->
 <!-- # This chunk ensures that the thesisdowndss package is -->

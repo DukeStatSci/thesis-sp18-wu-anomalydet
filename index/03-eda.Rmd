@@ -187,4 +187,4 @@ DstPkts_norm = nscore(DstPkts)$nscore
 DstPkts_table = nscore(DstPkts)$trn.table
 ```
 
-
+Finally, a normal scores transformation is applied to the dataset. The normal scores transformation reassigns each feature value so that it appears the overall data for that feature had arisen or been observed from a standard normal distribution. This transformation solves the issue of skewness-each value's histogram will now follow a standard gaussian density plot-, but it may cause issues with other analysis methods, particularly methods that are susceptible to ties in data. 

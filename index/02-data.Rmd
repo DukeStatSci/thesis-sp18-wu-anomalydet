@@ -21,7 +21,7 @@ Note, the destination packets and bytes features do not have the same values as 
 - Sport (Source Port): the network port number of the connection's source. A port numbers identifies the specific process to which a network message is forwarded when it arrives at a server. 
 - Dport (Destination Port): the network port number of the connection's destination 
 - Dir (direction): the direction of the connection 
-- State (connection state): a categorical assessment of the current phase in the transaction that the timestamp is taken at ???
+- State (connection state): a categorical assessment of the current phase in the transaction when the timestamp is recorded
 
 Note, the addresses have been anonymized for security reasons.
 

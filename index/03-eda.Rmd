@@ -1,11 +1,24 @@
 # Preliminary Data Investigation
 ## Exploratory Data Analysis
 ### Cleaning Predictors
+```{r,include=FALSE}
+setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index/")
+library(plyr)
+library(data.table)
+library(factoextra)
+library(ggbiplot)
+library(gridExtra)
+
+#argus = read.csv("data/argus-anon-20170201.csv")
+argus = readRDS("data/argus_complete.rds")
+# combinations = readRDS("/data/combinations.rds")
+```
+
 ```{r}
 sapply(argus, class)
 argus = transform(argus,
-                  Sport = as.factor(Sport),
-                  Dport = as.factor(Dport))
+                  Sport = as.factor(argus$Sport),
+                  Dport = as.factor(argus$Dport))
 argus = subset(argus, select = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport",
                                 "SrcPkts", "DstPkts", "SrcBytes", "DstBytes", "State"))
 attach(argus)
@@ -69,7 +82,7 @@ cor(SrcPkts, DstPkts)
 
 The plots of the predictors suggest strong linear trends between the predictors, which makes intuitive sense given the domain matter. Further investigations show that DstPkts has a correlation of ~1 with DstBytes and ~0.85 with SrcPkts.
 
-```{r, eval=FALSE}
+```{r,eval=FALSE}
 cor(DstBytes, DstPkts, method = "kendall")
 cor(SrcPkts, DstPkts, method = "kendall")
 cor(DstBytes, DstPkts, method = "spearman")
@@ -99,7 +112,7 @@ The continuous features are still unevenly distributed even with the 20% most ex
 
 ### Log Transformation
 
-```{r,eval=FALSE}
+```{r}
 par(mfrow=c(2,2))
 hist(log(SrcBytes)); hist(log(SrcPkts)); hist(log(DstBytes)); hist(log(DstPkts))
 plot(log(SrcPkts), log(SrcBytes)); plot(log(DstPkts), log(DstBytes))

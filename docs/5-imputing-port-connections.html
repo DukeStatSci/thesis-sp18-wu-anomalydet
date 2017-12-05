@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Anomaly Detection Techniques Applied to Network Attacks</title>
+  <meta name="description" content="Anomaly Detection Techniques Applied to Network Attacks">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Anomaly Detection Techniques Applied to Network Attacks" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Anomaly Detection Techniques Applied to Network Attacks" />
+  
+  
+  
+
+<meta name="author" content="James C. Wu">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="4-modeling-port-relationships.html">
+<link rel="next" href="6-statistical-model-for-port-behavior.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./"></a></li>
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html"><i class="fa fa-check"></i>Preliminary Content</a><ul>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#abstract"><i class="fa fa-check"></i>Abstract</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="1-introduction.html"><a href="1-introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="1-introduction.html"><a href="1-introduction.html#anomaly-detection"><i class="fa fa-check"></i><b>1.1</b> Anomaly Detection</a></li>
+<li class="chapter" data-level="1.2" data-path="1-introduction.html"><a href="1-introduction.html#network-attacks"><i class="fa fa-check"></i><b>1.2</b> Network Attacks</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="1-introduction.html"><a href="1-introduction.html#status-quo-solution"><i class="fa fa-check"></i><b>1.2.1</b> Status Quo Solution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="2-network-dataset.html"><a href="2-network-dataset.html"><i class="fa fa-check"></i><b>2</b> Network Dataset</a><ul>
+<li class="chapter" data-level="2.1" data-path="2-network-dataset.html"><a href="2-network-dataset.html#features"><i class="fa fa-check"></i><b>2.1</b> Features</a></li>
+<li class="chapter" data-level="2.2" data-path="2-network-dataset.html"><a href="2-network-dataset.html#argus"><i class="fa fa-check"></i><b>2.2</b> Argus</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html"><i class="fa fa-check"></i><b>3</b> Preliminary Data Investigation</a><ul>
+<li class="chapter" data-level="3.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>3.1</b> Exploratory Data Analysis</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#cleaning-predictors"><i class="fa fa-check"></i><b>3.1.1</b> Cleaning Predictors</a></li>
+<li class="chapter" data-level="3.1.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#categorical-features-unique-categories-and-counts"><i class="fa fa-check"></i><b>3.1.2</b> Categorical Features: Unique Categories and Counts</a></li>
+<li class="chapter" data-level="3.1.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#continuous-features-distributions-and-relationships"><i class="fa fa-check"></i><b>3.1.3</b> Continuous Features: Distributions and Relationships</a></li>
+<li class="chapter" data-level="3.1.4" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#correlation-between-features"><i class="fa fa-check"></i><b>3.1.4</b> Correlation Between Features</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#transformations-on-the-data"><i class="fa fa-check"></i><b>3.2</b> Transformations on the Data</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#removing-quantiles"><i class="fa fa-check"></i><b>3.2.1</b> Removing Quantiles</a></li>
+<li class="chapter" data-level="3.2.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#log-transformation"><i class="fa fa-check"></i><b>3.2.2</b> Log Transformation</a></li>
+<li class="chapter" data-level="3.2.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#normal-scores-transformation"><i class="fa fa-check"></i><b>3.2.3</b> Normal Scores Transformation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html"><i class="fa fa-check"></i><b>4</b> Modeling Port Relationships</a><ul>
+<li class="chapter" data-level="4.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#motivation"><i class="fa fa-check"></i><b>4.1</b> Motivation</a></li>
+<li class="chapter" data-level="4.2" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#principal-component-analysis"><i class="fa fa-check"></i><b>4.2</b> Principal Component Analysis</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#application"><i class="fa fa-check"></i><b>4.2.1</b> Application</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#ports-combination-matrixtensor"><i class="fa fa-check"></i><b>4.3.1</b> Ports Combination Matrix/Tensor</a></li>
+<li class="chapter" data-level="4.3.2" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#investigating-combinations"><i class="fa fa-check"></i><b>4.3.2</b> Investigating Combinations</a></li>
+<li class="chapter" data-level="4.3.3" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#interpretation"><i class="fa fa-check"></i><b>4.3.3</b> Interpretation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html"><i class="fa fa-check"></i><b>5</b> Imputing Port Connections</a><ul>
+<li class="chapter" data-level="5.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#motivation-1"><i class="fa fa-check"></i><b>5.1</b> Motivation</a></li>
+<li class="chapter" data-level="5.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#matrix-completion-algorithm"><i class="fa fa-check"></i><b>5.2</b> Matrix Completion Algorithm</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#anova-initial-imputation"><i class="fa fa-check"></i><b>5.2.1</b> Anova Initial Imputation</a></li>
+<li class="chapter" data-level="5.2.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#repeated-imputation"><i class="fa fa-check"></i><b>5.2.2</b> Repeated Imputation</a></li>
+<li class="chapter" data-level="5.2.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#convergence-criterion"><i class="fa fa-check"></i><b>5.2.3</b> Convergence Criterion</a></li>
+<li class="chapter" data-level="5.2.4" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#implementation-1"><i class="fa fa-check"></i><b>5.2.4</b> Implementation</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#assessing-imputation-strategy"><i class="fa fa-check"></i><b>5.3</b> Assessing Imputation Strategy</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#leave-one-out-cross-validation"><i class="fa fa-check"></i><b>5.3.1</b> Leave One Out Cross Validation</a></li>
+<li class="chapter" data-level="5.3.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#implementation-2"><i class="fa fa-check"></i><b>5.3.2</b> Implementation</a></li>
+<li class="chapter" data-level="5.3.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#results"><i class="fa fa-check"></i><b>5.3.3</b> Results</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html"><i class="fa fa-check"></i><b>6</b> Statistical Model for Port Behavior</a><ul>
+<li class="chapter" data-level="6.1" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#motivation-2"><i class="fa fa-check"></i><b>6.1</b> Motivation</a></li>
+<li class="chapter" data-level="6.2" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#ammi-model"><i class="fa fa-check"></i><b>6.2</b> AMMI Model</a></li>
+<li class="chapter" data-level="6.3" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#gibbs-sampling"><i class="fa fa-check"></i><b>6.3</b> Gibbs Sampling</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Anomaly Detection Techniques Applied to Network Attacks</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="imputing-port-connections" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Imputing Port Connections</h1>
+<div id="motivation-1" class="section level2">
+<h2><span class="header-section-number">5.1</span> Motivation</h2>
+<p>Following principal component analysis on the present ports combinations, the analysis shifts focus to the port combinations that are not present in the dataset. Imputing values for each of the four continuous features in the dataset for all possible source and destination port combinations yields a reasonable expected value in each cell of the ports matrix that can then be compared to actual connection values when they are observed. Actual values that differ greatly from the imputed values are flagged as anomalies and require further investigation.</p>
+<p>This results in a 3-dimensional matrix completion problem. The matrix dimensions are defined as the number of source ports by the number of destination ports by the number of continuous features observed in each transaction. Similar techniques were employed in the Netflix Challenge where top competitors used matrix completion to predict ratings for movies by users that had not watched the movie based on the other entries in the matrix of users and movies.</p>
+</div>
+<div id="matrix-completion-algorithm" class="section level2">
+<h2><span class="header-section-number">5.2</span> Matrix Completion Algorithm</h2>
+<p>There are <span class="math inline">\(m\)</span> source ports and <span class="math inline">\(n\)</span> destination ports. <span class="math inline">\(Y \in {\rm I\!R}^{m \times n}\)</span>, is the matrix that stores the means of the combinations of source ports and destination ports. <span class="math inline">\(Y\)</span> has missingness because not every source port interacts with every destination port. <span class="math inline">\(F \in {\rm I\!R}^{m \times n}\)</span> is a sparse matrix that represents the frequencies of combinations, i.e <span class="math inline">\(F[32242,12312]\)</span> represents the number of observations for the 32242 12312 port interaction. <span class="math inline">\(M \in {\rm I\!R}^{m \times n}\)</span> represents a boolean matrix of whether the corresponding <span class="math inline">\(Y\)</span> values are missing. <span class="math inline">\(Y[M]\)</span> represents all of the missing values of <span class="math inline">\(Y\)</span>.</p>
+<p>The objective is <span class="math display">\[min \sum_{i,j:F_{i,j} &gt; 0} (Y_{i,j} - u_iDv^T_j)^2\]</span> where <span class="math inline">\(UDV^T\)</span> represents the singular value decomposition of <span class="math inline">\(Y\)</span>.</p>
+<p>There are multiple steps to the matrix completion process:</p>
+<p>Least squares estimate with gaussian error model, for the same variance assumption between cells.</p>
+<div id="anova-initial-imputation" class="section level3">
+<h3><span class="header-section-number">5.2.1</span> Anova Initial Imputation</h3>
+<p>Impute the initial values for the missing <span class="math inline">\(y_{i,j}\)</span> observations <span class="math inline">\(1 \leq i \leq m, 1 \leq j \leq n\)</span>: In general an additive model is applicable: <span class="math display">\[y_{i,j} = \mu + a_i + b_j + \epsilon_{i,j}\]</span> where <span class="math inline">\(\epsilon \in N(0,\sigma^2)\)</span>, <span class="math inline">\(\mu\)</span> is the overall mean, <span class="math inline">\(a_i\)</span> is the row mean, and <span class="math inline">\(b_j\)</span> is column mean. An analysis of variance (ANOVA) imputation is used to fill in the initial values, <span class="math inline">\(y_{i,j}\)</span>. Ignoring the missing values for now, let <span class="math inline">\(y_{..}\)</span> denote the empirical overall mean, <span class="math inline">\(y_{i.}\)</span> denote the empirical row mean, and <span class="math inline">\(y_{.j}\)</span> denote the column mean. <span class="math display">\[y_{i,j} = y_{..} + (y_{i.}-y{..}) + (y_{.j}-y_{..}) = y_{i.} + y_{.j} - y{..}\]</span></p>
+</div>
+<div id="repeated-imputation" class="section level3">
+<h3><span class="header-section-number">5.2.2</span> Repeated Imputation</h3>
+<p>The repeated imputation procedure solves <span class="math inline">\(Y^{(s)}[M] = R_k(Y^{(s-1)})[M]\)</span> where <span class="math inline">\(R_k\)</span> is the best rank-k approximation for the <span class="math inline">\(s\)</span>-th step. For each step <span class="math inline">\((s)\)</span> use singular value decomposition to decompose <span class="math display">\[Y^{(s)} =  U^{(s)}DV^{T(s)}\]</span> where <span class="math inline">\(D\)</span> is a diagonal matrix of the singular values, <span class="math inline">\(U\)</span> is the left singular vectors of <span class="math inline">\(Y\)</span> and <span class="math inline">\(V\)</span> is the right singular vectors of <span class="math inline">\(Y\)</span>.</p>
+<p>The Eckart-Young-Mirsky (EYM) Theorem provides the best rank-k approximation for the missing values in <span class="math inline">\(Y^{(s+1)}\)</span>. Recall <span class="math inline">\(Y[M]\)</span> represents all of the missing values of <span class="math inline">\(Y\)</span>. Applying the EYM theorem: <span class="math display">\[Y^{(s+1)}[M] = (U[,1:k]^{(s)}D[,1:k]V[,1:k]^{T(s)})[M]\]</span> Where <span class="math inline">\(U[,1:k]\)</span> represents the first <span class="math inline">\(k\)</span> columns of <span class="math inline">\(U\)</span> and the same for <span class="math inline">\(D\)</span> and <span class="math inline">\(V\)</span>.</p>
+</div>
+<div id="convergence-criterion" class="section level3">
+<h3><span class="header-section-number">5.2.3</span> Convergence Criterion</h3>
+<p>The EYM rank approximation imputation steps are repeated until the relative difference between <span class="math inline">\(Y^{(s+1)}\)</span> and <span class="math inline">\(Y^{(s)}\)</span> falls below a set threshold, <span class="math inline">\(T\)</span>. The relative difference threshold is expressed: <span class="math display">\[\frac{\|Y^{(s+1)}-Y^{(s)}\|_2}{\|Y^{(s)}\|_2} &lt; T\]</span> where <span class="math inline">\(\|Y\|_2\)</span> is the Frobenius norm. The denominator of the expression ensures the convergence criterion is invariate to a scale change in the matrix itself.</p>
+</div>
+<div id="implementation-1" class="section level3">
+<h3><span class="header-section-number">5.2.4</span> Implementation</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#matrix parameters</span>
+n_Sport =<span class="st"> </span><span class="dv">20</span>
+n_Dport =<span class="st"> </span><span class="dv">20</span>
+
+<span class="co">#get freqs</span>
+Sport_table =<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">table</span>(argus$Sport))
+Sport_table =<span class="st"> </span>Sport_table[<span class="kw">order</span>(-Sport_table$Freq),]
+top_Sport =<span class="st"> </span>(<span class="kw">head</span>(Sport_table$Var1, n_Sport))
+
+<span class="co">#get freqs</span>
+Dport_table =<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">table</span>(argus$Dport))
+Dport_table =<span class="st"> </span>Dport_table[<span class="kw">order</span>(-Dport_table$Freq),]
+top_Dport =<span class="st"> </span>(<span class="kw">head</span>(Dport_table$Var1, n_Dport))
+
+<span class="co">#create starting matrices</span>
+ports_combo_matrix =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">list</span>(), <span class="dt">nrow =</span> n_Sport, <span class="dt">ncol =</span> n_Dport)
+<span class="kw">dimnames</span>(ports_combo_matrix) =<span class="st"> </span><span class="kw">list</span>(top_Sport, top_Dport)
+
+ports_freq_matrix =<span class="st"> </span><span class="kw">matrix</span>(<span class="dv">0</span>, <span class="dt">nrow =</span> n_Sport, <span class="dt">ncol =</span> n_Dport)
+<span class="kw">dimnames</span>(ports_freq_matrix) =<span class="st"> </span><span class="kw">list</span>(top_Sport, top_Dport)
+
+<span class="co">#fill the ports_combo_matrix and ports_freq_matrix</span>
+for (s in <span class="dv">1</span>:n_Sport){
+  for (d in <span class="dv">1</span>:n_Dport){
+    combination =<span class="st"> </span>argus[<span class="kw">is.element</span>(argus$Sport, top_Sport[s])
+                        &amp;<span class="st"> </span><span class="kw">is.element</span>(argus$Dport, top_Dport[d]),]
+    obs =<span class="st"> </span>combination$SrcBytes
+    n_obs =<span class="st"> </span><span class="kw">length</span>(obs) <span class="co">#ignores NA values</span>
+    if (n_obs &gt;<span class="st"> </span><span class="dv">0</span>){
+      obs =<span class="st"> </span><span class="kw">nscore</span>(obs)$nscore <span class="co">#normal transformation</span>
+      for (i in <span class="dv">1</span>:n_obs){
+        ports_combo_matrix[[s,d]] =<span class="st"> </span><span class="kw">c</span>(ports_combo_matrix[[s,d]],obs[i]) 
+        <span class="co">#O(1) time to append values to a list?</span>
+        ports_freq_matrix[s,d] =<span class="st"> </span>ports_freq_matrix[s,d] +<span class="st"> </span><span class="dv">1</span>
+      }
+    }
+  }
+}
+
+<span class="co">#create mean and variance matrix</span>
+ports_mean_matrix =<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA</span>, <span class="dt">nrow =</span> n_Sport, <span class="dt">ncol =</span> n_Dport)
+<span class="kw">dimnames</span>(ports_mean_matrix) =<span class="st"> </span><span class="kw">list</span>(top_Sport, top_Dport)
+
+ports_variance_matrix =<span class="st"> </span><span class="kw">matrix</span>(<span class="ot">NA</span>, <span class="dt">nrow =</span> n_Sport, <span class="dt">ncol =</span> n_Dport)
+<span class="kw">dimnames</span>(ports_variance_matrix) =<span class="st"> </span><span class="kw">list</span>(top_Sport, top_Dport)
+
+<span class="co">#fill mean and variance matrix</span>
+for (s in <span class="dv">1</span>:n_Sport){
+  for (d in <span class="dv">1</span>:n_Dport){
+    if (ports_freq_matrix[s,d] ==<span class="st"> </span><span class="dv">1</span>){
+      ports_mean_matrix[s,d] =<span class="st"> </span>ports_combo_matrix[[s,d]]
+      ports_variance_matrix[s,d] =<span class="st"> </span><span class="dv">0</span>
+    }
+    else if (ports_freq_matrix[s,d] &gt;<span class="st"> </span><span class="dv">1</span>){
+      ports_mean_matrix[s,d] =<span class="st"> </span><span class="kw">mean</span>(ports_combo_matrix[[s,d]])
+      ports_variance_matrix[s,d] =<span class="st"> </span><span class="kw">var</span>(ports_combo_matrix[[s,d]])
+    }
+  }
+}
+
+####Eckhart Young Theorem Implementation, Best Rank k Approximation####
+matrix_complete =<span class="st"> </span>function(<span class="dt">S =</span> <span class="dv">1000</span>, <span class="dt">k =</span> <span class="dv">2</span>, n_Sport, n_Dport, Y, M){
+  S =<span class="st"> </span><span class="dv">1000</span>
+  k =<span class="st"> </span><span class="dv">2</span>
+  Y_imputed =<span class="st"> </span>Y
+  <span class="co">#calculate overall mean</span>
+  n =<span class="st"> </span><span class="dv">0</span>
+  sum =<span class="st"> </span><span class="dv">0</span>
+  for (s in <span class="dv">1</span>:n_Sport){
+    for (d in <span class="dv">1</span>:n_Dport){
+      if (M[s,d] !=<span class="st"> </span><span class="dv">0</span>){
+        sum =<span class="st"> </span>sum +<span class="st"> </span>Y[s,d]
+        n =<span class="st"> </span>n +<span class="st"> </span>M[s,d]
+      }
+    }
+  }
+  overall_mean =<span class="st"> </span>sum/n
+  <span class="co">#calculate row means and col means</span>
+  row_means =<span class="st"> </span><span class="kw">rowMeans</span>(Y, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)
+  col_means =<span class="st"> </span><span class="kw">colMeans</span>(Y, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>)
+  <span class="co">#set NaN to 0 in means to fix anova fill in</span>
+  for (i in <span class="dv">1</span>:n_Sport){
+    if (!<span class="kw">is.finite</span>(row_means[i])){
+      row_means[i] =<span class="st"> </span><span class="dv">0</span>
+    }
+    if (!<span class="kw">is.finite</span>(col_means[i])){
+      col_means[i] =<span class="st"> </span><span class="dv">0</span>
+    }
+  }
+  <span class="co">#Fill in missing values in Y_imputed with ANOVA</span>
+  for (s in <span class="dv">1</span>:n_Sport){
+    for (d in <span class="dv">1</span>:n_Dport){
+      if (M[s,d] ==<span class="st"> </span><span class="dv">0</span>){
+        Y_imputed[s,d] =<span class="st"> </span>row_means[s] +<span class="st"> </span>col_means[d] -<span class="st"> </span>overall_mean
+      }
+    }
+  }
+  for (i in <span class="dv">1</span>:S){
+    <span class="co">#extract SVD</span>
+    svd_Y =<span class="st"> </span><span class="kw">svd</span>(Y_imputed)
+    D =<span class="st"> </span><span class="kw">diag</span>((svd_Y$d)[<span class="dv">1</span>:k])
+    U =<span class="st"> </span>svd_Y$u
+    V =<span class="st"> </span>svd_Y$v
+    <span class="co">#EYM theorem</span>
+    EYM =<span class="st"> </span>U[,<span class="dv">1</span>:k] %*%<span class="st"> </span>D %*%<span class="st"> </span><span class="kw">t</span>(V[,<span class="dv">1</span>:k])
+    for (s in <span class="dv">1</span>:n_Sport){
+      for (d in <span class="dv">1</span>:n_Dport){
+        if (M[s,d] ==<span class="st"> </span><span class="dv">0</span>){
+          Y_imputed[s,d] =<span class="st"> </span>EYM[s,d]
+        }
+      }
+    }
+  }
+  <span class="kw">return</span> (Y_imputed)
+}
+
+ports_mean_matrix_imputed =<span class="st"> </span><span class="kw">matrix_complete</span>(<span class="dv">1000</span>, <span class="dv">2</span>, n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
+
+<span class="co">#Relative distance using Frobenius Norm</span>
+relative_distance =<span class="st"> </span>function(Y, Y_imputed){
+  <span class="kw">return</span> (<span class="kw">sqrt</span>(<span class="kw">sum</span>((Y -<span class="st"> </span>Y_imputed)^<span class="dv">2</span>)) /<span class="st"> </span><span class="kw">sqrt</span>(<span class="kw">sum</span>(Y^<span class="dv">2</span>)))
+}</code></pre></div>
+</div>
+</div>
+<div id="assessing-imputation-strategy" class="section level2">
+<h2><span class="header-section-number">5.3</span> Assessing Imputation Strategy</h2>
+<div id="leave-one-out-cross-validation" class="section level3">
+<h3><span class="header-section-number">5.3.1</span> Leave One Out Cross Validation</h3>
+<p>To assess the quality of the imputation, Leave-One-Out Cross Validation (LOOCV) is used to generate a prediction error. LOOCV cycles through the observed values, setting each to NA (missing), and then performing the described imputation process. The prediction error is then calculated as some function of the difference between the imputed value and the true value. In this case, the algorithm records absolute error <span class="math inline">\(\sum \mid \hat y_{i,j} - y_{i,j}\mid\)</span> and root mean square error <span class="math inline">\(\sqrt{\frac{\sum (\hat y_{i,j} - y_{i,j})^2}{n}}\)</span> where <span class="math inline">\(n\)</span> is the number of observations not missing.</p>
+</div>
+<div id="implementation-2" class="section level3">
+<h3><span class="header-section-number">5.3.2</span> Implementation</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#Leave One Out Cross Validation</span>
+loocv =<span class="st"> </span>function (<span class="dt">S =</span> <span class="dv">1000</span>, <span class="dt">k =</span> <span class="dv">2</span>, <span class="dt">nrows =</span> n_Sport, <span class="dt">ncols =</span> n_Dport, Y, M){
+  error =<span class="st"> </span><span class="dv">0</span>
+  rmse =<span class="st"> </span><span class="dv">0</span>
+  n =<span class="st"> </span><span class="dv">0</span>
+  for (s in <span class="dv">1</span>:nrows){
+    for (d in <span class="dv">1</span>:ncols){
+      if (M[s,d] !=<span class="st"> </span><span class="dv">0</span>){
+        n =<span class="st"> </span>n +<span class="st"> </span><span class="dv">1</span>
+        M_imputed =<span class="st"> </span>M
+        M_imputed[s,d] =<span class="st"> </span><span class="dv">0</span>
+        Y_imputed =<span class="st"> </span><span class="kw">matrix_complete</span>(S, k, nrows, ncols, Y, M_imputed)
+        error =<span class="st"> </span>error +<span class="st"> </span><span class="kw">abs</span>((Y_imputed[s,d] -<span class="st"> </span>Y[s,d]))
+        rmse =<span class="st"> </span>rmse +<span class="st"> </span>(Y_imputed[s,d] -<span class="st"> </span>Y[s,d])^<span class="dv">2</span>
+      }
+    }
+  }
+  rmse =<span class="st"> </span><span class="kw">sqrt</span>(rmse/n)
+  <span class="kw">return</span> (<span class="kw">list</span>(<span class="dt">Error =</span> error, <span class="dt">RMSE =</span> rmse, <span class="dt">Observations =</span> n))
+}
+<span class="co">#find optimal rank</span></code></pre></div>
+</div>
+<div id="results" class="section level3">
+<h3><span class="header-section-number">5.3.3</span> Results</h3>
+<p>While matrix completion via singular value decomposition presents valid missing value imputations, and the algorithm converges relatively quickly, the error generated from leave one out cross validation reflects that the imputation performs rather poorly for low rank solutions to the data. Moreover, the errors are minimized at a rank approximation of 3, but even at this rank, the errors are relatively high considering the data was first normal transformed.</p>
+<p>This poor performance may largely be due to the fact the algorithm does not account for the variability in the number of observed solutions for each cell being imputed. Unlike the Netflix Competition, in which each cell of the matrix being completed contained only a single user rating of a movie, the matrix in this problem contains the average of a variable number of observations in each cell.</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="4-modeling-port-relationships.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="6-statistical-model-for-port-behavior.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": [["thesis.pdf", "PDF"], ["thesis.epub", "EPUB"], ["thesis.docx", "Word"]],
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

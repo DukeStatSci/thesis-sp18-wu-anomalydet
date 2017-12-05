@@ -5,11 +5,11 @@
 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Matrix Based Anomaly Detection Techniques Applied to Network Attacks</title>
-  <meta name="description" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks">
+  <title>Anomaly Detection Techniques Applied to Network Attacks</title>
+  <meta name="description" content="Anomaly Detection Techniques Applied to Network Attacks">
   <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
 
-  <meta property="og:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
+  <meta property="og:title" content="Anomaly Detection Techniques Applied to Network Attacks" />
   <meta property="og:type" content="book" />
   
   
@@ -17,7 +17,7 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Matrix Based Anomaly Detection Techniques Applied to Network Attacks" />
+  <meta name="twitter:title" content="Anomaly Detection Techniques Applied to Network Attacks" />
   
   
   
@@ -31,7 +31,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="B-the-second-appendix-for-fun.html">
+<link rel="prev" href="6-statistical-model-for-port-behavior.html">
 
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -110,9 +110,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1.2.1" data-path="1-introduction.html"><a href="1-introduction.html#status-quo-solution"><i class="fa fa-check"></i><b>1.2.1</b> Status Quo Solution</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="2" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html"><i class="fa fa-check"></i><b>2</b> Networks Dataset</a><ul>
-<li class="chapter" data-level="2.1" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html#features"><i class="fa fa-check"></i><b>2.1</b> Features</a></li>
-<li class="chapter" data-level="2.2" data-path="2-networks-dataset.html"><a href="2-networks-dataset.html#argus-and-data-nuances"><i class="fa fa-check"></i><b>2.2</b> Argus and Data Nuances</a></li>
+<li class="chapter" data-level="2" data-path="2-network-dataset.html"><a href="2-network-dataset.html"><i class="fa fa-check"></i><b>2</b> Network Dataset</a><ul>
+<li class="chapter" data-level="2.1" data-path="2-network-dataset.html"><a href="2-network-dataset.html#features"><i class="fa fa-check"></i><b>2.1</b> Features</a></li>
+<li class="chapter" data-level="2.2" data-path="2-network-dataset.html"><a href="2-network-dataset.html#argus"><i class="fa fa-check"></i><b>2.2</b> Argus</a></li>
 </ul></li>
 <li class="chapter" data-level="3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html"><i class="fa fa-check"></i><b>3</b> Preliminary Data Investigation</a><ul>
 <li class="chapter" data-level="3.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>3.1</b> Exploratory Data Analysis</a><ul>
@@ -127,22 +127,36 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="3.2.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#normal-scores-transformation"><i class="fa fa-check"></i><b>3.2.3</b> Normal Scores Transformation</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="4" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html"><i class="fa fa-check"></i><b>4</b> Matrix Techniques for Anomaly Detection</a><ul>
-<li class="chapter" data-level="4.1" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#ports-combination-matrixtensor"><i class="fa fa-check"></i><b>4.1</b> Ports Combination Matrix/Tensor</a></li>
-<li class="chapter" data-level="4.2" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#principal-component-analysis"><i class="fa fa-check"></i><b>4.2</b> Principal Component Analysis</a><ul>
-<li class="chapter" data-level="4.2.1" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#investigating-combinations"><i class="fa fa-check"></i><b>4.2.1</b> Investigating Combinations</a></li>
+<li class="chapter" data-level="4" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html"><i class="fa fa-check"></i><b>4</b> Modeling Port Relationships</a><ul>
+<li class="chapter" data-level="4.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#motivation"><i class="fa fa-check"></i><b>4.1</b> Motivation</a></li>
+<li class="chapter" data-level="4.2" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#principal-component-analysis"><i class="fa fa-check"></i><b>4.2</b> Principal Component Analysis</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#application"><i class="fa fa-check"></i><b>4.2.1</b> Application</a></li>
 </ul></li>
-<li class="chapter" data-level="4.3" data-path="4-matrix-techniques-for-anomaly-detection.html"><a href="4-matrix-techniques-for-anomaly-detection.html#matrix-completion-via-singular-value-decomposition"><i class="fa fa-check"></i><b>4.3</b> Matrix Completion via Singular Value Decomposition</a></li>
+<li class="chapter" data-level="4.3" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#ports-combination-matrixtensor"><i class="fa fa-check"></i><b>4.3.1</b> Ports Combination Matrix/Tensor</a></li>
+<li class="chapter" data-level="4.3.2" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#investigating-combinations"><i class="fa fa-check"></i><b>4.3.2</b> Investigating Combinations</a></li>
+<li class="chapter" data-level="4.3.3" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#interpretation"><i class="fa fa-check"></i><b>4.3.3</b> Interpretation</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="5-statistical-model.html"><a href="5-statistical-model.html"><i class="fa fa-check"></i><b>5</b> Statistical Model</a><ul>
-<li class="chapter" data-level="5.1" data-path="5-statistical-model.html"><a href="5-statistical-model.html#uneven-variances"><i class="fa fa-check"></i><b>5.1</b> Uneven Variances</a></li>
-<li class="chapter" data-level="5.2" data-path="5-statistical-model.html"><a href="5-statistical-model.html#determined-model"><i class="fa fa-check"></i><b>5.2</b> Determined Model</a></li>
-<li class="chapter" data-level="5.3" data-path="5-statistical-model.html"><a href="5-statistical-model.html#section"><i class="fa fa-check"></i><b>5.3</b> </a></li>
 </ul></li>
-<li class="chapter" data-level="" data-path="conclusion.html"><a href="conclusion.html"><i class="fa fa-check"></i>Conclusion</a></li>
-<li class="appendix"><span><b>Appendix</b></span></li>
-<li class="chapter" data-level="A" data-path="A-the-first-appendix.html"><a href="A-the-first-appendix.html"><i class="fa fa-check"></i><b>A</b> The First Appendix</a></li>
-<li class="chapter" data-level="B" data-path="B-the-second-appendix-for-fun.html"><a href="B-the-second-appendix-for-fun.html"><i class="fa fa-check"></i><b>B</b> The Second Appendix, for Fun</a></li>
+<li class="chapter" data-level="5" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html"><i class="fa fa-check"></i><b>5</b> Imputing Port Connections</a><ul>
+<li class="chapter" data-level="5.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#motivation-1"><i class="fa fa-check"></i><b>5.1</b> Motivation</a></li>
+<li class="chapter" data-level="5.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#matrix-completion-algorithm"><i class="fa fa-check"></i><b>5.2</b> Matrix Completion Algorithm</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#anova-initial-imputation"><i class="fa fa-check"></i><b>5.2.1</b> Anova Initial Imputation</a></li>
+<li class="chapter" data-level="5.2.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#repeated-imputation"><i class="fa fa-check"></i><b>5.2.2</b> Repeated Imputation</a></li>
+<li class="chapter" data-level="5.2.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#convergence-criterion"><i class="fa fa-check"></i><b>5.2.3</b> Convergence Criterion</a></li>
+<li class="chapter" data-level="5.2.4" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#implementation-1"><i class="fa fa-check"></i><b>5.2.4</b> Implementation</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#assessing-imputation-strategy"><i class="fa fa-check"></i><b>5.3</b> Assessing Imputation Strategy</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#leave-one-out-cross-validation"><i class="fa fa-check"></i><b>5.3.1</b> Leave One Out Cross Validation</a></li>
+<li class="chapter" data-level="5.3.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#implementation-2"><i class="fa fa-check"></i><b>5.3.2</b> Implementation</a></li>
+<li class="chapter" data-level="5.3.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#results"><i class="fa fa-check"></i><b>5.3.3</b> Results</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html"><i class="fa fa-check"></i><b>6</b> Statistical Model for Port Behavior</a><ul>
+<li class="chapter" data-level="6.1" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#motivation-2"><i class="fa fa-check"></i><b>6.1</b> Motivation</a></li>
+<li class="chapter" data-level="6.2" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#ammi-model"><i class="fa fa-check"></i><b>6.2</b> AMMI Model</a></li>
+<li class="chapter" data-level="6.3" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#gibbs-sampling"><i class="fa fa-check"></i><b>6.3</b> Gibbs Sampling</a></li>
+</ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
 <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
@@ -155,7 +169,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Matrix Based Anomaly Detection Techniques Applied to Network Attacks</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Anomaly Detection Techniques Applied to Network Attacks</a>
           </h1>
         </div>
 
@@ -198,7 +212,7 @@ This is just for testing with more citations for the bibliography at the end.  A
           </div>
         </div>
       </div>
-<a href="B-the-second-appendix-for-fun.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="6-statistical-model-for-port-behavior.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
     </div>
   </div>
@@ -231,7 +245,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": ["thesis.pdf"],
+"download": [["thesis.pdf", "PDF"], ["thesis.epub", "EPUB"], ["thesis.docx", "Word"]],
 "toc": {
 "collapse": "section"
 }

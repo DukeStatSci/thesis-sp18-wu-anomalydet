@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   
   
-<link rel="prev" href="preliminary-content.html">
-<link rel="next" href="2-network-dataset.html">
+<link rel="prev" href="5-imputing-port-connections.html">
+<link rel="next" href="references.html">
 <script src="libs/jquery-2.2.3/jquery.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
@@ -177,29 +177,26 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="introduction" class="section level1">
-<h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
-<div id="anomaly-detection" class="section level2">
-<h2><span class="header-section-number">1.1</span> Anomaly Detection</h2>
-<p>Anomaly detection is a technique used to identify unusual patterns that do not conform to expected behavior, called outliers. It has many applications in business, from intrusion detection (identifying strange patterns in network traffic that could signal a hack) to system health monitoring (spotting a malignant tumor in an MRI scan), and from fraud detection in credit card transactions to fault detection in operating environments.</p>
-<p>Anomalies can be broadly categorized as:</p>
-<p>Point anomalies: A single instance of data is anomalous if it’s too far off from the rest. Business use case: Detecting credit card fraud based on “amount spent.”</p>
-<p>Contextual anomalies: The abnormality is context specific. This type of anomaly is common in time-series data. Business use case: Spending $100 on food every day during the holiday season is normal, but may be odd otherwise.</p>
-<p>Collective anomalies: A set of data instances collectively helps in detecting anomalies. Business use case: Someone is trying to copy data form a remote machine to a local host unexpectedly, an anomaly that would be flagged as a potential cyber attack.</p>
-<p>Anomaly detection is similar to — but not entirely the same as — noise removal and novelty detection. Novelty detection is concerned with identifying an unobserved pattern in new observations not included in training data — like a sudden interest in a new channel on YouTube during Christmas, for instance. Noise removal (NR) is the process of immunizing analysis from the occurrence of unwanted observations; in other words, removing noise from an otherwise meaningful signal.</p>
+<div id="statistical-model-for-port-behavior" class="section level1">
+<h1><span class="header-section-number">Chapter 6</span> Statistical Model for Port Behavior</h1>
+<div id="motivation-2" class="section level2">
+<h2><span class="header-section-number">6.1</span> Motivation</h2>
+<p>The previous section’s results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination’s cell. The following section constructs a statistical model that takes frequency of observations for each cell into account and repeatedly samples from that statistical model to complete the matrix.</p>
 </div>
-<div id="network-attacks" class="section level2">
-<h2><span class="header-section-number">1.2</span> Network Attacks</h2>
-<p>Network security is becoming increasingly relevant as the flow of data, bandwith of transactions, and user dependency on hosted networks increase. As entire networks grow in nodes and complexity, attackers gain easier entry points of access to the network. The most benign of attackers attempt to shutdown networks (e.g. causing a website to shutdown with repeated pings to its server), while more malicious attempts involve hijacking the server to publish the attacker’s own content or stealing unsecured data from the server, thus compromising the privacy of the network’s users.</p>
-<p>Attackers follow a specific three step strategy when gathering intelligence on a network, the most important component of which is scanning. Network scanning is a procedure for identifying active hosts on a network, the attacker uses it to find information about the specific IP addresses that can be accessed over the Internet, their target’s operating systems, system architecture, and the services running on each node/computer in the network. Scanning procedures, such as ping sweeps and port scans, return information about which IP addresses map to live hosts that are active on the Internet and what services they offer. Another scanning method, inverse mapping, returns information about what IP addresses do not map to live hosts; this enables an attacker to make assumptions about viable addresses.</p>
-<p>All three of these scanning methods leave digital signatures in the networks they evaluate because they apply specific pings that are then stored in the network logs. Most scanners use a specific combination of bytes, packets, flags (in TCP protocol), and ports in a sequence of pings to a network. Identifying a scanner’s often many IP addresses from the set of pings available in the network’s logs is thus an anomaly detection problem. In particular, because the data is unlabeled, meaning it is unclear which observations are actually scanners and which are just standard user behavior, unsupervised approaches are necessary for tackling the problem.</p>
-<p>This particular dataset is from Duke University’s Office of Information Technology (OIT), and it covers all observations in their network traffic during a five minute period in February 2017.</p>
-<div id="status-quo-solution" class="section level3">
-<h3><span class="header-section-number">1.2.1</span> Status Quo Solution</h3>
-<p>OIT’s current solution for detecting scanners relies on specific domain knowledge gathered from diagnostics programs and data analysis completed on previous data. They prevent scanners by blocking IP addresses that fit certain rules they have constructed to run on every network transaction as it occurs. The specific checks in these rules are private for security reasons, but they belong to the nature of evaluating the size of transactions, repeated connections between particular ports, many pings from the same address, and combinations of these particular behaviors.</p>
-<p>While this solution presents a methodical way for banning IP addresses and its method of rule checking is essentially removing what OIT considers outliers for network transactions-any observation that does not fit within the constraints specified by the rules is classified as an outleir and its source IP is blocked-it is inflexible, prone to detecting false negatives, and fails to detect observations that may be within the parameter constraints of the rules but are anomalous with respect to other parameters or parameter constraints.</p>
+<div id="ammi-model" class="section level2">
+<h2><span class="header-section-number">6.2</span> AMMI Model</h2>
+</div>
+<div id="gibbs-sampling" class="section level2">
+<h2><span class="header-section-number">6.3</span> Gibbs Sampling</h2>
 
-</div>
+<!--
+The bib chunk below must go last in this document according to how R Markdown renders.  More info is at http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html
+-->
+<p></p>
+<!-- 
+If you'd like to change the name of the bibliography to something else,
+delete "References" and replace it.
+-->
 </div>
 </div>
             </section>
@@ -207,8 +204,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
           </div>
         </div>
       </div>
-<a href="preliminary-content.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="2-network-dataset.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="5-imputing-port-connections.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="references.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

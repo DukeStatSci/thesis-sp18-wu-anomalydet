@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Anomaly Detection Techniques Applied to Network Attacks</title>
+  <meta name="description" content="Anomaly Detection Techniques Applied to Network Attacks">
+  <meta name="generator" content="bookdown 0.5 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Anomaly Detection Techniques Applied to Network Attacks" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Anomaly Detection Techniques Applied to Network Attacks" />
+  
+  
+  
+
+<meta name="author" content="James C. Wu">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="3-preliminary-data-investigation.html">
+<link rel="next" href="5-imputing-port-connections.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./"></a></li>
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html"><i class="fa fa-check"></i>Preliminary Content</a><ul>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+<li class="chapter" data-level="" data-path="preliminary-content.html"><a href="preliminary-content.html#abstract"><i class="fa fa-check"></i>Abstract</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="1-introduction.html"><a href="1-introduction.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="1-introduction.html"><a href="1-introduction.html#anomaly-detection"><i class="fa fa-check"></i><b>1.1</b> Anomaly Detection</a></li>
+<li class="chapter" data-level="1.2" data-path="1-introduction.html"><a href="1-introduction.html#network-attacks"><i class="fa fa-check"></i><b>1.2</b> Network Attacks</a><ul>
+<li class="chapter" data-level="1.2.1" data-path="1-introduction.html"><a href="1-introduction.html#status-quo-solution"><i class="fa fa-check"></i><b>1.2.1</b> Status Quo Solution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="2-network-dataset.html"><a href="2-network-dataset.html"><i class="fa fa-check"></i><b>2</b> Network Dataset</a><ul>
+<li class="chapter" data-level="2.1" data-path="2-network-dataset.html"><a href="2-network-dataset.html#features"><i class="fa fa-check"></i><b>2.1</b> Features</a></li>
+<li class="chapter" data-level="2.2" data-path="2-network-dataset.html"><a href="2-network-dataset.html#argus"><i class="fa fa-check"></i><b>2.2</b> Argus</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html"><i class="fa fa-check"></i><b>3</b> Preliminary Data Investigation</a><ul>
+<li class="chapter" data-level="3.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#exploratory-data-analysis"><i class="fa fa-check"></i><b>3.1</b> Exploratory Data Analysis</a><ul>
+<li class="chapter" data-level="3.1.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#cleaning-predictors"><i class="fa fa-check"></i><b>3.1.1</b> Cleaning Predictors</a></li>
+<li class="chapter" data-level="3.1.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#categorical-features-unique-categories-and-counts"><i class="fa fa-check"></i><b>3.1.2</b> Categorical Features: Unique Categories and Counts</a></li>
+<li class="chapter" data-level="3.1.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#continuous-features-distributions-and-relationships"><i class="fa fa-check"></i><b>3.1.3</b> Continuous Features: Distributions and Relationships</a></li>
+<li class="chapter" data-level="3.1.4" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#correlation-between-features"><i class="fa fa-check"></i><b>3.1.4</b> Correlation Between Features</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#transformations-on-the-data"><i class="fa fa-check"></i><b>3.2</b> Transformations on the Data</a><ul>
+<li class="chapter" data-level="3.2.1" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#removing-quantiles"><i class="fa fa-check"></i><b>3.2.1</b> Removing Quantiles</a></li>
+<li class="chapter" data-level="3.2.2" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#log-transformation"><i class="fa fa-check"></i><b>3.2.2</b> Log Transformation</a></li>
+<li class="chapter" data-level="3.2.3" data-path="3-preliminary-data-investigation.html"><a href="3-preliminary-data-investigation.html#normal-scores-transformation"><i class="fa fa-check"></i><b>3.2.3</b> Normal Scores Transformation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html"><i class="fa fa-check"></i><b>4</b> Modeling Port Relationships</a><ul>
+<li class="chapter" data-level="4.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#motivation"><i class="fa fa-check"></i><b>4.1</b> Motivation</a></li>
+<li class="chapter" data-level="4.2" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#principal-component-analysis"><i class="fa fa-check"></i><b>4.2</b> Principal Component Analysis</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#application"><i class="fa fa-check"></i><b>4.2.1</b> Application</a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#implementation"><i class="fa fa-check"></i><b>4.3</b> Implementation</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#ports-combination-matrixtensor"><i class="fa fa-check"></i><b>4.3.1</b> Ports Combination Matrix/Tensor</a></li>
+<li class="chapter" data-level="4.3.2" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#investigating-combinations"><i class="fa fa-check"></i><b>4.3.2</b> Investigating Combinations</a></li>
+<li class="chapter" data-level="4.3.3" data-path="4-modeling-port-relationships.html"><a href="4-modeling-port-relationships.html#interpretation"><i class="fa fa-check"></i><b>4.3.3</b> Interpretation</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html"><i class="fa fa-check"></i><b>5</b> Imputing Port Connections</a><ul>
+<li class="chapter" data-level="5.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#motivation-1"><i class="fa fa-check"></i><b>5.1</b> Motivation</a></li>
+<li class="chapter" data-level="5.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#matrix-completion-algorithm"><i class="fa fa-check"></i><b>5.2</b> Matrix Completion Algorithm</a><ul>
+<li class="chapter" data-level="5.2.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#anova-initial-imputation"><i class="fa fa-check"></i><b>5.2.1</b> Anova Initial Imputation</a></li>
+<li class="chapter" data-level="5.2.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#repeated-imputation"><i class="fa fa-check"></i><b>5.2.2</b> Repeated Imputation</a></li>
+<li class="chapter" data-level="5.2.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#convergence-criterion"><i class="fa fa-check"></i><b>5.2.3</b> Convergence Criterion</a></li>
+<li class="chapter" data-level="5.2.4" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#implementation-1"><i class="fa fa-check"></i><b>5.2.4</b> Implementation</a></li>
+</ul></li>
+<li class="chapter" data-level="5.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#assessing-imputation-strategy"><i class="fa fa-check"></i><b>5.3</b> Assessing Imputation Strategy</a><ul>
+<li class="chapter" data-level="5.3.1" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#leave-one-out-cross-validation"><i class="fa fa-check"></i><b>5.3.1</b> Leave One Out Cross Validation</a></li>
+<li class="chapter" data-level="5.3.2" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#implementation-2"><i class="fa fa-check"></i><b>5.3.2</b> Implementation</a></li>
+<li class="chapter" data-level="5.3.3" data-path="5-imputing-port-connections.html"><a href="5-imputing-port-connections.html#results"><i class="fa fa-check"></i><b>5.3.3</b> Results</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html"><i class="fa fa-check"></i><b>6</b> Statistical Model for Port Behavior</a><ul>
+<li class="chapter" data-level="6.1" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#motivation-2"><i class="fa fa-check"></i><b>6.1</b> Motivation</a></li>
+<li class="chapter" data-level="6.2" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#ammi-model"><i class="fa fa-check"></i><b>6.2</b> AMMI Model</a></li>
+<li class="chapter" data-level="6.3" data-path="6-statistical-model-for-port-behavior.html"><a href="6-statistical-model-for-port-behavior.html#gibbs-sampling"><i class="fa fa-check"></i><b>6.3</b> Gibbs Sampling</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Anomaly Detection Techniques Applied to Network Attacks</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="modeling-port-relationships" class="section level1">
+<h1><span class="header-section-number">Chapter 4</span> Modeling Port Relationships</h1>
+<div id="motivation" class="section level2">
+<h2><span class="header-section-number">4.1</span> Motivation</h2>
+<p>Previous exploratory data analysis signaled that there may exist trends between different port combinations. For instance, a particular source and destination port may frequently contain large byte transactions in their connections. Devising a systematic way to identify these combinations may present outliers that can be further investigated for scanner behavior.</p>
+<p>Beginning the investigation requires the creation of a 2-dimensional matrix of the most common source and destination port combinations. Each cell in this matrix is of variable length and holds all of the data observations involving that particular source and destination port pairing. Following the creation of this matrix, principal component analysis may be applied to the combinations present in each cell to investigate the behavior of that specific connection.</p>
+</div>
+<div id="principal-component-analysis" class="section level2">
+<h2><span class="header-section-number">4.2</span> Principal Component Analysis</h2>
+<!-- DEFINE NOTATION Let $X \in {\rm I\!R}^{m \times n}$  -->
+<p>Principal component analysis represents data in terms of its principal components rather than relying on traditional Cartesian axes. Principal components contain the underlying structure in data by representing the directions that contain the most variance.</p>
+<!-- ### Algorithm -->
+<!-- <!-- DEFINE IN TERMS OF MATH -->
+<p>–&gt;</p>
+<div id="application" class="section level3">
+<h3><span class="header-section-number">4.2.1</span> Application</h3>
+<p>In this problem, Principal Component Anaylsis is applied to each source-destination port grouping of observed data to understand the underlying structure of the data partition’s continuous features: source bytes and packets and destination bytes and packets. In particular the amount of variance explained by the generated principal components and their relative directions will signal whether specific trends in connection behavior occur at certain ports, and whether the size of each of the continuous features affects port behavior as well as the other features.</p>
+</div>
+</div>
+<div id="implementation" class="section level2">
+<h2><span class="header-section-number">4.3</span> Implementation</h2>
+<div id="ports-combination-matrixtensor" class="section level3">
+<h3><span class="header-section-number">4.3.1</span> Ports Combination Matrix/Tensor</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#set counts</span>
+s_num =<span class="st"> </span><span class="dv">25</span>
+d_num =<span class="st"> </span><span class="dv">25</span>
+combo_num =<span class="st"> </span><span class="dv">20</span>
+
+<span class="co">#get top sport and dport values</span>
+Sport_table =<span class="st"> </span><span class="kw">table</span>(Sport)
+Sport_table =<span class="st"> </span><span class="kw">as.data.frame</span>(Sport_table)
+Sport_table =<span class="st"> </span>Sport_table[<span class="kw">order</span>(-Sport_table$Freq),]
+top_Sport =<span class="st"> </span>(<span class="kw">head</span>(Sport_table$Sport, s_num))
+
+Dport_table =<span class="st"> </span><span class="kw">table</span>(Dport)
+Dport_table =<span class="st"> </span><span class="kw">as.data.frame</span>(Dport_table)
+Dport_table =<span class="st"> </span>Dport_table[<span class="kw">order</span>(-Dport_table$Freq),]
+top_Dport =<span class="st"> </span>(<span class="kw">head</span>(Dport_table$Dport, d_num))
+
+<span class="co">#subset data for the combinations</span>
+argus_maxes =<span class="st"> </span>argus[<span class="kw">is.element</span>(Sport, top_Sport) &amp;<span class="st"> </span><span class="kw">is.element</span>(Dport, top_Dport), ]
+argus_maxes =<span class="st"> </span><span class="kw">transform</span>(argus_maxes,
+                        <span class="dt">Sport =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Sport)),
+                        <span class="dt">Dport =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Dport)))
+max_combinations =<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">table</span>(argus_maxes$Sport, argus_maxes$Dport))
+
+top_combinations =<span class="st"> </span><span class="kw">head</span>(max_combinations[<span class="kw">order</span>(-max_combinations$Freq),], combo_num)
+top_combinations$Sport =<span class="st"> </span>top_combinations$Var1
+top_combinations$Dport =<span class="st"> </span>top_combinations$Var2
+top_combinations$Var1 =<span class="st"> </span><span class="ot">NULL</span>
+top_combinations$Var2 =<span class="st"> </span><span class="ot">NULL</span>
+top_combinations =<span class="st"> </span><span class="kw">transform</span>(top_combinations,
+                             <span class="dt">Sport =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Sport)),
+                             <span class="dt">Dport =</span> <span class="kw">as.numeric</span>(<span class="kw">as.character</span>(Dport)))
+
+<span class="co">#generate the combinations matrix of ports</span>
+extract_intersection =<span class="st"> </span>function(sport, dport){
+  argus_subset =<span class="st"> </span>argus[Sport ==<span class="st"> </span>sport &amp;<span class="st"> </span>Dport ==<span class="st"> </span>dport,]
+  <span class="kw">return</span> (argus_subset)
+}
+generate_combinations_matrix =<span class="st"> </span>function(top_combinations){
+  n =<span class="st"> </span><span class="kw">dim</span>(top_combinations)[<span class="dv">1</span>]
+  combinations =<span class="st"> </span><span class="kw">c</span>()
+  for (i in <span class="dv">1</span>:n){
+    sport =<span class="st"> </span><span class="kw">as.numeric</span>(top_combinations[i,]$Sport)
+    dport =<span class="st"> </span><span class="kw">as.numeric</span>(top_combinations[i,]$Dport)
+    combo =<span class="st"> </span><span class="kw">extract_intersection</span>(sport, dport)
+    combinations =<span class="st"> </span><span class="kw">c</span>(combinations, <span class="kw">list</span>(combo))
+  }
+  <span class="kw">return</span> (combinations)
+}
+combinations =<span class="st"> </span><span class="kw">generate_combinations_matrix</span>(top_combinations)</code></pre></div>
+</div>
+<div id="investigating-combinations" class="section level3">
+<h3><span class="header-section-number">4.3.2</span> Investigating Combinations</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#principal component analysis and visualizing results</span>
+pca_analysis =<span class="st"> </span>function(SrcBytes, SrcPkts, DstBytes, DstPkts){
+  pca_cont_vars =<span class="st"> </span><span class="kw">cbind</span>(SrcBytes, SrcPkts, DstBytes, DstPkts)
+  pca =<span class="st"> </span><span class="kw">prcomp</span>(pca_cont_vars, <span class="dt">center =</span> <span class="ot">TRUE</span>, <span class="dt">scale. =</span> <span class="ot">TRUE</span>)
+  <span class="kw">print</span>(pca$rotation)
+  <span class="kw">print</span>((<span class="kw">summary</span>(pca)))
+  <span class="co">#screeplot(pca, type=&quot;lines&quot;,col=3)</span>
+  g =<span class="st"> </span><span class="kw">ggbiplot</span>(pca, <span class="dt">obs.scale =</span> <span class="dv">1</span>, <span class="dt">var.scale =</span> <span class="dv">1</span>,
+                <span class="dt">ellipse =</span> <span class="ot">TRUE</span>,
+                <span class="dt">circle =</span> <span class="ot">TRUE</span>)
+  g =<span class="st"> </span>g +<span class="st"> </span><span class="kw">scale_color_discrete</span>(<span class="dt">name =</span> <span class="st">&#39;&#39;</span>)
+  g =<span class="st"> </span>g +<span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.direction =</span> <span class="st">&#39;horizontal&#39;</span>,
+                 <span class="dt">legend.position =</span> <span class="st">&#39;top&#39;</span>)
+  <span class="kw">print</span>(g)
+  <span class="kw">return</span>(pca$rotation)
+}
+<span class="co">#apply pca to the data partitions on the top 10 port combinations </span>
+combo_num =<span class="st"> </span><span class="dv">10</span>
+for (i in <span class="dv">1</span>:combo_num){
+  combo_table =<span class="st"> </span>combinations[i]
+  combo_table =<span class="st"> </span><span class="kw">transform</span>(combo_table,
+                          <span class="dt">SrcBytes =</span> <span class="kw">as.numeric</span>(SrcBytes),
+                          <span class="dt">SrcPkts =</span> <span class="kw">as.numeric</span>(SrcPkts),
+                          <span class="dt">DstBytes =</span> <span class="kw">as.numeric</span>(DstBytes),
+                          <span class="dt">DstPkts =</span> <span class="kw">as.numeric</span>(DstPkts))
+  <span class="kw">cat</span>(<span class="st">&quot;Sport:&quot;</span>, combo_table$Sport[<span class="dv">1</span>],<span class="st">&quot;</span><span class="ch">\t</span><span class="st">&quot;</span>)
+  <span class="kw">cat</span>(<span class="st">&quot;Dport:&quot;</span>, combo_table$Dport[<span class="dv">1</span>],<span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>)
+  SrcBytes_norm =<span class="st">  </span><span class="kw">nscore</span>(combo_table$SrcBytes)$nscore
+  SrcPkts_norm =<span class="st">  </span><span class="kw">nscore</span>(combo_table$SrcPkts)$nscore
+  DstBytes_norm =<span class="st">  </span><span class="kw">nscore</span>(combo_table$DstBytes)$nscore
+  DstPkts_norm =<span class="st">  </span><span class="kw">nscore</span>(combo_table$DstPkts)$nscore
+  <span class="kw">pca_analysis</span>(SrcBytes_norm, SrcPkts_norm, DstBytes_norm, DstPkts_norm)
+}</code></pre></div>
+<pre><code>Sport: 32416    Dport: 9163 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.4113308 -0.7246604 -0.5528760  0.001575730
+SrcPkts  0.5054262 -0.3234250  0.7999554  0.003459252
+DstBytes 0.5357591  0.4327433 -0.1665939  0.705649994
+DstPkts  0.5369483  0.4277813 -0.1632360 -0.708550377
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.7118 0.8991 0.51065 0.02309
+Proportion of Variance 0.7326 0.2021 0.06519 0.00013
+Cumulative Proportion  0.7326 0.9347 0.99987 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 4145     Dport: 9119 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.4333309  0.8902089 -0.1405308  0.001886624
+SrcPkts  0.5213529 -0.1206221  0.8439979  0.036180840
+DstBytes 0.5190742 -0.3165495 -0.3953966  0.688490995
+DstPkts  0.5205549 -0.3045896 -0.3340362 -0.724339380
+Importance of components:
+                         PC1    PC2     PC3     PC4
+Standard deviation     1.875 0.6538 0.23124 0.05551
+Proportion of Variance 0.879 0.1069 0.01337 0.00077
+Cumulative Proportion  0.879 0.9859 0.99923 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 19239    Dport: 9153 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.4400190  0.8125062 -0.3823817 -0.001104223
+SrcPkts  0.5189497  0.1174251  0.8466938 -0.003489750
+DstBytes 0.5179403 -0.4057384 -0.2640886 -0.705245607
+DstPkts  0.5184712 -0.4017728 -0.2591352  0.708953621
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.8418 0.7037 0.33316 0.03695
+Proportion of Variance 0.8481 0.1238 0.02775 0.00034
+Cumulative Proportion  0.8481 0.9719 0.99966 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 4243     Dport: 27 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.3986539  0.8262979 -0.3978739  0.001762539
+SrcPkts  0.5268775  0.1487193  0.8367993  0.007045781
+DstBytes 0.5300998 -0.3876467 -0.2708012  0.703840168
+DstPkts  0.5314785 -0.3805842 -0.2610173 -0.710321243
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.7727 0.8343 0.40033 0.03406
+Proportion of Variance 0.7856 0.1740 0.04007 0.00029
+Cumulative Proportion  0.7856 0.9596 0.99971 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 4243     Dport: 10290 
+                PC1         PC2        PC3          PC4
+SrcBytes -0.4146349  0.86007431 -0.2972268 -0.002501828
+SrcPkts  -0.5225073  0.04229265  0.8514240 -0.016572825
+DstBytes -0.5257892 -0.36545098 -0.3181251 -0.699133556
+DstPkts  -0.5278350 -0.35345310 -0.2924547  0.714794623
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.8125 0.7560 0.37528 0.05022
+Proportion of Variance 0.8213 0.1429 0.03521 0.00063
+Cumulative Proportion  0.8213 0.9642 0.99937 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-5.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 4243     Dport: 26 
+               PC1         PC2        PC3          PC4
+SrcBytes 0.4320683  0.87332152 -0.2249932  0.002131619
+SrcPkts  0.5202875 -0.03769203  0.8529953  0.016712305
+DstBytes 0.5202102 -0.34831316 -0.3463831  0.698625865
+DstPkts  0.5215355 -0.33847715 -0.3190547 -0.715288791
+Importance of components:
+                          PC1    PC2     PC3    PC4
+Standard deviation     1.8559 0.6797 0.30326 0.0398
+Proportion of Variance 0.8611 0.1155 0.02299 0.0004
+Cumulative Proportion  0.8611 0.9766 0.99960 1.0000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-6.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 4243     Dport: 25 
+               PC1        PC2        PC3           PC4
+SrcBytes 0.4278586  0.8931432 -0.1386797 -0.0005117289
+SrcPkts  0.5214493 -0.1186010  0.8449812 -0.0055942005
+DstBytes 0.5218835 -0.3078511 -0.3699338 -0.7042828114
+DstPkts  0.5221736 -0.3057071 -0.3604494  0.7098972916
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.8651 0.6736 0.25860 0.02853
+Proportion of Variance 0.8697 0.1134 0.01672 0.00020
+Cumulative Proportion  0.8697 0.9831 0.99980 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-7.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 4243     Dport: 10282 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.3952127  0.8082469 -0.4365116  0.001226653
+SrcPkts  0.5292182  0.1880550  0.8273666  0.005281099
+DstBytes 0.5303470 -0.3972687 -0.2534339  0.704755906
+DstPkts  0.5314763 -0.3918544 -0.2463602 -0.709429149
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.7608 0.8629 0.39223 0.03300
+Proportion of Variance 0.7751 0.1862 0.03846 0.00027
+Cumulative Proportion  0.7751 0.9613 0.99973 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-8.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 19581    Dport: 118 
+               PC1        PC2         PC3           PC4
+SrcBytes 0.4978768  0.5190781 -0.69474927  0.0003069068
+SrcPkts  0.5010460  0.4817043  0.71896568 -0.0014778396
+DstBytes 0.5004716 -0.4999998 -0.01523225 -0.7066090712
+DstPkts  0.5005994 -0.4985169 -0.01340796  0.7076025312
+Importance of components:
+                          PC1     PC2     PC3     PC4
+Standard deviation     1.9145 0.56579 0.10402 0.06249
+Proportion of Variance 0.9163 0.08003 0.00271 0.00098
+Cumulative Proportion  0.9163 0.99632 0.99902 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-9.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>Sport: 35506    Dport: 12 
+               PC1        PC2        PC3         PC4
+SrcBytes 0.4432713  0.7265363  0.5248198 -0.01482290
+SrcPkts  0.5148990  0.2730712 -0.8122575  0.02343025
+DstBytes 0.5185367 -0.4458439  0.1990667  0.70193688
+DstPkts  0.5191429 -0.4458702  0.1586646 -0.71169932
+Importance of components:
+                        PC1    PC2     PC3     PC4
+Standard deviation     1.80 0.7830 0.38006 0.05046
+Proportion of Variance 0.81 0.1533 0.03611 0.00064
+Cumulative Proportion  0.81 0.9633 0.99936 1.00000</code></pre>
+<p><img src="thesis_files/figure-html/unnamed-chunk-13-10.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="interpretation" class="section level3">
+<h3><span class="header-section-number">4.3.3</span> Interpretation</h3>
+<p>In general the first two principal components explained most of the variance (~90%) for each of the port combinations. The scatterplots of the principal components show clear horizontal patterns in the 2nd principal component. This similar behavior, mirrored throughout the top 10 most frequent ports, may be caused by the high frequency of zeroes in the dataset. Recall, the first quartile of observations for destination bytes and packets were all 0. This high frequency of the same value (0) yields ties when performing the normal scores transformation applied to the data, which may also cause the horizontal behavior exhibited in every principal component analysis.</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="3-preliminary-data-investigation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="5-imputing-port-connections.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": [["thesis.pdf", "PDF"], ["thesis.epub", "EPUB"], ["thesis.docx", "Word"]],
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:" && /^https?:/.test(script.src))
+      script.src  = script.src.replace(/^https?:/, '');
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

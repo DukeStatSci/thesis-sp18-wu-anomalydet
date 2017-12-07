@@ -185,9 +185,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </div>
 <div id="ammi-model" class="section level2">
 <h2><span class="header-section-number">6.2</span> AMMI Model</h2>
+<p>Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination. Applying the same mathematical notation as the previous section, the model is formally expressed: <span class="math display">\[y_{i,j} = u + a_i + b_j + \mathbf{u_i}D\mathbf{v_j^T} + \sigma_{i,j}\epsilon_{i,j}\]</span> where <span class="math inline">\(sigma_{i,j}\)</span> is the variance for the <span class="math inline">\(ith\)</span> row <span class="math inline">\(jth\)</span> column in the ports combination matrix, and <span class="math inline">\(\epsilon \sim N(0,1)\)</span>.</p>
 </div>
 <div id="gibbs-sampling" class="section level2">
 <h2><span class="header-section-number">6.3</span> Gibbs Sampling</h2>
+<p>Following the application of the AMMI model, Gibbs Sampling is used to repeatedly generate samples from the statistical model, yielding an approximate value for each cell.</p>
 
 <!--
 The bib chunk below must go last in this document according to how R Markdown renders.  More info is at http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html

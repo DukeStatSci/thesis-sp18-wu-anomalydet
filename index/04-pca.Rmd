@@ -10,11 +10,11 @@ Beginning the investigation requires the creation of a 2-dimensional matrix of t
 
 <!-- DEFINE NOTATION Let $X \in {\rm I\!R}^{m \times n}$  --> 
 
-Principal component analysis represents data in terms of its principal components rather than relying on traditional Cartesian axes. Principal components contain the underlying structure in data by representing the directions that contain the most variance. 
+Principal component analysis represents data in terms of its principal components rather than relying on traditional Cartesian axes. Principal components contain the underlying structure in data by representing the directions that contain the most variance. Each successive principal component is orthoganol to the previous, so the resulting vectors yields an uncorrelated orthogonal basis set. Because PCA is sensitive to relative scaling of variables, a normal scores transformation is applied before the algorithm is run.
 
 <!-- ### Algorithm -->
 
-<!-- <!-- DEFINE IN TERMS OF MATH --> -->
+<!-- <!-- DEFINE IN TERMS OF MATH -->
 
 ### Application
 

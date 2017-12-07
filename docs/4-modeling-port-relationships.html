@@ -187,10 +187,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="principal-component-analysis" class="section level2">
 <h2><span class="header-section-number">4.2</span> Principal Component Analysis</h2>
 <!-- DEFINE NOTATION Let $X \in {\rm I\!R}^{m \times n}$  -->
-<p>Principal component analysis represents data in terms of its principal components rather than relying on traditional Cartesian axes. Principal components contain the underlying structure in data by representing the directions that contain the most variance.</p>
+<p>Principal component analysis represents data in terms of its principal components rather than relying on traditional Cartesian axes. Principal components contain the underlying structure in data by representing the directions that contain the most variance. Each successive principal component is orthoganol to the previous, so the resulting vectors yields an uncorrelated orthogonal basis set. Because PCA is sensitive to relative scaling of variables, a normal scores transformation is applied before the algorithm is run.</p>
 <!-- ### Algorithm -->
 <!-- <!-- DEFINE IN TERMS OF MATH -->
-<p>–&gt;</p>
 <div id="application" class="section level3">
 <h3><span class="header-section-number">4.2.1</span> Application</h3>
 <p>In this problem, Principal Component Anaylsis is applied to each source-destination port grouping of observed data to understand the underlying structure of the data partition’s continuous features: source bytes and packets and destination bytes and packets. In particular the amount of variance explained by the generated principal components and their relative directions will signal whether specific trends in connection behavior occur at certain ports, and whether the size of each of the continuous features affects port behavior as well as the other features.</p>

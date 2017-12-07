@@ -11,11 +11,7 @@ This results in a 3-dimensional matrix completion problem. The matrix dimensions
 
 There are $m$ source ports and $n$ destination ports. $Y \in {\rm I\!R}^{m \times n}$, is the matrix that stores the means of the combinations of source ports and destination ports. $Y$ has missingness because not every source port interacts with every destination port. $F \in {\rm I\!R}^{m \times n}$ is a sparse matrix that represents the frequencies of combinations, i.e $F[32242,12312]$ represents the number of observations for the 32242 12312 port interaction. $M \in {\rm I\!R}^{m \times n}$ represents a boolean matrix of whether the corresponding $Y$ values are missing. $Y[M]$ represents all of the missing values of $Y$. 
 
-The objective is $$min \sum_{i,j:F_{i,j} > 0} (Y_{i,j} - u_iDv^T_j)^2$$ where $UDV^T$ represents the singular value decomposition of $Y$.
-
-There are multiple steps to the matrix completion process:
-
-Least squares estimate with gaussian error model, for the same variance assumption between cells.
+The objective is $$min \sum_{i,j:F_{i,j} > 0} (Y_{i,j} - u_iDv^T_j)^2$$ where $UDV^T$ represents the singular value decomposition of $Y$. There are multiple steps to the matrix completion process:
 
 ### Anova Initial Imputation
 

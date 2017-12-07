@@ -6,6 +6,10 @@ The previous section's results reflected the need for an imputation strategy tha
 
 ## AMMI Model 
 
+Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination. Applying the same mathematical notation as the previous section, the model is formally expressed: $$y_{i,j} = u + a_i + b_j + \mathbf{u_i}D\mathbf{v_j^T} + \sigma_{i,j}\epsilon_{i,j}$$
+where $sigma_{i,j}$ is the variance for the $ith$ row $jth$ column in the ports combination matrix, and $\epsilon \sim N(0,1)$.
 
 ## Gibbs Sampling
+
+Following the application of the AMMI model, Gibbs Sampling is used to repeatedly generate samples from the statistical model, yielding an approximate value for each cell. 
 

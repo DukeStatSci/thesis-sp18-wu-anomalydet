@@ -181,12 +181,11 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1><span class="header-section-number">Chapter 1</span> Introduction</h1>
 <div id="anomaly-detection" class="section level2">
 <h2><span class="header-section-number">1.1</span> Anomaly Detection</h2>
-<p>Anomaly detection is a technique used to identify unusual patterns that do not conform to expected behavior, called outliers. It has many applications in business, from intrusion detection (identifying strange patterns in network traffic that could signal a hack) to system health monitoring (spotting a malignant tumor in an MRI scan), and from fraud detection in credit card transactions to fault detection in operating environments.</p>
-<p>Anomalies can be broadly categorized as:</p>
-<p>Point anomalies: A single instance of data is anomalous if it’s too far off from the rest. Business use case: Detecting credit card fraud based on “amount spent.”</p>
-<p>Contextual anomalies: The abnormality is context specific. This type of anomaly is common in time-series data. Business use case: Spending $100 on food every day during the holiday season is normal, but may be odd otherwise.</p>
-<p>Collective anomalies: A set of data instances collectively helps in detecting anomalies. Business use case: Someone is trying to copy data form a remote machine to a local host unexpectedly, an anomaly that would be flagged as a potential cyber attack.</p>
-<p>Anomaly detection is similar to — but not entirely the same as — noise removal and novelty detection. Novelty detection is concerned with identifying an unobserved pattern in new observations not included in training data — like a sudden interest in a new channel on YouTube during Christmas, for instance. Noise removal (NR) is the process of immunizing analysis from the occurrence of unwanted observations; in other words, removing noise from an otherwise meaningful signal.</p>
+<p>Anomaly detection is a technique used to identify unusual patterns that do not conform to expected behavior in a dataset, called outliers. Anomalies can be broadly categorized into three categories:</p>
+<p>Point anomalies: A single instance of data is anomalous if it’s too far off from the rest. For example detecting credit card fraud based on a single spending spree that represents the credit card being stolen and used.</p>
+<p>Contextual anomalies: The abnormality is context specific. This type of anomaly is common in time-series data. For instance, high spending on food and gifts every day during the holiday season is normal, but may be considered unusual otherwise.</p>
+<p>Collective anomalies: A set of data observations that when collectively assessed helps in detecting anomalies. For instance, repeated pings from a certain IP address to a port connection on a hosted network may be classified as a port scanner, which often preludes a network attack.</p>
+<!-- Anomaly detection is similar to — but not entirely the same as — noise removal and novelty detection. Novelty detection is concerned with identifying an unobserved pattern in new observations not included in training data — like a sudden interest in a new channel on YouTube during Christmas, for instance. Noise removal (NR) is the process of immunizing analysis from the occurrence of unwanted observations; in other words, removing noise from an otherwise meaningful signal.  -->
 </div>
 <div id="network-attacks" class="section level2">
 <h2><span class="header-section-number">1.2</span> Network Attacks</h2>

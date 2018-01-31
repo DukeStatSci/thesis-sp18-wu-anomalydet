@@ -10,11 +10,11 @@ committeemembertwo: 'Committeemember T. Name'
 dus: 'Mine Cetinkaya-Rundel'
 department: 'Department of Statistical Science'
 degree: 'Bachelor of Science in Statistical Science'
-title: 'Anomaly Detection Techniques Applied to Network Attacks'
+title: 'Tensor Completion Techniques For Anomaly Detection in Network Attacks'
 knit: "bookdown::render_book"
 site: bookdown::bookdown_site
 output: 
-  #thesisdowndss::thesis_pdf: default
+  thesisdowndss::thesis_pdf: default
   thesisdowndss::thesis_gitbook: default
 #  thesisdowndss::thesis_word: default
 #  thesisdowndss::thesis_epub: default

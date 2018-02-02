@@ -1,0 +1,8 @@
+# Modeling Port Relationships 
+
+## Motivation
+
+  Preliminary data analysis signaled that there may exist trends between different port combinations. For instance, a particular source and destination port may frequently contain large byte transactions in their connections. Devising a systematic way to identify these combinations may present outliers that can be further investigated for scanner behavior. 
+
+  Beginning the investigation requires the creation of a 2-dimensional matrix, $X \in \mathbb{R}_{10 \times 10}$ of the most common source and destination port combinations. Each cell, $y_{ij}$ in this matrix is of variable length and holds all of the data observations involving that particular source and destination port pairing $ij$.  
+

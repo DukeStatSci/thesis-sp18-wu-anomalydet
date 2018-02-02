@@ -362,25 +362,20 @@ loocv = function (S = 1000, k = 2, nrows = n_Sport, ncols = n_Dport, Y, M){
   return (list(Error = error, RMSE = rmse, Observations = n))
 }
 
-ranks = seq(1,10,1)
-#RMSEs = lapply(seq(1,10,1), function(k) loocv(250,k,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)$RMSE)
-RMSEs = c()
-for (k in ranks){
-  print (k)
-  cv = loocv(250,k,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
-  RMSEs = c(RMSEs, cv$RMSE)
-}
-plot(ranks, RMSEs)
-
-cv1 = loocv(250,1,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
-cv2 = loocv(250,2,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
-cv3 = loocv(250,3,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
-cv5 = loocv(250,5,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
-
-
-
-
-
+# ranks = seq(1,10,1)
+# #RMSEs = lapply(seq(1,10,1), function(k) loocv(250,k,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)$RMSE)
+# RMSEs = c()
+# for (k in ranks){
+#   print (k)
+#   cv = loocv(250,k,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
+#   RMSEs = c(RMSEs, cv$RMSE)
+# }
+# plot(ranks, RMSEs)
+# 
+# cv1 = loocv(250,1,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
+# cv2 = loocv(250,2,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
+# cv3 = loocv(250,3,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
+# cv5 = loocv(250,5,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)
 ```
 
 

@@ -47,3 +47,18 @@ Recall that in a traditional vectorized OLS, $y = X\beta + \sigma\epsilon$, wher
 Applying this formulation to the weighted least squares gives $y = X\beta + W^{-\frac{1}{2}}\epsilon$. Solving for the weighted least squares estimator gives $\hat \beta = (X^TWX)^{-1}X^TWy$. 
 
 Repeating this estimation technique across each slice of the tensor $a_i$, $b_j$, $c_k$ results in a completed model for $y_{ijk}$.
+
+
+## Motivation
+
+The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The following section constructs a statistical model that takes frequency of observations for each cell into account and repeatedly samples from that statistical model to complete the matrix. 
+
+## AMMI Model 
+
+Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination. Applying the same mathematical notation as the previous section, the model is formally expressed: $$y_{i,j} = u + a_i + b_j + \mathbf{u_i}D\mathbf{v_j^T} + \sigma_{i,j}\epsilon_{i,j}$$
+where $sigma_{i,j}$ is the variance for the $ith$ row $jth$ column in the ports combination matrix, and $\epsilon \sim N(0,1)$.
+
+## Gibbs Sampling
+
+Following the application of the AMMI model, Gibbs Sampling is used to repeatedly generate samples from the statistical model, yielding an approximate value for each cell. 
+

@@ -1,21 +1,18 @@
-# Imputing Port Connections 
+# Alternating Least Squares Applied to Matrix Slices
 
 ## Motivation 
 
-Following principal component analysis on the present ports combinations, the analysis shifts focus to the port combinations that are not present in the dataset. Imputing values for each of the four continuous features in the dataset for all possible source and destination port combinations yields a reasonable 
-expected value in each cell of the ports matrix that can then be compared to actual connection values when they are observed. Actual values that differ greatly from the imputed values are flagged as anomalies and require further investigation. 
-
-This results in a 3-dimensional matrix completion problem. The matrix dimensions are defined as the number of source ports by the number of destination ports by the number of continuous features observed in each transaction. Similar techniques were employed in the Netflix Challenge where top competitors used matrix completion to predict ratings for movies by users that had not watched the movie based on the other entries in the matrix of users and movies.
+The preliminary tensor imputation technique slices the tensor into four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}$. Each matrix has dimensions defined by the number of source ports by the number of destination ports. Each cell, $Y^{(k)}_{ij}$ contains the mean of the observations observed for continuous feature $k$ and source port $i$ destination port $j$. Each matrix will have its missing cells imputed with information from the rest of that matrix, and separately from information about the other matrices. The four completed matrices will then be recombined to create the tensor $Y$. Similar techniques for matrix completion were employed in the Netflix Challenge where top competitor predicted ratings for movies by users that had not watched the movie based on the other ratings in the matrix of users and movies.
 
 ## Matrix Completion Algorithm
 
-There are $m$ source ports and $n$ destination ports. $Y \in {\rm I\!R}^{m \times n}$, is the matrix that stores the means of the combinations of source ports and destination ports. $Y$ has missingness because not every source port interacts with every destination port. $F \in {\rm I\!R}^{m \times n}$ is a sparse matrix that represents the frequencies of combinations, i.e $F[32242,12312]$ represents the number of observations for the 32242 12312 port interaction. $M \in {\rm I\!R}^{m \times n}$ represents a boolean matrix of whether the corresponding $Y$ values are missing. $Y[M]$ represents all of the missing values of $Y$. 
+Each $Y^{(k)}$ has missingness because not every source port interacts with every destination port. $F \in {\rm I\!R}^{m \times n}$ is a sparse matrix that represents the frequencies of combinations, i.e $F[32242,12312]$ represents the number of observations for the 32242 12312 port interaction. $M \in {\rm I\!R}^{m \times n}$ represents a boolean matrix of whether the corresponding $Y$ values are missing. $Y^{(k)}[M]$ represents all of the missing values of $Y^{(k)}$. Moreover because each non-missing observation contains all four continuous features, $Y[M]$ represents all the missing values of $Y$.
 
-The objective is $$min \sum_{i,j:F_{i,j} > 0} (Y_{i,j} - u_iDv^T_j)^2$$ where $UDV^T$ represents the singular value decomposition of $Y$. There are multiple steps to the matrix completion process:
+The objective is $$min \sum_{i,j:F_{i,j} > 0} (Y^{(k)}_{i,j} - u^{(k)}_iD^{(k)}v^{(k)T}_j)^2$$ where $U^{(k)}D^{(k)}V^{(k)T}$ represents the singular value decomposition of $Y^{(k)}$. There are multiple steps to the matrix completion process:
 
 ### Anova Initial Imputation
 
-Impute the initial values for the missing $y_{i,j}$ observations $1 \leq i \leq m, 1 \leq j \leq n$: In general an additive model is applicable: $$y_{i,j} = \mu + a_i + b_j + \epsilon_{i,j}$$ where $\epsilon \in N(0,\sigma^2)$, $\mu$ is the overall mean, $a_i$ is the row mean, and $b_j$ is column mean. An analysis of variance (ANOVA) imputation is used to fill in the initial values, $y_{i,j}$. Ignoring the missing values for now, let $y_{..}$ denote the empirical overall mean, $y_{i.}$ denote the empirical row mean, and $y_{.j}$ denote the column mean. $$y_{i,j} = y_{..} + (y_{i.}-y{..}) + (y_{.j}-y_{..}) = y_{i.} + y_{.j} - y{..}$$
+Impute the initial values for the missing $y^{(k)}_{i,j}$ observations $1 \leq i \leq m, 1 \leq j \leq n$: In general an additive model is applicable: $$y^{(k)}_{i,j} = \mu^{(k)} + a^{(k)}_i + b^{(k)}_j + \epsilon^{(k)}_{i,j}$$ where $\epsilon^{(k)} \in N(0,\sigma^2)$, $\mu^{(k)}$ is the overall mean of $Y^{(k)}$, $a^{(k)}_i$ is the row mean, and $b^{(k)}_j$ is column mean. An analysis of variance (ANOVA) imputation is used to fill in the initial values, $y^{(k)}_{i,j}$. Ignoring the missing values for now, let $y_{..}$ denote the empirical overall mean, $y_{i.}$ denote the empirical row mean, and $y_{.j}$ denote the column mean. $$y_{i,j} = y_{..} + (y_{i.}-y{..}) + (y_{.j}-y_{..}) = y_{i.} + y_{.j} - y{..}$$
 
 ### Repeated Imputation
 

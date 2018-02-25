@@ -1,8 +1,163 @@
 # Modeling Port Relationships 
 
+```{r, include=FALSE}
+library(lattice)
+library(reshape)
+setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index")
+argus = readRDS("data/argus_complete.rds")
+means = readRDS("data/means.RDS")
+vars = readRDS("data/vars.RDS")
+freqs = readRDS("data/freqs.RDS")
+combos = readRDS("data/combos.RDS")
+
+n_Sport = 20
+n_Dport = 20
+
+#get freqs
+Sport_table = as.data.frame(table(argus$Sport))
+Sport_table = Sport_table[order(-Sport_table$Freq),]
+top_Sport = (head(Sport_table$Var1, n_Sport))
+
+#get freqs
+Dport_table = as.data.frame(table(argus$Dport))
+Dport_table = Dport_table[order(-Dport_table$Freq),]
+top_Dport = (head(Dport_table$Var1, n_Dport))
+```
+
 ## Motivation
 
   Preliminary data analysis signaled that there may exist trends between different port combinations. For instance, a particular source and destination port may frequently contain large byte transactions in their connections. Devising a systematic way to identify these combinations may present outliers that can be further investigated for scanner behavior. 
 
-  Beginning the investigation requires the creation of a 2-dimensional matrix, $X \in \mathbb{R}_{10 \times 10}$ of the most common source and destination port combinations. Each cell, $y_{ij}$ in this matrix is of variable length and holds all of the data observations involving that particular source and destination port pairing $ij$.  
+  This approach to the anomaly detection problem reduces the dataset to the values of the four continuous features, SrcBytes, SrcPkts, DstBytes, DstPkts, observed across different source port and destination port combinations. The data can be represented as a 3-dimensional tensor $Y \in \mathbb{R_{m \times n \times 4}}$ where $m$ represents the number of source ports, $n$ represents the number of destination ports, and $4$ accounts for the four continuous features in the dataset. Each cell, $y_{ijk}$, contains the mean of all the observations observed for source port, $i$, and destination port $j$. In the cases where the combination of $i$ and $j$ is not observed in the dataset, $y_{ijk}$ is missing.
+
+  The goal of this project is to devise an optimal strategy for imputing the missing cells in $Y$ to create the completed tensor $Y' \in \mathbb{R_{m \times n \times 4}}$. As new observations are observed for combinations of ports $i$ and $j$, the $y'_{ijk}$ values can be interpreted as an approximation for the expected behavior for that particular port combination. Observations with continuous features that are a certain threshold away from $y'_{ijk}$ may be marked as anomalies and investigated further.
+
+  Imputing values for each of the four continuous features in the dataset for all possible source and destination port combinations yields a reasonable expected value in each cell of the ports matrix that can then be compared to actual connection values when they are observed. New observations that differ greatly from the imputed values are flagged as anomalies and require further investigation. 
+
+## Tensor Properties
+
+The following properties of $Y$ inform the imputation strategies in following sections.
+
+### Correlations
+
+```{r, echo = FALSE}
+### CORRELATIONS
+kendall_cors = matrix(c(1.0000000, 0.7227563, 0.5729918, 0.6367907,
+                0.7227563, 1.0000000, 0.7425211, 0.8108184,
+                0.5729918, 0.7425211, 1.0000000, 0.8827988,
+                0.6367907, 0.8108184, 0.8827988, 1.0000000),
+                nrow = 4, ncol = 4)
+rownames(kendall_cors) = c("SrcBytes", "SrcPkts", "DstBytes", "DstPkts")
+colnames(kendall_cors) = c("SrcBytes", "SrcPkts", "DstBytes", "DstPkts")
+levelplot(kendall_cors, main = "Kendall Correlations Between Continuous 
+          Features", xlab = "", ylab = "")
+#continuous_data = subset(argus, select = c("SrcBytes", "SrcPkts", "DstBytes", "DstPkts"))
+#sub_data = continuous_data[1:50000,]
+#cor(continuous_data, method = "kendall")
+
+#           SrcBytes   SrcPkts  DstBytes   DstPkts
+# SrcBytes 1.0000000 0.7227563 0.5729918 0.6367907
+# SrcPkts  0.7227563 1.0000000 0.7425211 0.8108184
+# DstBytes 0.5729918 0.7425211 1.0000000 0.8827988
+# DstPkts  0.6367907 0.8108184 0.8827988 1.0000000
+
+```
+
+### Missingness
+
+```{r, echo = FALSE}
+### MISSINGNESS VISUALIZATIONS
+
+sum(apply(means, MARGIN = 1, FUN = function(x) length(x[is.na(x)])))
+
+missing = matrix(list(), nrow = n_Sport, ncol = n_Dport)
+dimnames(missing) = list(top_Sport, top_Dport)
+for (s in 1:n_Sport){
+  for (d in 1:n_Dport){
+    if(freqs[s,d] == 0){
+      missing[s,d] = 1
+    }
+    else{
+      missing[s,d] = 0
+    }
+  }
+}
+levelplot(missing,xlab = "Source Ports", ylab = "Destination Ports", 
+          main = "Missingness in Ports Matrix", col.regions=gray(0:1,1),cuts=1)
+```
+
+### Row and Column Properties
+
+```{r, echo = FALSE}
+### ROW MEANS/COL MEANS VISUALIZATION
+row_means = rowMeans(means, na.rm = TRUE)
+col_means = colMeans(means, na.rm = TRUE)
+
+par(mfrow=c(2,1))
+barplot(row_means, las=2, xlab = "Source Port", ylab = "Mean (SrcBytes)",
+        main = "Row Means of SrcBytes Matrix")
+barplot(col_means, las=2, xlab = "Destination Port", ylab = "Mean (SrcBytes)",
+        main = "Column Means of SrcBytes Matrix")
+```
+
+### Port Connections
+
+```{r, echo=FALSE}
+### PORTS NETWORK GRAPH
+library(igraph)
+# net = graph_from_adjacency_matrix(missing)
+# net <- simplify(net, remove.multiple = T, remove.loops = T) 
+# 
+# 
+# # Compute node degrees (#links) and use that to set node size:
+# deg <- degree(net, mode="all")
+# V(net)$size <- deg*3
+# # We could also use the audience size value:
+# V(net)$size <- V(net)$audience.size*0.6
+# 
+# E(net)$width <- E(net)$weight/6
+# #change arrow size and edge color:
+# E(net)$arrow.size <- .2
+# E(net)$edge.color <- "gray80"
+# plot(net, edge.arrow.size=.2, edge.color="orange",
+#      vertex.color="orange", vertex.frame.color="#ffffff",
+#      vertex.label.color="black") 
+
+
+# Dataframe way
+test = melt(means)
+test = na.omit(test)
+g = graph.data.frame(test)
+
+V(g)$type <- 1
+V(g)[name %in% top_Dport]$type <- 2
+V(g)[name %in% top_Sport]$type <- 3
+deg <- degree(g, mode="all")
+V(g)$size <- deg
+E(g)$width <- E(g)$weight * 3
+E(g)$arrow.size <- .2
+g = simplify(g, remove.multiple = T, remove.loops = T) 
+shape <- c("circle", "square", "circle")
+col <- c("orange", "steelblue","red")
+plot(g,
+     vertex.color = col[V(g)$type],
+     vertex.shape = shape[V(g)$type],
+     edge.arrow.size = 0.2
+)
+```
+
+### Matrix Slice Properties
+
+
+
+```{r}
+### MATRIX VISUALIZATIONS
+# https://stackoverflow.com/questions/5453336/plot-correlation-matrix-into-a-graph
+# levelplot(means, xlab = "Source Ports", ylab = "Destination Ports", 
+#           main = "Means of SrcBytes By Ports", 
+#           col.regions=rgb.palette(120))
+levelplot(freqs, xlab = "Source Ports", ylab = "Destination Ports",  
+          col.regions = heat.colors(16)[length(heat.colors(16)):1],
+          main = "Sample Sizes of Port Combinations")
+```
 

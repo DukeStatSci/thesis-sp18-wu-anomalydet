@@ -5,12 +5,6 @@ output:
 ---
 # Tensor Completion
 
-## Motivation
-
-This approach to the anomaly detection problem reduces the dataset to the values of the four continuous features, SrcBytes, SrcPkts, DstBytes, DstPkts, observed across different source port and destination port combinations. The data can be represented as a 3-dimensional tensor $Y \in \mathbb{R_{m \times n \times 4}}$ where $m$ represents the number of source ports, $n$ represents the number of destination ports, and $4$ accounts for the four continuous features in the dataset. Each cell, $y_{ijk}$, contains the mean of all the observations observed for source port, $i$, and destination port $j$. In the cases where the combination of $i$ and $j$ is not observed in the dataset, $y_{ijk}$ is missing.
-
-The goal of this project is to devise an optimal strategy for imputing the missing cells in $Y$ to create the completed tensor $Y' \in \mathbb{R_{m \times n \times 4}}$. As new observations are observed for combinations of ports $i$ and $j$, the $y'_{ijk}$ values can be interpreted as an approximation for the expected behavior for that particular port combination. Observations with continuous features that are a certain threshold away from $y'_{ijk}$ may be marked as anomalies and investigated further.
-
 ## Imputation Strategy
 
 The imputation strategy focuses on finding a low rank approximation for $Y$ when decomposing the tensor.
@@ -21,7 +15,7 @@ The CP decomposition expresses the tensor as: $$Y = \sum_{r=1}^Ru_r \cdotp v_r \
 
 ### Variable Sample Sizes
 
-A traditional approach to tensor completion involves using alternating least squares regression to impute the missing values after populating them with some initial values. The next section applies this approach to a 2-dimensional $m \times n$ tensor that represents a cross-section slice of $Y$ that only includes one of the four continuous features. 
+A traditional approach to tensor completion involves using alternating least squares regression to impute the missing values after populating them with some initial values. The previous section applies this approach to a 2-dimensional $m \times n$ tensor that represents a cross-section slice of $Y$ that only includes one of the four continuous features. 
 *include als section here, related work: https://arxiv.org/abs/1410.2596 (hastie fast als), application netflix challenge*
 
 While this approach yields a completed tensor, it does not account for the fact that the means in each cell are calculated from a variable number of observations. Furthermore it is not necessarily true that $n_{ijk} = n_{i'j'k'}$ or $\sigma^2_{ijk} = \sigma^2_{i'j'k'}$ for $i \neq i', j \neq j', k \neq k'$. 
@@ -48,17 +42,18 @@ Applying this formulation to the weighted least squares gives $y = X\beta + W^{-
 
 Repeating this estimation technique across each slice of the tensor $a_i$, $b_j$, $c_k$ results in a completed model for $y_{ijk}$.
 
+<!-- ## Motivation -->
 
-## Motivation
+<!-- The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The following section constructs a statistical model that takes frequency of observations for each cell into account and repeatedly samples from that statistical model to complete the matrix.  -->
 
-The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The following section constructs a statistical model that takes frequency of observations for each cell into account and repeatedly samples from that statistical model to complete the matrix. 
+<!-- ## AMMI Model  -->
 
-## AMMI Model 
-
-Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination. Applying the same mathematical notation as the previous section, the model is formally expressed: $$y_{i,j} = u + a_i + b_j + \mathbf{u_i}D\mathbf{v_j^T} + \sigma_{i,j}\epsilon_{i,j}$$
-where $sigma_{i,j}$ is the variance for the $ith$ row $jth$ column in the ports combination matrix, and $\epsilon \sim N(0,1)$.
+<!-- Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination. Applying the same mathematical notation as the previous section, the model is formally expressed: $$y_{i,j} = u + a_i + b_j + \mathbf{u_i}D\mathbf{v_j^T} + \sigma_{i,j}\epsilon_{i,j}$$ -->
+<!-- where $sigma_{i,j}$ is the variance for the $ith$ row $jth$ column in the ports combination matrix, and $\epsilon \sim N(0,1)$. -->
 
 ## Gibbs Sampling
 
-Following the application of the AMMI model, Gibbs Sampling is used to repeatedly generate samples from the statistical model, yielding an approximate value for each cell. 
+Following the formulation of the model, a Gibbs Sampling algorithm is used to repeatedly generate samples from the full conditional of each parameter in the model statistical model, which iteratively creates an approximate value for each cell. 
+
+
 

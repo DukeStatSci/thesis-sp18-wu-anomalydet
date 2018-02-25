@@ -381,62 +381,141 @@ connections. Devising a systematic way to identify these combinations
 may present outliers that can be further investigated for scanner
 behavior.
 
-Beginning the investigation requires the creation of a 2-dimensional
-matrix, \(X \in \mathbb{R}_{10 \times 10}\) of the most common source
-and destination port combinations. Each cell, \(y_{ij}\) in this matrix
-is of variable length and holds all of the data observations involving
-that particular source and destination port pairing \(ij\).
+This approach to the anomaly detection problem reduces the dataset to
+the values of the four continuous features, SrcBytes, SrcPkts, DstBytes,
+DstPkts, observed across different source port and destination port
+combinations. The data can be represented as a 3-dimensional tensor
+\(Y \in \mathbb{R_{m \times n \times 4}}\) where \(m\) represents the
+number of source ports, \(n\) represents the number of destination
+ports, and \(4\) accounts for the four continuous features in the
+dataset. Each cell, \(y_{ijk}\), contains the mean of all the
+observations observed for source port, \(i\), and destination port
+\(j\). In the cases where the combination of \(i\) and \(j\) is not
+observed in the dataset, \(y_{ijk}\) is missing.
 
-\chapter{Imputing Port Connections}\label{imputing-port-connections}
+The goal of this project is to devise an optimal strategy for imputing
+the missing cells in \(Y\) to create the completed tensor
+\(Y' \in \mathbb{R_{m \times n \times 4}}\). As new observations are
+observed for combinations of ports \(i\) and \(j\), the \(y'_{ijk}\)
+values can be interpreted as an approximation for the expected behavior
+for that particular port combination. Observations with continuous
+features that are a certain threshold away from \(y'_{ijk}\) may be
+marked as anomalies and investigated further.
+
+Imputing values for each of the four continuous features in the dataset
+for all possible source and destination port combinations yields a
+reasonable expected value in each cell of the ports matrix that can then
+be compared to actual connection values when they are observed. New
+observations that differ greatly from the imputed values are flagged as
+anomalies and require further investigation.
+
+\section{Tensor Properties}\label{tensor-properties}
+
+The following properties of \(Y\) inform the imputation strategies in
+following sections.
+
+\subsection{Correlations}\label{correlations}
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+\subsection{Missingness}\label{missingness}
+\begin{verbatim}
+[1] 295
+\end{verbatim}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\subsection{Row and Column Properties}\label{row-and-column-properties}
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\subsection{Port Connections}\label{port-connections}
+\begin{verbatim}
+
+Attaching package: 'igraph'
+\end{verbatim}
+\begin{verbatim}
+The following objects are masked from 'package:dplyr':
+
+    as_data_frame, groups, union
+\end{verbatim}
+\begin{verbatim}
+The following objects are masked from 'package:stats':
+
+    decompose, spectrum
+\end{verbatim}
+\begin{verbatim}
+The following object is masked from 'package:base':
+
+    union
+\end{verbatim}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\subsection{Matrix Slice Properties}\label{matrix-slice-properties}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{### MATRIX VISUALIZATIONS}
+\CommentTok{# https://stackoverflow.com/questions/5453336/plot-correlation-matrix-into-a-graph}
+\CommentTok{# levelplot(means, xlab = "Source Ports", ylab = "Destination Ports", }
+\CommentTok{#           main = "Means of SrcBytes By Ports", }
+\CommentTok{#           col.regions=rgb.palette(120))}
+\KeywordTok{levelplot}\NormalTok{(freqs, }\DataTypeTok{xlab =} \StringTok{"Source Ports"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Destination Ports"}\NormalTok{,  }
+          \DataTypeTok{col.regions =} \KeywordTok{heat.colors}\NormalTok{(}\DecValTok{16}\NormalTok{)[}\KeywordTok{length}\NormalTok{(}\KeywordTok{heat.colors}\NormalTok{(}\DecValTok{16}\NormalTok{)):}\DecValTok{1}\NormalTok{],}
+          \DataTypeTok{main =} \StringTok{"Sample Sizes of Port Combinations"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\chapter{Alternating Least Squares Applied to Matrix
+Slices}\label{alternating-least-squares-applied-to-matrix-slices}
 
 \section{Motivation}\label{motivation-1}
 
-Following principal component analysis on the present ports
-combinations, the analysis shifts focus to the port combinations that
-are not present in the dataset. Imputing values for each of the four
-continuous features in the dataset for all possible source and
-destination port combinations yields a reasonable expected value in each
-cell of the ports matrix that can then be compared to actual connection
-values when they are observed. Actual values that differ greatly from
-the imputed values are flagged as anomalies and require further
-investigation.
-
-This results in a 3-dimensional matrix completion problem. The matrix
-dimensions are defined as the number of source ports by the number of
-destination ports by the number of continuous features observed in each
-transaction. Similar techniques were employed in the Netflix Challenge
-where top competitors used matrix completion to predict ratings for
-movies by users that had not watched the movie based on the other
-entries in the matrix of users and movies.
+The preliminary tensor imputation technique slices the tensor into four
+separate matrices,
+\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}\). Each
+matrix has dimensions defined by the number of source ports by the
+number of destination ports. Each cell, \(Y^{(k)}_{ij}\) contains the
+mean of the observations observed for continuous feature \(k\) and
+source port \(i\) destination port \(j\). Each matrix will have its
+missing cells imputed with information from the rest of that matrix, and
+separately from information about the other matrices. The four completed
+matrices will then be recombined to create the tensor \(Y\). Similar
+techniques for matrix completion were employed in the Netflix Challenge
+where top competitor predicted ratings for movies by users that had not
+watched the movie based on the other ratings in the matrix of users and
+movies.
 
 \section{Matrix Completion Algorithm}\label{matrix-completion-algorithm}
 
-There are \(m\) source ports and \(n\) destination ports.
-\(Y \in {\rm I\!R}^{m \times n}\), is the matrix that stores the means
-of the combinations of source ports and destination ports. \(Y\) has
-missingness because not every source port interacts with every
-destination port. \(F \in {\rm I\!R}^{m \times n}\) is a sparse matrix
-that represents the frequencies of combinations, i.e \(F[32242,12312]\)
-represents the number of observations for the 32242 12312 port
-interaction. \(M \in {\rm I\!R}^{m \times n}\) represents a boolean
-matrix of whether the corresponding \(Y\) values are missing. \(Y[M]\)
-represents all of the missing values of \(Y\).
+Each \(Y^{(k)}\) has missingness because not every source port interacts
+with every destination port. \(F \in {\rm I\!R}^{m \times n}\) is a
+sparse matrix that represents the frequencies of combinations, i.e
+\(F[32242,12312]\) represents the number of observations for the 32242
+12312 port interaction. \(M \in {\rm I\!R}^{m \times n}\) represents a
+boolean matrix of whether the corresponding \(Y\) values are missing.
+\(Y^{(k)}[M]\) represents all of the missing values of \(Y^{(k)}\).
+Moreover because each non-missing observation contains all four
+continuous features, \(Y[M]\) represents all the missing values of
+\(Y\).
 
-The objective is \[min \sum_{i,j:F_{i,j} > 0} (Y_{i,j} - u_iDv^T_j)^2\]
-where \(UDV^T\) represents the singular value decomposition of \(Y\).
-There are multiple steps to the matrix completion process:
+The objective is
+\[min \sum_{i,j:F_{i,j} > 0} (Y^{(k)}_{i,j} - u^{(k)}_iD^{(k)}v^{(k)T}_j)^2\]
+where \(U^{(k)}D^{(k)}V^{(k)T}\) represents the singular value
+decomposition of \(Y^{(k)}\). There are multiple steps to the matrix
+completion process:
 
 \subsection{Anova Initial Imputation}\label{anova-initial-imputation}
 
-Impute the initial values for the missing \(y_{i,j}\) observations
+Impute the initial values for the missing \(y^{(k)}_{i,j}\) observations
 \(1 \leq i \leq m, 1 \leq j \leq n\): In general an additive model is
-applicable: \[y_{i,j} = \mu + a_i + b_j + \epsilon_{i,j}\] where
-\(\epsilon \in N(0,\sigma^2)\), \(\mu\) is the overall mean, \(a_i\) is
-the row mean, and \(b_j\) is column mean. An analysis of variance
-(ANOVA) imputation is used to fill in the initial values, \(y_{i,j}\).
-Ignoring the missing values for now, let \(y_{..}\) denote the empirical
-overall mean, \(y_{i.}\) denote the empirical row mean, and \(y_{.j}\)
-denote the column mean.
+applicable:
+\[y^{(k)}_{i,j} = \mu^{(k)} + a^{(k)}_i + b^{(k)}_j + \epsilon^{(k)}_{i,j}\]
+where \(\epsilon^{(k)} \in N(0,\sigma^2)\), \(\mu^{(k)}\) is the overall
+mean of \(Y^{(k)}\), \(a^{(k)}_i\) is the row mean, and \(b^{(k)}_j\) is
+column mean. An analysis of variance (ANOVA) imputation is used to fill
+in the initial values, \(y^{(k)}_{i,j}\). Ignoring the missing values
+for now, let \(y_{..}\) denote the empirical overall mean, \(y_{i.}\)
+denote the empirical row mean, and \(y_{.j}\) denote the column mean.
 \[y_{i,j} = y_{..} + (y_{i.}-y{..}) + (y_{.j}-y_{..}) = y_{i.} + y_{.j} - y{..}\]
 
 \subsection{Repeated Imputation}\label{repeated-imputation}
@@ -714,6 +793,15 @@ number of observations not missing.
 Loading required package: Matrix
 \end{verbatim}
 \begin{verbatim}
+
+Attaching package: 'Matrix'
+\end{verbatim}
+\begin{verbatim}
+The following object is masked from 'package:reshape':
+
+    expand
+\end{verbatim}
+\begin{verbatim}
 Loaded softImpute 1.4
 \end{verbatim}
 \begin{Shaded}
@@ -722,16 +810,21 @@ Loaded softImpute 1.4
 \end{Highlighting}
 \end{Shaded}
 \begin{verbatim}
-1 : obj 112760067 ratio 8975505008 
-2 : obj 216079.2 ratio 0.0008674132 
-3 : obj 177462.3 ratio 0.0001521115 
-4 : obj 151720.3 ratio 0.000132054 
-5 : obj 125031.4 ratio 0.0001286754 
-6 : obj 104025.9 ratio 8.711663e-05 
-7 : obj 93028.7 ratio 4.017977e-05 
-8 : obj 88549.52 ratio 1.563999e-05 
-9 : obj 86758.93 ratio 6.471911e-06 
-final SVD: obj 86151.56 
+1 : obj 118447630 ratio 8862771621 
+2 : obj 338300.9 ratio 0.002398703 
+3 : obj 261856.6 ratio 0.0002617471 
+4 : obj 216131.7 ratio 0.0003460135 
+5 : obj 168096 ratio 0.0002697307 
+6 : obj 139246.7 ratio 0.0001180686 
+7 : obj 124787.1 ratio 6.149304e-05 
+8 : obj 115182.9 ratio 4.595611e-05 
+9 : obj 107326.8 ratio 3.952473e-05 
+10 : obj 100581.7 ratio 3.386247e-05 
+11 : obj 95056.82 ratio 2.698493e-05 
+12 : obj 90911.68 ratio 1.958786e-05 
+13 : obj 88054.62 ratio 1.316015e-05 
+14 : obj 86180.49 ratio 8.536606e-06 
+final SVD: obj 84890.87 
 \end{verbatim}
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -739,7 +832,7 @@ final SVD: obj 86151.56
 \end{Highlighting}
 \end{Shaded}
 \begin{verbatim}
-[1] 164047.611  12792.346   8080.531
+[1] 163274.716  17272.466   7494.707
 \end{verbatim}
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -747,14 +840,14 @@ final SVD: obj 86151.56
 \KeywordTok{plot}\NormalTok{(ports_mean_matrix[!}\KeywordTok{is.na}\NormalTok{(ports_mean_matrix)], filled[!}\KeywordTok{is.na}\NormalTok{(ports_mean_matrix)])}
 \end{Highlighting}
 \end{Shaded}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-9-1.pdf}
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{plot}\NormalTok{(ports_mean_matrix[!}\KeywordTok{is.na}\NormalTok{(ports_mean_matrix)], filled[!}\KeywordTok{is.na}\NormalTok{(ports_mean_matrix)],}
      \DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{5000}\NormalTok{), }\DataTypeTok{ylim =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{5000}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-3-2.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-9-2.pdf}
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{####Eckhart Young Theorem Implementation, Best Rank k Approximation####}
@@ -889,29 +982,6 @@ variable number of observations in each cell.
 
 \chapter{Tensor Completion}\label{tensor-completion}
 
-\section{Motivation}\label{motivation-2}
-
-This approach to the anomaly detection problem reduces the dataset to
-the values of the four continuous features, SrcBytes, SrcPkts, DstBytes,
-DstPkts, observed across different source port and destination port
-combinations. The data can be represented as a 3-dimensional tensor
-\(Y \in \mathbb{R_{m \times n \times 4}}\) where \(m\) represents the
-number of source ports, \(n\) represents the number of destination
-ports, and \(4\) accounts for the four continuous features in the
-dataset. Each cell, \(y_{ijk}\), contains the mean of all the
-observations observed for source port, \(i\), and destination port
-\(j\). In the cases where the combination of \(i\) and \(j\) is not
-observed in the dataset, \(y_{ijk}\) is missing.
-
-The goal of this project is to devise an optimal strategy for imputing
-the missing cells in \(Y\) to create the completed tensor
-\(Y' \in \mathbb{R_{m \times n \times 4}}\). As new observations are
-observed for combinations of ports \(i\) and \(j\), the \(y'_{ijk}\)
-values can be interpreted as an approximation for the expected behavior
-for that particular port combination. Observations with continuous
-features that are a certain threshold away from \(y'_{ijk}\) may be
-marked as anomalies and investigated further.
-
 \section{Imputation Strategy}\label{imputation-strategy}
 
 The imputation strategy focuses on finding a low rank approximation for
@@ -933,10 +1003,10 @@ where \(lambda_r\) is the regularization penalty.
 
 A traditional approach to tensor completion involves using alternating
 least squares regression to impute the missing values after populating
-them with some initial values. The next section applies this approach to
-a 2-dimensional \(m \times n\) tensor that represents a cross-section
-slice of \(Y\) that only includes one of the four continuous features.
-\emph{include als section here, related work:
+them with some initial values. The previous section applies this
+approach to a 2-dimensional \(m \times n\) tensor that represents a
+cross-section slice of \(Y\) that only includes one of the four
+continuous features. \emph{include als section here, related work:
 \url{https://arxiv.org/abs/1410.2596} (hastie fast als), application
 netflix challenge}
 
@@ -995,35 +1065,11 @@ least squares estimator gives \(\hat \beta = (X^TWX)^{-1}X^TWy\).
 Repeating this estimation technique across each slice of the tensor
 \(a_i\), \(b_j\), \(c_k\) results in a completed model for \(y_{ijk}\).
 
-\section{Motivation}\label{motivation-3}
-
-The previous section's results reflected the need for an imputation
-strategy that accounted for the variability in the number of
-observations observed for each port combination when imputing that
-particular combination's cell. The following section constructs a
-statistical model that takes frequency of observations for each cell
-into account and repeatedly samples from that statistical model to
-complete the matrix.
-
-\section{AMMI Model}\label{ammi-model}
-
-Additive Main Effects and Multiplicative Interaction Models (AMMI
-models) provide a defined statistical model for each cell in the ports
-matrix. In particular, the model combines the additive effects of the
-initial ANOVA imputation with the multiplicative effects yielded from
-singular value decomposition described in the previous section. More
-importantly, the model also includes a variance term for each cell that
-takes into account the differing frequency of observations in each port
-combination. Applying the same mathematical notation as the previous
-section, the model is formally expressed:
-\[y_{i,j} = u + a_i + b_j + \mathbf{u_i}D\mathbf{v_j^T} + \sigma_{i,j}\epsilon_{i,j}\]
-where \(sigma_{i,j}\) is the variance for the \(ith\) row \(jth\) column
-in the ports combination matrix, and \(\epsilon \sim N(0,1)\).
-
 \section{Gibbs Sampling}\label{gibbs-sampling}
 
-Following the application of the AMMI model, Gibbs Sampling is used to
-repeatedly generate samples from the statistical model, yielding an
+Following the formulation of the model, a Gibbs Sampling algorithm is
+used to repeatedly generate samples from the full conditional of each
+parameter in the model statistical model, which iteratively creates an
 approximate value for each cell.
 
 \chapter*{Conclusion}\label{conclusion}

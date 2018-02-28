@@ -68,7 +68,7 @@ loocv = function (S = 1000, k = 2, nrows = nrows, ncols = ncols, Y, M){
   return (list(Error = error, RMSE = rmse, Observations = n))
 }
 
-RMSEs = lapply(seq(1,10,1), function(k) loocv(250,k, 20, 20, Y, M)$RMSE)
+RMSEs = lapply(seq(1,8,1), function(k) loocv(250,k, nrow(Y), ncol(Y), Y, M)$RMSE)
 
 # generate m x n matrix with rank r, add noise
 generate_low_rank_matrix = function(m, n, r, noise = FALSE){

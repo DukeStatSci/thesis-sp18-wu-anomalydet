@@ -1,5 +1,7 @@
-setwd("~/Desktop/Stats Thesis/")
-argus = readRDS("Dataset/argus_complete.rds")
+# setwd("~/Desktop/Stats Thesis/")
+# argus = readRDS("Dataset/argus_complete.rds")
+setwd("C:/Users/Admin/Desktop/thesis-sp18-wu-anomalydet/index")
+argus = readRDS("data/argus_complete.rds")
 
 #matrix parameters
 n_Sport = 100
@@ -33,7 +35,7 @@ for (s in 1:n_Sport){
   for (d in 1:n_Dport){
     combination = argus[is.element(argus$Sport, top_Sport[s])
                         & is.element(argus$Dport, top_Dport[d]),]
-    obs = combination$SrcBytes
+    obs = combination$DstPkts
     n_obs = length(obs) #ignores NA values
     if (n_obs > 0){
       #obs = nscore(obs)$nscore #normal transformation
@@ -66,6 +68,56 @@ for (s in 1:n_Sport){
     }
   }
 }
+
+
+### Filtering NA's
+Y = Y[, colSums(is.na(Y)) != nrow(Y)] #remove NA cols
+Y = Y[rowSums(is.na(Y)) != ncol(Y),] #remove NA rows
+## REMOVING FULL 0 COLUMNS FROM MATRICES
+M = M[ , !apply(M==0,2,all)]
+M = M[ !apply(M==0,1,all) , ]
+V = V[, colSums(is.na(V)) != nrow(V)] #remove NA cols
+V = V[rowSums(is.na(V)) != ncol(V),]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # #untuned ALS using softimpute
 # library(softImpute)

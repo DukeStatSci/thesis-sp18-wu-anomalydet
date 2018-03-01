@@ -393,8 +393,8 @@ observations observed for source port, \(i\), and destination port
 \(j\). In the cases where the combination of \(i\) and \(j\) is not
 observed in the dataset, \(y_{ijk}\) is missing.
 
-The goal of this project is to devise an optimal strategy for imputing
-the missing cells in \(Y\) to create the completed tensor
+The goal of this paper is to devise an optimal strategy for imputing the
+missing cells in \(Y\) to create the completed tensor
 \(Y' \in \mathbb{R_{m \times n \times 4}}\). As new observations are
 observed for combinations of ports \(i\) and \(j\), the \(y'_{ijk}\)
 values can be interpreted as an approximation for the expected behavior
@@ -418,55 +418,55 @@ following sections.
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-2-1.pdf}
 
+The matrix above describes the Kendall rank correlations (commonly
+referred to as Kendall's tau coefficent) between the four continuous
+features in the dataset.
+
+Intuitively, the Kendall correlation between two features will be high
+when observations have a similar rank (i.e.~relative position label of
+observations within the variable: 1st, 2nd, 3rd, etc.) between the two
+variables, and low when observations have a dissimilar rank between the
+two variables. The range of correlations is {[}-1, 1{]}. Kendall
+correlation was selected as a measure because it evaluates ranks between
+observations, as opposed to Pearson, which is more susceptible to
+outliers in the dataset (large byte and packet observations in the
+continuous feautres skewed the Pearson measures).
+
 \subsection{Missingness}\label{missingness}
 \begin{verbatim}
 [1] 295
 \end{verbatim}
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
 
+The above matrix represents the missingness in the port combinations for
+pairings of the top 20 most used source ports and destination ports. The
+black cells represent missingness; of the 400 cells in the matrix, 295
+(73.75\%) of cells are missing observations.
+
 \subsection{Row and Column Properties}\label{row-and-column-properties}
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
 
+The bar plots above represent the row and column means of the continuous
+features for each slice of the tensor. These row means and column means
+inform imputation techniques for the missing cells within those
+respective rows and columns. COMMENT ON DISPROPORTIONATE MEANS BASED ON
+MISSING VARIANCES
+
 \subsection{Port Connections}\label{port-connections}
-\begin{verbatim}
 
-Attaching package: 'igraph'
-\end{verbatim}
-\begin{verbatim}
-The following objects are masked from 'package:dplyr':
-
-    as_data_frame, groups, union
-\end{verbatim}
-\begin{verbatim}
-The following objects are masked from 'package:stats':
-
-    decompose, spectrum
-\end{verbatim}
-\begin{verbatim}
-The following object is masked from 'package:base':
-
-    union
-\end{verbatim}
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
 
+Describe Ports network graph
+
 \subsection{Matrix Slice Properties}\label{matrix-slice-properties}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{### MATRIX VISUALIZATIONS}
-\CommentTok{# https://stackoverflow.com/questions/5453336/plot-correlation-matrix-into-a-graph}
-\CommentTok{# levelplot(means, xlab = "Source Ports", ylab = "Destination Ports", }
-\CommentTok{#           main = "Means of SrcBytes By Ports", }
-\CommentTok{#           col.regions=rgb.palette(120))}
-\KeywordTok{levelplot}\NormalTok{(freqs, }\DataTypeTok{xlab =} \StringTok{"Source Ports"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Destination Ports"}\NormalTok{,  }
-          \DataTypeTok{col.regions =} \KeywordTok{heat.colors}\NormalTok{(}\DecValTok{16}\NormalTok{)[}\KeywordTok{length}\NormalTok{(}\KeywordTok{heat.colors}\NormalTok{(}\DecValTok{16}\NormalTok{)):}\DecValTok{1}\NormalTok{],}
-          \DataTypeTok{main =} \StringTok{"Sample Sizes of Port Combinations"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
+
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-6-1.pdf}
 
-\chapter{Alternating Least Squares Applied to Matrix
-Slices}\label{alternating-least-squares-applied-to-matrix-slices}
+Variance in sample size 0 to 35000
+
+\chapter{Alternating Least Squares Applied to Two Dimensional
+Matrices}\label{alternating-least-squares-applied-to-two-dimensional-matrices}
 
 \section{Motivation}\label{motivation-1}
 
@@ -546,132 +546,7 @@ convergence criterion is invariate to a scale change in the matrix
 itself.
 
 \subsection{Implementation}\label{implementation}
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{#matrix parameters}
-\NormalTok{n_Sport =}\StringTok{ }\DecValTok{20}
-\NormalTok{n_Dport =}\StringTok{ }\DecValTok{20}
 
-\CommentTok{#get freqs}
-\NormalTok{Sport_table =}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{table}\NormalTok{(argus$Sport))}
-\NormalTok{Sport_table =}\StringTok{ }\NormalTok{Sport_table[}\KeywordTok{order}\NormalTok{(-Sport_table$Freq),]}
-\NormalTok{top_Sport =}\StringTok{ }\NormalTok{(}\KeywordTok{head}\NormalTok{(Sport_table$Var1, n_Sport))}
-
-\CommentTok{#get freqs}
-\NormalTok{Dport_table =}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{table}\NormalTok{(argus$Dport))}
-\NormalTok{Dport_table =}\StringTok{ }\NormalTok{Dport_table[}\KeywordTok{order}\NormalTok{(-Dport_table$Freq),]}
-\NormalTok{top_Dport =}\StringTok{ }\NormalTok{(}\KeywordTok{head}\NormalTok{(Dport_table$Var1, n_Dport))}
-
-\CommentTok{#create starting matrices}
-\NormalTok{ports_combo_matrix =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{list}\NormalTok{(), }\DataTypeTok{nrow =} \NormalTok{n_Sport, }\DataTypeTok{ncol =} \NormalTok{n_Dport)}
-\KeywordTok{dimnames}\NormalTok{(ports_combo_matrix) =}\StringTok{ }\KeywordTok{list}\NormalTok{(top_Sport, top_Dport)}
-
-\NormalTok{ports_freq_matrix =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DataTypeTok{nrow =} \NormalTok{n_Sport, }\DataTypeTok{ncol =} \NormalTok{n_Dport)}
-\KeywordTok{dimnames}\NormalTok{(ports_freq_matrix) =}\StringTok{ }\KeywordTok{list}\NormalTok{(top_Sport, top_Dport)}
-
-\CommentTok{#fill the ports_combo_matrix and ports_freq_matrix}
-\NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-  \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-    \NormalTok{combination =}\StringTok{ }\NormalTok{argus[}\KeywordTok{is.element}\NormalTok{(argus$Sport, top_Sport[s])}
-                        \NormalTok{&}\StringTok{ }\KeywordTok{is.element}\NormalTok{(argus$Dport, top_Dport[d]),]}
-    \NormalTok{obs =}\StringTok{ }\NormalTok{combination$SrcBytes}
-    \NormalTok{n_obs =}\StringTok{ }\KeywordTok{length}\NormalTok{(obs) }\CommentTok{#ignores NA values}
-    \NormalTok{if (n_obs >}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-      \NormalTok{obs =}\StringTok{ }\KeywordTok{nscore}\NormalTok{(obs)$nscore }\CommentTok{#normal transformation}
-      \NormalTok{for (i in }\DecValTok{1}\NormalTok{:n_obs)\{}
-        \NormalTok{ports_combo_matrix[[s,d]] =}\StringTok{ }\KeywordTok{c}\NormalTok{(ports_combo_matrix[[s,d]],obs[i]) }
-        \CommentTok{#O(1) time to append values to a list?}
-        \NormalTok{ports_freq_matrix[s,d] =}\StringTok{ }\NormalTok{ports_freq_matrix[s,d] +}\StringTok{ }\DecValTok{1}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-\NormalTok{\}}
-
-\CommentTok{#create mean and variance matrix}
-\NormalTok{ports_mean_matrix =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =} \NormalTok{n_Sport, }\DataTypeTok{ncol =} \NormalTok{n_Dport)}
-\KeywordTok{dimnames}\NormalTok{(ports_mean_matrix) =}\StringTok{ }\KeywordTok{list}\NormalTok{(top_Sport, top_Dport)}
-
-\NormalTok{ports_variance_matrix =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =} \NormalTok{n_Sport, }\DataTypeTok{ncol =} \NormalTok{n_Dport)}
-\KeywordTok{dimnames}\NormalTok{(ports_variance_matrix) =}\StringTok{ }\KeywordTok{list}\NormalTok{(top_Sport, top_Dport)}
-
-\CommentTok{#fill mean and variance matrix}
-\NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-  \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-    \NormalTok{if (ports_freq_matrix[s,d] ==}\StringTok{ }\DecValTok{1}\NormalTok{)\{}
-      \NormalTok{ports_mean_matrix[s,d] =}\StringTok{ }\NormalTok{ports_combo_matrix[[s,d]]}
-      \NormalTok{ports_variance_matrix[s,d] =}\StringTok{ }\DecValTok{0}
-    \NormalTok{\}}
-    \NormalTok{else if (ports_freq_matrix[s,d] >}\StringTok{ }\DecValTok{1}\NormalTok{)\{}
-      \NormalTok{ports_mean_matrix[s,d] =}\StringTok{ }\KeywordTok{mean}\NormalTok{(ports_combo_matrix[[s,d]])}
-      \NormalTok{ports_variance_matrix[s,d] =}\StringTok{ }\KeywordTok{var}\NormalTok{(ports_combo_matrix[[s,d]])}
-    \NormalTok{\}}
-  \NormalTok{\}}
-\NormalTok{\}}
-
-\NormalTok{####Eckhart Young Theorem Implementation, Best Rank k Approximation####}
-\NormalTok{matrix_complete =}\StringTok{ }\NormalTok{function(}\DataTypeTok{S =} \DecValTok{1000}\NormalTok{, }\DataTypeTok{k =} \DecValTok{2}\NormalTok{, n_Sport, n_Dport, Y, M)\{}
-  \NormalTok{S =}\StringTok{ }\DecValTok{1000}
-  \NormalTok{k =}\StringTok{ }\DecValTok{2}
-  \NormalTok{Y_imputed =}\StringTok{ }\NormalTok{Y}
-  \CommentTok{#calculate overall mean}
-  \NormalTok{n =}\StringTok{ }\DecValTok{0}
-  \NormalTok{sum =}\StringTok{ }\DecValTok{0}
-  \NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-    \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-      \NormalTok{if (M[s,d] !=}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-        \NormalTok{sum =}\StringTok{ }\NormalTok{sum +}\StringTok{ }\NormalTok{Y[s,d]}
-        \NormalTok{n =}\StringTok{ }\NormalTok{n +}\StringTok{ }\NormalTok{M[s,d]}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \NormalTok{overall_mean =}\StringTok{ }\NormalTok{sum/n}
-  \CommentTok{#calculate row means and col means}
-  \NormalTok{row_means =}\StringTok{ }\KeywordTok{rowMeans}\NormalTok{(Y, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)}
-  \NormalTok{col_means =}\StringTok{ }\KeywordTok{colMeans}\NormalTok{(Y, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)}
-  \CommentTok{#set NaN to 0 in means to fix anova fill in}
-  \NormalTok{for (i in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-    \NormalTok{if (!}\KeywordTok{is.finite}\NormalTok{(row_means[i]))\{}
-      \NormalTok{row_means[i] =}\StringTok{ }\DecValTok{0}
-    \NormalTok{\}}
-    \NormalTok{if (!}\KeywordTok{is.finite}\NormalTok{(col_means[i]))\{}
-      \NormalTok{col_means[i] =}\StringTok{ }\DecValTok{0}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \CommentTok{#Fill in missing values in Y_imputed with ANOVA}
-  \NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-    \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-      \NormalTok{if (M[s,d] ==}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-        \NormalTok{Y_imputed[s,d] =}\StringTok{ }\NormalTok{row_means[s] +}\StringTok{ }\NormalTok{col_means[d] -}\StringTok{ }\NormalTok{overall_mean}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \NormalTok{for (i in }\DecValTok{1}\NormalTok{:S)\{}
-    \CommentTok{#extract SVD}
-    \NormalTok{svd_Y =}\StringTok{ }\KeywordTok{svd}\NormalTok{(Y_imputed)}
-    \NormalTok{D =}\StringTok{ }\KeywordTok{diag}\NormalTok{((svd_Y$d)[}\DecValTok{1}\NormalTok{:k])}
-    \NormalTok{U =}\StringTok{ }\NormalTok{svd_Y$u}
-    \NormalTok{V =}\StringTok{ }\NormalTok{svd_Y$v}
-    \CommentTok{#EYM theorem}
-    \NormalTok{EYM =}\StringTok{ }\NormalTok{U[,}\DecValTok{1}\NormalTok{:k] %*%}\StringTok{ }\NormalTok{D %*%}\StringTok{ }\KeywordTok{t}\NormalTok{(V[,}\DecValTok{1}\NormalTok{:k])}
-    \NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-      \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-        \NormalTok{if (M[s,d] ==}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-          \NormalTok{Y_imputed[s,d] =}\StringTok{ }\NormalTok{EYM[s,d]}
-        \NormalTok{\}}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \KeywordTok{return} \NormalTok{(Y_imputed)}
-\NormalTok{\}}
-
-\NormalTok{ports_mean_matrix_imputed =}\StringTok{ }\KeywordTok{matrix_complete}\NormalTok{(}\DecValTok{1000}\NormalTok{, }\DecValTok{2}\NormalTok{, n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)}
-
-\CommentTok{#Relative distance using Frobenius Norm}
-\NormalTok{relative_distance =}\StringTok{ }\NormalTok{function(Y, Y_imputed)\{}
-  \KeywordTok{return} \NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{((Y -}\StringTok{ }\NormalTok{Y_imputed)^}\DecValTok{2}\NormalTok{)) /}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(}\KeywordTok{sum}\NormalTok{(Y^}\DecValTok{2}\NormalTok{)))}
-\NormalTok{\}}
-\end{Highlighting}
-\end{Shaded}
 \section{Assessing Imputation
 Strategy}\label{assessing-imputation-strategy}
 
@@ -689,280 +564,7 @@ value. In this case, the algorithm records absolute error
 number of observations not missing.
 
 \subsection{Implementation}\label{implementation-1}
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{#Leave One Out Cross Validation}
-\NormalTok{loocv =}\StringTok{ }\NormalTok{function (}\DataTypeTok{S =} \DecValTok{1000}\NormalTok{, }\DataTypeTok{k =} \DecValTok{2}\NormalTok{, }\DataTypeTok{nrows =} \NormalTok{n_Sport, }\DataTypeTok{ncols =} \NormalTok{n_Dport, Y, M)\{}
-  \NormalTok{error =}\StringTok{ }\DecValTok{0}
-  \NormalTok{rmse =}\StringTok{ }\DecValTok{0}
-  \NormalTok{n =}\StringTok{ }\DecValTok{0}
-  \NormalTok{for (s in }\DecValTok{1}\NormalTok{:nrows)\{}
-    \NormalTok{for (d in }\DecValTok{1}\NormalTok{:ncols)\{}
-      \NormalTok{if (M[s,d] !=}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-        \NormalTok{n =}\StringTok{ }\NormalTok{n +}\StringTok{ }\DecValTok{1}
-        \NormalTok{M_imputed =}\StringTok{ }\NormalTok{M}
-        \NormalTok{M_imputed[s,d] =}\StringTok{ }\DecValTok{0}
-        \NormalTok{Y_imputed =}\StringTok{ }\KeywordTok{matrix_complete}\NormalTok{(S, k, nrows, ncols, Y, M_imputed)}
-        \NormalTok{error =}\StringTok{ }\NormalTok{error +}\StringTok{ }\KeywordTok{abs}\NormalTok{((Y_imputed[s,d] -}\StringTok{ }\NormalTok{Y[s,d]))}
-        \NormalTok{rmse =}\StringTok{ }\NormalTok{rmse +}\StringTok{ }\NormalTok{(Y_imputed[s,d] -}\StringTok{ }\NormalTok{Y[s,d])^}\DecValTok{2}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \NormalTok{rmse =}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(rmse/n)}
-  \KeywordTok{return} \NormalTok{(}\KeywordTok{list}\NormalTok{(}\DataTypeTok{Error =} \NormalTok{error, }\DataTypeTok{RMSE =} \NormalTok{rmse, }\DataTypeTok{Observations =} \NormalTok{n))}
-\NormalTok{\}}
-\CommentTok{#find optimal rank}
-\end{Highlighting}
-\end{Shaded}
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{setwd}\NormalTok{(}\StringTok{"~/Desktop/Stats Thesis/"}\NormalTok{)}
-\NormalTok{argus =}\StringTok{ }\KeywordTok{readRDS}\NormalTok{(}\StringTok{"Dataset/argus_complete.rds"}\NormalTok{)}
 
-\CommentTok{#matrix parameters}
-\NormalTok{n_Sport =}\StringTok{ }\DecValTok{20}
-\NormalTok{n_Dport =}\StringTok{ }\DecValTok{20}
-
-\CommentTok{#get freqs}
-\NormalTok{Sport_table =}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{table}\NormalTok{(argus$Sport))}
-\NormalTok{Sport_table =}\StringTok{ }\NormalTok{Sport_table[}\KeywordTok{order}\NormalTok{(-Sport_table$Freq),]}
-\NormalTok{top_Sport =}\StringTok{ }\NormalTok{(}\KeywordTok{head}\NormalTok{(Sport_table$Var1, n_Sport))}
-
-\CommentTok{#get freqs}
-\NormalTok{Dport_table =}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{table}\NormalTok{(argus$Dport))}
-\NormalTok{Dport_table =}\StringTok{ }\NormalTok{Dport_table[}\KeywordTok{order}\NormalTok{(-Dport_table$Freq),]}
-\NormalTok{top_Dport =}\StringTok{ }\NormalTok{(}\KeywordTok{head}\NormalTok{(Dport_table$Var1, n_Dport))}
-
-\CommentTok{#create starting matrices}
-\NormalTok{ports_combo_matrix =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{list}\NormalTok{(), }\DataTypeTok{nrow =} \NormalTok{n_Sport, }\DataTypeTok{ncol =} \NormalTok{n_Dport)}
-\KeywordTok{dimnames}\NormalTok{(ports_combo_matrix) =}\StringTok{ }\KeywordTok{list}\NormalTok{(top_Sport, top_Dport)}
-
-\NormalTok{ports_freq_matrix =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DataTypeTok{nrow =} \NormalTok{n_Sport, }\DataTypeTok{ncol =} \NormalTok{n_Dport)}
-\KeywordTok{dimnames}\NormalTok{(ports_freq_matrix) =}\StringTok{ }\KeywordTok{list}\NormalTok{(top_Sport, top_Dport)}
-
-\NormalTok{nscore =}\StringTok{ }\NormalTok{function(x) \{}
-  \NormalTok{nscore =}\StringTok{ }\KeywordTok{qqnorm}\NormalTok{(x, }\DataTypeTok{plot.it =} \OtherTok{FALSE}\NormalTok{)$x  }\CommentTok{# normal score }
-  \NormalTok{trn.table =}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{x=}\KeywordTok{sort}\NormalTok{(x),}\DataTypeTok{nscore=}\KeywordTok{sort}\NormalTok{(nscore))}
-  \KeywordTok{return} \NormalTok{(}\KeywordTok{list}\NormalTok{(}\DataTypeTok{nscore=}\NormalTok{nscore, }\DataTypeTok{trn.table=}\NormalTok{trn.table))}
-\NormalTok{\}}
-
-\CommentTok{#fill the ports_combo_matrix and ports_freq_matrix}
-\NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-  \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-    \NormalTok{combination =}\StringTok{ }\NormalTok{argus[}\KeywordTok{is.element}\NormalTok{(argus$Sport, top_Sport[s])}
-                        \NormalTok{&}\StringTok{ }\KeywordTok{is.element}\NormalTok{(argus$Dport, top_Dport[d]),]}
-    \NormalTok{obs =}\StringTok{ }\NormalTok{combination$SrcBytes}
-    \NormalTok{n_obs =}\StringTok{ }\KeywordTok{length}\NormalTok{(obs) }\CommentTok{#ignores NA values}
-    \NormalTok{if (n_obs >}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-      \CommentTok{#obs = nscore(obs)$nscore #normal transformation}
-      \NormalTok{for (i in }\DecValTok{1}\NormalTok{:n_obs)\{}
-        \NormalTok{ports_combo_matrix[[s,d]] =}\StringTok{ }\KeywordTok{c}\NormalTok{(ports_combo_matrix[[s,d]],obs[i]) }
-        \CommentTok{#O(1) time to append values to a list?}
-        \NormalTok{ports_freq_matrix[s,d] =}\StringTok{ }\NormalTok{ports_freq_matrix[s,d] +}\StringTok{ }\DecValTok{1}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-\NormalTok{\}}
-
-\CommentTok{#create mean and variance matrix}
-\NormalTok{ports_mean_matrix =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =} \NormalTok{n_Sport, }\DataTypeTok{ncol =} \NormalTok{n_Dport)}
-\KeywordTok{dimnames}\NormalTok{(ports_mean_matrix) =}\StringTok{ }\KeywordTok{list}\NormalTok{(top_Sport, top_Dport)}
-
-\NormalTok{ports_variance_matrix =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =} \NormalTok{n_Sport, }\DataTypeTok{ncol =} \NormalTok{n_Dport)}
-\KeywordTok{dimnames}\NormalTok{(ports_variance_matrix) =}\StringTok{ }\KeywordTok{list}\NormalTok{(top_Sport, top_Dport)}
-
-\CommentTok{#fill mean and variance matrix}
-\NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-  \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-    \NormalTok{if (ports_freq_matrix[s,d] ==}\StringTok{ }\DecValTok{1}\NormalTok{)\{}
-      \NormalTok{ports_mean_matrix[s,d] =}\StringTok{ }\NormalTok{ports_combo_matrix[[s,d]]}
-      \NormalTok{ports_variance_matrix[s,d] =}\StringTok{ }\DecValTok{0}
-    \NormalTok{\}}
-    \NormalTok{else if (ports_freq_matrix[s,d] >}\StringTok{ }\DecValTok{1}\NormalTok{)\{}
-      \NormalTok{ports_mean_matrix[s,d] =}\StringTok{ }\KeywordTok{mean}\NormalTok{(ports_combo_matrix[[s,d]])}
-      \NormalTok{ports_variance_matrix[s,d] =}\StringTok{ }\KeywordTok{var}\NormalTok{(ports_combo_matrix[[s,d]])}
-    \NormalTok{\}}
-  \NormalTok{\}}
-\NormalTok{\}}
-
-\CommentTok{#untuned ALS using softimpute}
-\KeywordTok{library}\NormalTok{(softImpute)}
-\end{Highlighting}
-\end{Shaded}
-\begin{verbatim}
-Loading required package: Matrix
-\end{verbatim}
-\begin{verbatim}
-
-Attaching package: 'Matrix'
-\end{verbatim}
-\begin{verbatim}
-The following object is masked from 'package:reshape':
-
-    expand
-\end{verbatim}
-\begin{verbatim}
-Loaded softImpute 1.4
-\end{verbatim}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{fit =}\StringTok{ }\KeywordTok{softImpute}\NormalTok{(ports_mean_matrix,}\DataTypeTok{rank.max=}\DecValTok{3}\NormalTok{,}\DataTypeTok{lambda=}\FloatTok{0.9}\NormalTok{,}\DataTypeTok{trace=}\OtherTok{TRUE}\NormalTok{,}\DataTypeTok{type=}\StringTok{"als"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-\begin{verbatim}
-1 : obj 118447630 ratio 8862771621 
-2 : obj 338300.9 ratio 0.002398703 
-3 : obj 261856.6 ratio 0.0002617471 
-4 : obj 216131.7 ratio 0.0003460135 
-5 : obj 168096 ratio 0.0002697307 
-6 : obj 139246.7 ratio 0.0001180686 
-7 : obj 124787.1 ratio 6.149304e-05 
-8 : obj 115182.9 ratio 4.595611e-05 
-9 : obj 107326.8 ratio 3.952473e-05 
-10 : obj 100581.7 ratio 3.386247e-05 
-11 : obj 95056.82 ratio 2.698493e-05 
-12 : obj 90911.68 ratio 1.958786e-05 
-13 : obj 88054.62 ratio 1.316015e-05 
-14 : obj 86180.49 ratio 8.536606e-06 
-final SVD: obj 84890.87 
-\end{verbatim}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{fit$d}
-\end{Highlighting}
-\end{Shaded}
-\begin{verbatim}
-[1] 163274.716  17272.466   7494.707
-\end{verbatim}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{filled =}\StringTok{ }\KeywordTok{complete}\NormalTok{(ports_mean_matrix, fit)}
-\KeywordTok{plot}\NormalTok{(ports_mean_matrix[!}\KeywordTok{is.na}\NormalTok{(ports_mean_matrix)], filled[!}\KeywordTok{is.na}\NormalTok{(ports_mean_matrix)])}
-\end{Highlighting}
-\end{Shaded}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-9-1.pdf}
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{plot}\NormalTok{(ports_mean_matrix[!}\KeywordTok{is.na}\NormalTok{(ports_mean_matrix)], filled[!}\KeywordTok{is.na}\NormalTok{(ports_mean_matrix)],}
-     \DataTypeTok{xlim =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{5000}\NormalTok{), }\DataTypeTok{ylim =} \KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{5000}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-9-2.pdf}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{####Eckhart Young Theorem Implementation, Best Rank k Approximation####}
-\NormalTok{matrix_complete =}\StringTok{ }\NormalTok{function(}\DataTypeTok{S =} \DecValTok{1000}\NormalTok{, }\DataTypeTok{k =} \DecValTok{2}\NormalTok{, n_Sport, n_Dport, Y, M)\{}
-  \NormalTok{S =}\StringTok{ }\DecValTok{1000}
-  \NormalTok{k =}\StringTok{ }\DecValTok{2}
-  \NormalTok{Y_imputed =}\StringTok{ }\NormalTok{Y}
-  \CommentTok{#calculate overall mean}
-  \NormalTok{n =}\StringTok{ }\DecValTok{0}
-  \NormalTok{sum =}\StringTok{ }\DecValTok{0}
-  \NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-    \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-      \NormalTok{if (M[s,d] !=}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-        \NormalTok{sum =}\StringTok{ }\NormalTok{sum +}\StringTok{ }\NormalTok{Y[s,d]}
-        \NormalTok{n =}\StringTok{ }\NormalTok{n +}\StringTok{ }\NormalTok{M[s,d]}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \NormalTok{overall_mean =}\StringTok{ }\NormalTok{sum/n}
-  \CommentTok{#calculate row means and col means}
-  \NormalTok{row_means =}\StringTok{ }\KeywordTok{rowMeans}\NormalTok{(Y, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)}
-  \NormalTok{col_means =}\StringTok{ }\KeywordTok{colMeans}\NormalTok{(Y, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)}
-  \CommentTok{#set NaN to 0 in means to fix anova fill in}
-  \NormalTok{for (i in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-    \NormalTok{if (!}\KeywordTok{is.finite}\NormalTok{(row_means[i]))\{}
-      \NormalTok{row_means[i] =}\StringTok{ }\DecValTok{0}
-    \NormalTok{\}}
-    \NormalTok{if (!}\KeywordTok{is.finite}\NormalTok{(col_means[i]))\{}
-      \NormalTok{col_means[i] =}\StringTok{ }\DecValTok{0}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \CommentTok{#Fill in missing values in Y_imputed with ANOVA}
-  \NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-    \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-      \NormalTok{if (M[s,d] ==}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-        \NormalTok{Y_imputed[s,d] =}\StringTok{ }\NormalTok{row_means[s] +}\StringTok{ }\NormalTok{col_means[d] -}\StringTok{ }\NormalTok{overall_mean}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \NormalTok{for (i in }\DecValTok{1}\NormalTok{:S)\{}
-    \CommentTok{#extract SVD}
-    \NormalTok{svd_Y =}\StringTok{ }\KeywordTok{svd}\NormalTok{(Y_imputed)}
-    \NormalTok{D =}\StringTok{ }\KeywordTok{diag}\NormalTok{((svd_Y$d)[}\DecValTok{1}\NormalTok{:k])}
-    \NormalTok{U =}\StringTok{ }\NormalTok{svd_Y$u}
-    \NormalTok{V =}\StringTok{ }\NormalTok{svd_Y$v}
-    \CommentTok{#EYM theorem}
-    \NormalTok{EYM =}\StringTok{ }\NormalTok{U[,}\DecValTok{1}\NormalTok{:k] %*%}\StringTok{ }\NormalTok{D %*%}\StringTok{ }\KeywordTok{t}\NormalTok{(V[,}\DecValTok{1}\NormalTok{:k])}
-    \CommentTok{#replace imputed values with new values, REPLACE ONLY MISSING OR REPLACE ALL? }
-    \CommentTok{#Replacing only missing means we cant assess fitted error}
-    \NormalTok{for (s in }\DecValTok{1}\NormalTok{:n_Sport)\{}
-      \NormalTok{for (d in }\DecValTok{1}\NormalTok{:n_Dport)\{}
-        \NormalTok{if (M[s,d] ==}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-          \NormalTok{Y_imputed[s,d] =}\StringTok{ }\NormalTok{EYM[s,d]}
-        \NormalTok{\}}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \KeywordTok{return} \NormalTok{(Y_imputed)}
-\NormalTok{\}}
-
-\NormalTok{matrix_complete2 =}\StringTok{ }\NormalTok{function(Y, }\DataTypeTok{k =} \DecValTok{2}\NormalTok{, }\DataTypeTok{lambda =} \FloatTok{1.0}\NormalTok{)\{}
-  \NormalTok{fit =}\StringTok{ }\KeywordTok{softImpute}\NormalTok{(Y, }\DataTypeTok{rank.max=}\NormalTok{k, }\DataTypeTok{lambda =} \NormalTok{lambda, }\DataTypeTok{trace=}\OtherTok{TRUE}\NormalTok{, }\DataTypeTok{type=}\StringTok{"als"}\NormalTok{)}
-  \CommentTok{# fit$d}
-  \NormalTok{filled =}\StringTok{ }\KeywordTok{complete}\NormalTok{(Y, fit)}
-  \KeywordTok{return}\NormalTok{(filled)}
-\NormalTok{\}}
-
-\CommentTok{#ports_mean_matrix_imputed = matrix_complete(1000, 2, n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)}
-
-\CommentTok{#Relative distance using Frobenius Norm}
-\NormalTok{relative_distance =}\StringTok{ }\NormalTok{function(Y, Y_imputed)\{}
-  \KeywordTok{return} \NormalTok{(}\KeywordTok{frobenius.norm}\NormalTok{(Y -}\StringTok{ }\NormalTok{Y_imputed) /}\StringTok{ }\KeywordTok{frobenius.norm}\NormalTok{(Y))}
-\NormalTok{\}}
-
-\CommentTok{#Leave One Out Cross Validation}
-\NormalTok{loocv =}\StringTok{ }\NormalTok{function (}\DataTypeTok{S =} \DecValTok{1000}\NormalTok{, }\DataTypeTok{k =} \DecValTok{2}\NormalTok{, }\DataTypeTok{nrows =} \NormalTok{n_Sport, }\DataTypeTok{ncols =} \NormalTok{n_Dport, Y, M)\{}
-  \NormalTok{error =}\StringTok{ }\DecValTok{0}
-  \NormalTok{rmse =}\StringTok{ }\DecValTok{0}
-  \NormalTok{n =}\StringTok{ }\DecValTok{0}
-  \NormalTok{for (s in }\DecValTok{1}\NormalTok{:nrows)\{}
-    \NormalTok{for (d in }\DecValTok{1}\NormalTok{:ncols)\{}
-      \NormalTok{if (M[s,d] !=}\StringTok{ }\DecValTok{0}\NormalTok{)\{}
-        \NormalTok{n =}\StringTok{ }\NormalTok{n +}\StringTok{ }\DecValTok{1}
-        \CommentTok{# M_imputed = M}
-        \CommentTok{# M_imputed[s,d] = 0}
-        \CommentTok{# Y_imputed = matrix_complete(S, k, nrows, ncols, Y, M_imputed)}
-        \NormalTok{true_sd =}\StringTok{ }\NormalTok{Y[s,d]}
-        \NormalTok{Y[s,d] <-}\StringTok{ }\OtherTok{NA}
-        \NormalTok{Y_imputed =}\StringTok{ }\KeywordTok{matrix_complete2}\NormalTok{(Y, k, }\FloatTok{0.9}\NormalTok{)}
-        \NormalTok{error =}\StringTok{ }\NormalTok{error +}\StringTok{ }\KeywordTok{abs}\NormalTok{((Y_imputed[s,d] -}\StringTok{ }\NormalTok{true_sd))}
-        \NormalTok{rmse =}\StringTok{ }\NormalTok{rmse +}\StringTok{ }\NormalTok{(Y_imputed[s,d] -}\StringTok{ }\NormalTok{true_sd)^}\DecValTok{2}
-        \NormalTok{Y[s,d] =}\StringTok{ }\NormalTok{true_sd}
-      \NormalTok{\}}
-    \NormalTok{\}}
-  \NormalTok{\}}
-  \NormalTok{rmse =}\StringTok{ }\KeywordTok{sqrt}\NormalTok{(rmse/n)}
-  \KeywordTok{return} \NormalTok{(}\KeywordTok{list}\NormalTok{(}\DataTypeTok{Error =} \NormalTok{error, }\DataTypeTok{RMSE =} \NormalTok{rmse, }\DataTypeTok{Observations =} \NormalTok{n))}
-\NormalTok{\}}
-
-\CommentTok{# ranks = seq(1,10,1)}
-\CommentTok{# #RMSEs = lapply(seq(1,10,1), function(k) loocv(250,k,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)$RMSE)}
-\CommentTok{# RMSEs = c()}
-\CommentTok{# for (k in ranks)\{}
-\CommentTok{#   print (k)}
-\CommentTok{#   cv = loocv(250,k,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)}
-\CommentTok{#   RMSEs = c(RMSEs, cv$RMSE)}
-\CommentTok{# \}}
-\CommentTok{# plot(ranks, RMSEs)}
-\CommentTok{# }
-\CommentTok{# cv1 = loocv(250,1,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)}
-\CommentTok{# cv2 = loocv(250,2,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)}
-\CommentTok{# cv3 = loocv(250,3,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)}
-\CommentTok{# cv5 = loocv(250,5,n_Sport, n_Dport, ports_mean_matrix, ports_freq_matrix)}
-\end{Highlighting}
-\end{Shaded}
 \subsection{Results}\label{results}
 
 While matrix completion via singular value decomposition presents valid
@@ -979,6 +581,76 @@ each cell being imputed. Unlike the Netflix Competition, in which each
 cell of the matrix being completed contained only a single user rating
 of a movie, the matrix in this problem contains the average of a
 variable number of observations in each cell.
+
+\section{Validation Against Simulated
+Data}\label{validation-against-simulated-data}
+
+\subsection{Constructing a Low Rank
+Matrix}\label{constructing-a-low-rank-matrix}
+
+\subsection{Approximating Low Rank with Leave One Out Cross
+Validation}\label{approximating-low-rank-with-leave-one-out-cross-validation}
+
+\chapter{A Bayesian Approach to Two Dimensional Matrix
+Completion}\label{a-bayesian-approach-to-two-dimensional-matrix-completion}
+
+\section{Motivation}\label{motivation-2}
+
+This technique again slices the tensor into the four separate matrices,
+\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}\). The
+previous technique fails to take into account the differing sample size
+and variance in each cell (source port \(i\), destination port \(j\)),
+so the algorithm treated each \(y_{ij}^{k}\), which represents the mean
+of all observations in cell \((i,j)\) for continuous feature \(k\), as a
+single value with no consideration of differing sample sizes and
+variances between cells.
+
+\section{Statistical Model for Port
+Relationships}\label{statistical-model-for-port-relationships}
+
+The following statistical model is defined for imputing port
+relationships:
+\[y_{i,j} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{n_{ij}}}\epsilon_{ij}\]
+where \(u_i\) represents \_\_\_\_\_\_, \(v_j\) represents \_\_\_\_\_,
+\(\sigma_i\) represents the MEAN??? of the standard deviations of each
+row in the matrix, \(\tau_j\) represents the MEAN??? of the standard
+deviations of each column in the matrix, and
+\(\epsilon_{ij} \sim N(0,1)\). Fixing specific rows or columns in the
+analysis enables the model to be rewritten in the form of a weighted
+least squares. In particular, fixing the \(j\)th row of the matrix
+yields: \[y_i = \beta^Tx_i + \sigma w_i\epsilon_{ij}\] where
+\(w_i = \frac{\tau_j}{\sqrt(n_{ij}}\), and \(\beta^T = u_i\).
+
+Using this model, we construct a Gibbs Sampler:
+\[\tilde{y} = X\beta + \sigma W \epsilon\] where \(W\) is the diagonal
+matrix of weights. This is a specific form of the Generalized Least
+Squares Model.
+
+In this case:
+\[\Sigma^{-1} = (\sigma^2W^{-1})^{-1} = \frac{W}{\sigma^2}\]
+
+\[\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)\]
+\[\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})\]
+\[ \begin{cases}
+      \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
+      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^-1 \beta_0)
+    \end{cases}\]
+\[SSR_W = (y - X\beta)^TW(y-X\beta)\] Priors:
+
+\[\beta \sim MVN (\beta_0, W_0)\]
+\[\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)\]
+\(\nu_0 = 2, \sigma_0^2 = 1\)
+
+\[ \begin{cases}
+      \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
+      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^-1 \beta_0)
+    \end{cases}\]
+\section{Gibbs Sampling}\label{gibbs-sampling}
+
+Following the formulation of the model, a Gibbs Sampling algorithm is
+used to repeatedly generate samples from the full conditional of each
+parameter in the statistical model, which iteratively creates an
+approximate value for each cell.
 
 \chapter{Tensor Completion}\label{tensor-completion}
 
@@ -1065,7 +737,7 @@ least squares estimator gives \(\hat \beta = (X^TWX)^{-1}X^TWy\).
 Repeating this estimation technique across each slice of the tensor
 \(a_i\), \(b_j\), \(c_k\) results in a completed model for \(y_{ijk}\).
 
-\section{Gibbs Sampling}\label{gibbs-sampling}
+\section{Gibbs Sampling}\label{gibbs-sampling-1}
 
 Following the formulation of the model, a Gibbs Sampling algorithm is
 used to repeatedly generate samples from the full conditional of each

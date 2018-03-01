@@ -1,12 +1,7 @@
-setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/")
+setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index")
 Y = readRDS("data/means.RDS")
 M = readRDS("data/freqs.RDS")
-## REMOVING FULL MISSING COLUMNS FROM MATRICES
-Y = Y[, colSums(is.na(Y))!=nrow(Y)] #remove NA cols
-Y = Y[rowSums(is.na(Y)) != ncol(Y),] #remove NA rows
-## REMOVING FULL 0 COLUMNS FROM MATRICES
-M = M[ , !apply(M==0,2,all)]
-M = M[ !apply(M==0,1,all) , ]
+
 ####Eckhart Young Theorem Implementation, Best Rank k Approximation####
 matrix_complete = function(S = 1000, k = 2, nrows, ncols, Y, M){
   Y_imputed = Y
@@ -119,6 +114,7 @@ approximate_rank = function(Y, M, S = 50, simulated = TRUE){
     else{
       cv_errors = lapply(seq(1,10,1), function(k) loocv(200,k,nrows,ncols,Y, M)$RMSE)
     }
+    all_errors = c()
     low_rank = which.min(cv_errors)
     ranks = c(ranks, low_rank)
   }
@@ -144,5 +140,48 @@ Y5 = generate_low_rank_matrix(10,10,5)
 ranks5 = approximate_rank(Y5, M, 20, simulated = TRUE)
 
 
+# > RMSEs
+# [[1]]
+# [1] 33379.07
+# 
+# [[2]]
+# [1] 34069.78
+# 
+# [[3]]
+# [1] 44874.4
+# 
+# [[4]]
+# [1] 48005.11
+# 
+# [[5]]
+# [1] 46944.11
+
+# > RMSEs = lapply(seq(1,8,1), function(k) loocv(200,k, 100, 74, Y, M)$RMSE)
+# > RMSEs
+# [[1]]
+# [1] 42727.19
+# 
+# [[2]]
+# [1] 31878.69
+# 
+# [[3]]
+# [1] 44605.58
+# 
+# [[4]]
+# [1] 48193.36
+# 
+# [[5]]
+# [1] 46903.49
+# 
+# [[6]]
+# [1] 47509.22
+# 
+# [[7]]
+# [1] 47807.57
+# 
+# [[8]]
+# [1] 48136.36
+# 
+# > plot(seq(1,8,1), RMSEs)
 
 

@@ -33,7 +33,7 @@ $$\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\si
 where MVN represents the Multivariate Normal Distribution, IG represents the Inverse Gamma distribution, W is described above, and 
 $$ \begin{cases}
       \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
-      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^-1 \beta_0)
+      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^{-1} \beta_0)
     \end{cases}$$
 $$SSR_W = (y - X\beta)^TW(y-X\beta)$$
 

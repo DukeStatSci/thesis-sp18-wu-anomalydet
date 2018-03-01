@@ -3,7 +3,8 @@
 ```{r, include=FALSE}
 library(lattice)
 library(reshape)
-setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index")
+library(igraph)
+setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/")
 argus = readRDS("data/argus_complete.rds")
 means = readRDS("data/means.RDS")
 vars = readRDS("data/vars.RDS")
@@ -30,7 +31,7 @@ top_Dport = (head(Dport_table$Var1, n_Dport))
 
   This approach to the anomaly detection problem reduces the dataset to the values of the four continuous features, SrcBytes, SrcPkts, DstBytes, DstPkts, observed across different source port and destination port combinations. The data can be represented as a 3-dimensional tensor $Y \in \mathbb{R_{m \times n \times 4}}$ where $m$ represents the number of source ports, $n$ represents the number of destination ports, and $4$ accounts for the four continuous features in the dataset. Each cell, $y_{ijk}$, contains the mean of all the observations observed for source port, $i$, and destination port $j$. In the cases where the combination of $i$ and $j$ is not observed in the dataset, $y_{ijk}$ is missing.
 
-  The goal of this project is to devise an optimal strategy for imputing the missing cells in $Y$ to create the completed tensor $Y' \in \mathbb{R_{m \times n \times 4}}$. As new observations are observed for combinations of ports $i$ and $j$, the $y'_{ijk}$ values can be interpreted as an approximation for the expected behavior for that particular port combination. Observations with continuous features that are a certain threshold away from $y'_{ijk}$ may be marked as anomalies and investigated further.
+  The goal of this paper is to devise an optimal strategy for imputing the missing cells in $Y$ to create the completed tensor $Y' \in \mathbb{R_{m \times n \times 4}}$. As new observations are observed for combinations of ports $i$ and $j$, the $y'_{ijk}$ values can be interpreted as an approximation for the expected behavior for that particular port combination. Observations with continuous features that are a certain threshold away from $y'_{ijk}$ may be marked as anomalies and investigated further.
 
   Imputing values for each of the four continuous features in the dataset for all possible source and destination port combinations yields a reasonable expected value in each cell of the ports matrix that can then be compared to actual connection values when they are observed. New observations that differ greatly from the imputed values are flagged as anomalies and require further investigation. 
 
@@ -63,12 +64,17 @@ levelplot(kendall_cors, main = "Kendall Correlations Between Continuous
 
 ```
 
+The matrix above describes the Kendall rank correlations (commonly referred to as Kendall's tau coefficent) between the four continuous features in the dataset.
+<!-- A tau test is a non-parametric hypothesis test for statistical dependence based on the tau coefficient. -->
+
+Intuitively, the Kendall correlation between two features will be high when observations have a similar rank (i.e. relative position label of observations within the variable: 1st, 2nd, 3rd, etc.) between the two variables, and low when observations have a dissimilar rank between the two variables. The range of correlations is [-1, 1]. Kendall correlation was selected as a measure because it evaluates ranks between observations, as opposed to Pearson, which is more susceptible to outliers in the dataset (large byte and packet observations in the continuous feautres skewed the Pearson measures). 
+
 ### Missingness
 
 ```{r, echo = FALSE}
 ### MISSINGNESS VISUALIZATIONS
 
-sum(apply(means, MARGIN = 1, FUN = function(x) length(x[is.na(x)])))
+#sum(apply(means, MARGIN = 1, FUN = function(x) length(x[is.na(x)])))
 
 missing = matrix(list(), nrow = n_Sport, ncol = n_Dport)
 dimnames(missing) = list(top_Sport, top_Dport)
@@ -86,6 +92,8 @@ levelplot(missing,xlab = "Source Ports", ylab = "Destination Ports",
           main = "Missingness in Ports Matrix", col.regions=gray(0:1,1),cuts=1)
 ```
 
+The above matrix represents the missingness in the port combinations for pairings of the top 20 most used source ports and destination ports. The black cells represent missingness; of the 400 cells in the matrix, 295 (73.75%) of cells are missing observations.
+
 ### Row and Column Properties
 
 ```{r, echo = FALSE}
@@ -100,11 +108,12 @@ barplot(col_means, las=2, xlab = "Destination Port", ylab = "Mean (SrcBytes)",
         main = "Column Means of SrcBytes Matrix")
 ```
 
+The bar plots above represent the row and column means of the continuous features for each slice of the tensor. These row means and column means inform imputation techniques for the missing cells within those respective rows and columns. COMMENT ON DISPROPORTIONATE MEANS BASED ON MISSING VARIANCES
+
 ### Port Connections
 
 ```{r, echo=FALSE}
 ### PORTS NETWORK GRAPH
-library(igraph)
 # net = graph_from_adjacency_matrix(missing)
 # net <- simplify(net, remove.multiple = T, remove.loops = T) 
 # 
@@ -146,11 +155,11 @@ plot(g,
 )
 ```
 
+Describe Ports network graph
+
 ### Matrix Slice Properties
 
-
-
-```{r}
+```{r, echo = FALSE}
 ### MATRIX VISUALIZATIONS
 # https://stackoverflow.com/questions/5453336/plot-correlation-matrix-into-a-graph
 # levelplot(means, xlab = "Source Ports", ylab = "Destination Ports", 
@@ -161,3 +170,4 @@ levelplot(freqs, xlab = "Source Ports", ylab = "Destination Ports",
           main = "Sample Sizes of Port Combinations")
 ```
 
+Variance in sample size 0 to 35000

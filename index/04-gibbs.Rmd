@@ -1,0 +1,62 @@
+# A Bayesian Approach to Two Dimensional Matrix Completion
+
+## Motivation
+
+This technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}$. The previous technique fails to take into account the differing sample size and variance in each cell (source port $i$, destination port $j$), so the algorithm treated each $y_{ij}^{k}$, which represents the mean of all observations in cell $(i,j)$ for continuous feature $k$, as a single value with no consideration of differing sample sizes and variances between cells.
+
+## Statistical Model for Port Relationships
+
+The following statistical model is defined for imputing port relationships: $$y_{i,j} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{n_{ij}}}\epsilon_{ij}$$ where $u_i$ represents ______, $v_j$ represents _____, $\sigma_i$ represents the MEAN??? of the standard deviations of each row in the matrix, $\tau_j$ represents the MEAN??? of the standard deviations of each column in the matrix, and $\epsilon_{ij} \sim N(0,1)$. Fixing specific rows or columns in the analysis enables the model to be rewritten in the form of a weighted least squares. In particular, fixing the $j$th row of the matrix yields: $$y_i = \beta^Tx_i + \sigma w_i\epsilon_{ij}$$ where $w_i = (\frac{\tau_j}{\sqrt(n_{ij}})^2$, and $\beta^T = u_i$. 
+
+### Generalized Least Squares Model
+
+Vectorizing the above model yields $$\tilde{y} = X\beta + \sigma W^{1/2} \epsilon$$ where $W \in \mathbb{R}_{m \times n}$ is the diagonal matrix of weights, such that $$
+  W =
+  \begin{bmatrix}
+    w^{-1}_{1} & & \\
+    & \ddots & \\
+    & & w^{-1}_{m}
+  \end{bmatrix} 
+  = \begin{bmatrix}
+    \frac{n_{11}}{\tau_1^2} & & \\
+    & \ddots & \\
+    & & \frac{n_{mn}}{\tau_n^2}
+  \end{bmatrix}$$
+
+This is a specific form of the Generalized Least Squares Model (GLS), which gives a weighted least squares estimate of $\beta$, and it is appropriate when the error terms are not independent and identically distributed. Bayesian analysis of this problem provides similar parameter estimates to GLS, and both ordinary least squares and GLS provide unbiased parameter estimates of $\beta$ with the latter giving estimates with a lower variance. 
+
+The full conditional distributions of the random variables $\beta$ and $\sigma^2$ for this case of GLS are descrbied below: 
+
+$$\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)$$
+$$\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})$$
+where MVN represents the Multivariate Normal Distribution, IG represents the Inverse Gamma distribution, W is an inverse diagonal matrix of $w_i$ $ \begin{cases}
+      \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
+      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^-1 \beta_0)
+    \end{cases}$$
+$$SSR_W = (y - X\beta)^TW(y-X\beta)$$
+
+Priors: 
+
+$$\beta \sim MVN (\beta_0, W_0)$$
+$$\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)$$
+$\nu_0 = 2, \sigma_0^2 = 1$ 
+
+$$ \begin{cases}
+      \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
+      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^-1 \beta_0)
+    \end{cases}$$
+<!-- ## Motivation -->
+
+<!-- The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The following section constructs a statistical model that takes frequency of observations for each cell into account and repeatedly samples from that statistical model to complete the matrix.  -->
+
+<!-- ## AMMI Model  -->
+
+<!-- Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination. Applying the same mathematical notation as the previous section, the model is formally expressed: $$y_{i,j} = u + a_i + b_j + \mathbf{u_i}D\mathbf{v_j^T} + \sigma_{i,j}\epsilon_{i,j}$$ -->
+<!-- where $sigma_{i,j}$ is the variance for the $ith$ row $jth$ column in the ports combination matrix, and $\epsilon \sim N(0,1)$. -->
+
+## Gibbs Sampling
+Using this model, we construct a Gibbs Sampler: 
+Following the formulation of the model, a Gibbs Sampling algorithm is used to repeatedly generate samples from the full conditional of each parameter in the statistical model, which iteratively creates an approximate value for each cell. 
+
+
+

@@ -68,15 +68,15 @@
 
 
 % To pass between YAML and LaTeX the dollar signs are added by CII
-\title{Tensor Completion Techniques For Anomaly Detection in Network Attacks}
+\title{Matrix Completion Techniques For Anomaly Detection in Network Attacks}
 \author{James C. Wu}
 % The month and year that you submit your FINAL draft TO THE LIBRARY (May or December)
 \date{May 2018}
 \advisor{Peter D. Hoff}
 \institution{Duke University}
 \degree{Bachelor of Science in Statistical Science}
-\committeememberone{Committeemember O. Name}
-\committeemembertwo{Committeemember T. Name}
+\committeememberone{Jerry P. Reiter}
+\committeemembertwo{Galen Reeves}
 \dus{Mine Cetinkaya-Rundel}
 %If you have two advisors for some reason, you can use the following
 % Uncommented out by CII
@@ -115,10 +115,9 @@
 I thank my advisor, Professor Peter Hoff, and the Director of
 Undergraduate Studies, Professor Mine Cetinkaya-Rundel, for their
 guidance in this project. I also thank Duke University's Statistics
-Department and Office of Information Technology, especially my dataset
-contact at OIT, Eric Hope, for making this project possible. Most of all
-I thank my parents for their continued unwavering support in all my
-endeavors.
+Department for supervising this project and the Office of Information
+Technology for providing the dataset. Most of all I thank my parents for
+their continued unwavering support in all my endeavors.
 }
 
 \Dedication{
@@ -171,10 +170,9 @@ pending) in determining anomalous entries in the tensor.
     I thank my advisor, Professor Peter Hoff, and the Director of
     Undergraduate Studies, Professor Mine Cetinkaya-Rundel, for their
     guidance in this project. I also thank Duke University's Statistics
-    Department and Office of Information Technology, especially my dataset
-    contact at OIT, Eric Hope, for making this project possible. Most of all
-    I thank my parents for their continued unwavering support in all my
-    endeavors.
+    Department for supervising this project and the Office of Information
+    Technology for providing the dataset. Most of all I thank my parents for
+    their continued unwavering support in all my endeavors.
   \end{acknowledgements}
 
   \hypersetup{linkcolor=black}
@@ -433,9 +431,7 @@ outliers in the dataset (large byte and packet observations in the
 continuous feautres skewed the Pearson measures).
 
 \subsection{Missingness}\label{missingness}
-\begin{verbatim}
-[1] 295
-\end{verbatim}
+
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
 
 The above matrix represents the missingness in the port combinations for
@@ -585,28 +581,41 @@ variable number of observations in each cell.
 \section{Validation Against Simulated
 Data}\label{validation-against-simulated-data}
 
-\subsection{Constructing a Low Rank
-Matrix}\label{constructing-a-low-rank-matrix}
+\subsection{Simulating a Low Rank
+Matrix}\label{simulating-a-low-rank-matrix}
 
-\subsection{Approximating Low Rank with Leave One Out Cross
-Validation}\label{approximating-low-rank-with-leave-one-out-cross-validation}
+\subsection{Approximating Optimal
+Rank}\label{approximating-optimal-rank}
 
 \chapter{A Bayesian Approach to Two Dimensional Matrix
 Completion}\label{a-bayesian-approach-to-two-dimensional-matrix-completion}
 
 \section{Motivation}\label{motivation-2}
 
-This technique again slices the tensor into the four separate matrices,
-\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}\). The
-previous technique fails to take into account the differing sample size
-and variance in each cell (source port \(i\), destination port \(j\)),
-so the algorithm treated each \(y_{ij}^{k}\), which represents the mean
-of all observations in cell \((i,j)\) for continuous feature \(k\), as a
-single value with no consideration of differing sample sizes and
-variances between cells.
+The previous section's results reflected the need for an imputation
+strategy that accounted for the variability in the number of
+observations observed for each port combination when imputing that
+particular combination's cell. The previous technique fails to take into
+account the differing sample size and variance in each cell (source port
+\(i\), destination port \(j\)), so the algorithm treated each
+\(y_{ij}^{k}\), which represents the mean of all observations in cell
+\((i,j)\) for continuous feature \(k\), as a single value with no
+consideration of differing sample sizes and variances between cells. The
+following section constructs a statistical model that takes frequency of
+observations for each cell into account and repeatedly samples from that
+statistical model to complete the matrix.
 
 \section{Statistical Model for Port
 Relationships}\label{statistical-model-for-port-relationships}
+
+Additive Main Effects and Multiplicative Interaction Models (AMMI
+models) provide a defined statistical model for each cell in the ports
+matrix. In particular, the model combines the additive effects of the
+initial ANOVA imputation with the multiplicative effects yielded from
+singular value decomposition described in the previous section. More
+importantly, the model also includes a variance term for each cell that
+takes into account the differing frequency of observations in each port
+combination.
 
 The following statistical model is defined for imputing port
 relationships:
@@ -619,38 +628,77 @@ deviations of each column in the matrix, and
 analysis enables the model to be rewritten in the form of a weighted
 least squares. In particular, fixing the \(j\)th row of the matrix
 yields: \[y_i = \beta^Tx_i + \sigma w_i\epsilon_{ij}\] where
-\(w_i = \frac{\tau_j}{\sqrt(n_{ij}}\), and \(\beta^T = u_i\).
+\(w_i = (\frac{\tau_j}{\sqrt(n_{ij}})^2\), and \(\beta^T = u_i\). Note,
+this technique again slices the tensor into the four separate matrices,
+\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}\), and
+the model can be applied to each matrix \(Y^{(k)}\) separately.
 
-Using this model, we construct a Gibbs Sampler:
-\[\tilde{y} = X\beta + \sigma W \epsilon\] where \(W\) is the diagonal
-matrix of weights. This is a specific form of the Generalized Least
-Squares Model.
+\subsection{Generalized Least Squares
+Model}\label{generalized-least-squares-model}
 
-In this case:
-\[\Sigma^{-1} = (\sigma^2W^{-1})^{-1} = \frac{W}{\sigma^2}\]
+Vectorizing the above model yields
+\[\tilde{y} = X\beta + \sigma W^{1/2} \epsilon\] where
+\(W \in \mathbb{R}_{m \times n}\) is the diagonal matrix of weights,
+such that \[
+  W =
+  \begin{bmatrix}
+    w^{-1}_{1} & & \\
+    & \ddots & \\
+    & & w^{-1}_{m}
+  \end{bmatrix} 
+  = \begin{bmatrix}
+    \frac{n_{11}}{\tau_1^2} & & \\
+    & \ddots & \\
+    & & \frac{n_{mn}}{\tau_n^2}
+  \end{bmatrix}\]
+This is a specific form of the Generalized Least Squares Model (GLS),
+which gives a weighted least squares estimate of \(\beta\), and it is
+appropriate when the error terms are not independent and identically
+distributed. Bayesian analysis of this problem provides similar
+parameter estimates to GLS, and both ordinary least squares and GLS
+provide unbiased parameter estimates of \(\beta\) with the latter giving
+estimates with a lower variance.
 
+The full conditional distributions of the random variables \(\beta\) and
+\(\sigma^2\) for this case of GLS are descrbied below:
 \[\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)\]
 \[\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})\]
+where MVN represents the Multivariate Normal Distribution, IG represents
+the Inverse Gamma distribution, W is described above, and
 \[ \begin{cases}
       \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
-      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^-1 \beta_0)
-    \end{cases}\]
-\[SSR_W = (y - X\beta)^TW(y-X\beta)\] Priors:
-
+      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^{-1} \beta_0)
+    \end{cases}\] \[SSR_W = (y - X\beta)^TW(y-X\beta)\]
+The remaining variables in the closed form full conditionals come from
+the random variables prior distributions, which are defined as follows:
 \[\beta \sim MVN (\beta_0, W_0)\]
 \[\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)\]
-\(\nu_0 = 2, \sigma_0^2 = 1\)
 
-\[ \begin{cases}
-      \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
-      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^-1 \beta_0)
-    \end{cases}\]
+The initial values for the prior distributions are set as:
+\(\beta_0 = 0\), \(W_0 = \gamma^2I\) where \(\gamma^2\) is a large
+number and \(I\) is the \(m \times n\) identity matrix, \(\nu_0 = 2\),
+\(\sigma_0^2 = 1\). This results in a diffuse prior for \(\beta\) that
+spreads out the density, and a noninformative prior for \(\sigma^2_0\).
+
 \section{Gibbs Sampling}\label{gibbs-sampling}
 
-Following the formulation of the model, a Gibbs Sampling algorithm is
-used to repeatedly generate samples from the full conditional of each
-parameter in the statistical model, which iteratively creates an
-approximate value for each cell.
+Following the formulation of the model, a Gibbs Sampling is created to
+repeatedly generate samples from the full conditional of each parameter
+in the statistical model, which iteratively creates an approximate value
+for each cell.
+
+The Gibbs Sampler algorithm progresses as follows:
+
+Let the set of parameter samples at step \(s\) in the algorithm be
+defined as \(\phi^{(s)} = \{\beta^{(s)}, \sigma^{2(k)}\}\)
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Sample \(\beta^{(s+1)} \sim P(\beta \mid X, \vec{y}, \sigma^{2(k)})\)
+\item
+  Sample \(\sigma^2 \sim P(\sigma^2 \mid X, \vec{y}, \beta^{(s+1)})\)
+\end{enumerate}
+Set \(\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}\)
 
 \chapter{Tensor Completion}\label{tensor-completion}
 

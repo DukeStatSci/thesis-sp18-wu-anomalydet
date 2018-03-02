@@ -1,4 +1,4 @@
-setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index")
+setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/")
 Y = readRDS("data/means.RDS")
 M = readRDS("data/freqs.RDS")
 
@@ -155,7 +155,8 @@ ranks5 = approximate_rank(Y5, M, 20, simulated = TRUE)
 # 
 # [[5]]
 # [1] 46944.11
-
+RMSEs = c (42727.19, 31878.69, 44605.58, 48193.36, 46903.49, 47509.22, 47807.57, 48136.36 )
+plot(seq(1,8,1), RMSEs)
 # > RMSEs = lapply(seq(1,8,1), function(k) loocv(200,k, 100, 74, Y, M)$RMSE)
 # > RMSEs
 # [[1]]

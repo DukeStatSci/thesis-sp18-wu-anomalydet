@@ -45,8 +45,17 @@ The initial values for the prior distributions are set as: $\beta_0 = 0$, $W_0 =
 
 
 ## Gibbs Sampling
-Using this model, we construct a Gibbs Sampler: 
-Following the formulation of the model, a Gibbs Sampling algorithm is used to repeatedly generate samples from the full conditional of each parameter in the statistical model, which iteratively creates an approximate value for each cell. 
 
+Following the formulation of the model, a Gibbs Sampling is created to repeatedly generate samples from the full conditional of each parameter in the statistical model, which iteratively creates an approximate value for each cell. 
+
+The Gibbs Sampler algorithm progresses as follows: 
+
+Let the set of parameter samples at step $s$ in the algorithm be defined as $\phi^{(s)} = \{\beta^{(s)}, \sigma^{2(k)}\}$
+
+1. Sample $\beta^{(s+1)} \sim P(\beta \mid X, \vec{y}, \sigma^{2(k)})$
+
+2. Sample $\sigma^2 \sim P(\sigma^2 \mid X, \vec{y}, \beta^{(s+1)})$
+
+Set $\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}$
 
 

@@ -8,6 +8,7 @@ n = 0 #what exacltyis n
 
 gibbs_sampler = function (X, y, W, n, S = 1000){
   m = nrow(X)
+  n = ncol(X)
   ### prior values 
   nu_0 = 2
   sigma2_0 = 1

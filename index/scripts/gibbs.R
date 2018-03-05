@@ -28,7 +28,7 @@ gibbs_sampler = function (X, y, W, n, S = 1000){
     # generate a new Beta value from its full conditional
     Sigma_n = inv ( ( t(X) %*% W %*% X )* ( 1 / inv_sigma2 ) + inv(W_0) ) # 1 / sigma2?
     beta_n = Sigma_n %*% ( ( t(X) %*% W %*% X ) %*% y * ( 1 / inv_sigma2 ) + inv(W_0) %*% beta_0)
-    beta = mvrnorm( 1, beta_n, Sigma_n ) # how to sample MVN
+    beta = mvrnorm( 1, beta_n, Sigma_n ) # how to sample MVN, use MASS?
     
     # generate a new 1/sigma2 value from its full conditional
     SSR_W = ( inv( y - X %*% beta ) %*% W  %*% ( y - X %*% beta ))

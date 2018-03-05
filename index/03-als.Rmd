@@ -255,10 +255,26 @@ matrix_complete = function(S = 1000, k = 2, nrows, ncols, Y, M){
 Y_imputed = matrix_complete(250, 2, nrow(Y), ncol(Y), Y, M)
 par(mfrow = c(1,2))
 plot(Y[!is.na(Y)], Y_imputed[!is.na(Y)])
+abline(0,1, col = "red")
 plot(Y[!is.na(Y)], Y_imputed[!is.na(Y)], xlim = c(0,1000), ylim = c(0,1000))
+abline(0,1, col = "red")
 ```
 
-The two plots above display the true values of the $Y$ matrix (i.e. the non-missing values) versus their corresponding fitted values using the alternating least squares algorithm with an input of rank 2. The first plot displays all values and shows a somewhat linear trend (an ideal fit of the true values would be a fully linear trend). However, several outliers with large true values skew this dataset and cause the plot to appear linear. Closer examination of the true and fitted values smaller than 1000 (the plot on the right)
+The two plots above display the true values of the $Y$ matrix (i.e. the non-missing values) versus their corresponding fitted values using the alternating least squares algorithm with an input of rank 2. The first plot displays all values and shows a somewhat positive linear trend (an ideal fit of the true values would be a scatter of points following the 45 degree angled line represented in red). However, several outliers with large true values skew this dataset and cause the plot to appear linear. Closer examination of the true and fitted values smaller than 1000 (the plot on the right) reveals the relationship is far from the linear pattern.
+
+### Scale Transformations
+
+The poorly fitted results motivates a consideration of the scale of the data. The present algorithm uses the sample averages of the overall matrix as well as the row and column means when imputing each missing cell value. This reliance upon sample means leads to susceptiblity to outliers. Moreover exploratory data analysis reveals the dataset contains outliers, particularly in the SrcBytes and DstBytes measurements. Thus, a transformation of features in the model may be appropriate for improving the fit of the algorithm.
+
+When a natural log transformation is applied to the raw dataset before any imputation steps are taken, the alternating least squares imputation algorithm yields the following root mean square errors varied by rank. Note, these errors have been reverse transformed with exponentiation to remain on the same scale as the errors from the non-transformed dataset.
+
+
+
+
+
+
+
+
 
 <!-- While matrix completion via singular value decomposition presents valid missing value imputations, and the algorithm converges relatively quickly, the error generated from leave one out cross validation reflects that the imputation performs rather poorly for low rank solutions to the data. Moreover, the errors are minimized at a rank approximation of 3, but even at this rank, the errors are relatively high considering the data was first normal transformed.  -->
 

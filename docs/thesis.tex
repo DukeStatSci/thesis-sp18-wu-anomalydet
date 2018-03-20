@@ -484,7 +484,7 @@ movies.
 \section{Matrix Completion Algorithm}\label{matrix-completion-algorithm}
 
 Each \(Y^{(k)}\) has missingness because not every source port interacts
-with every destination port. \(F \in {\rm I\!R}^{m \times n}\) is a
+with every destination port. \(F \in \mathbb{R}_{m \times n}\) is a
 sparse matrix that represents the frequencies of combinations, i.e
 \(F[32242,12312]\) represents the number of observations for the 32242
 12312 port interaction. \(M \in {\rm I\!R}^{m \times n}\) represents a
@@ -500,7 +500,7 @@ where \(U^{(k)}D^{(k)}V^{(k)T}\) represents the singular value
 decomposition of \(Y^{(k)}\). There are multiple steps to the matrix
 completion process:
 
-\subsection{Anova Initial Imputation}\label{anova-initial-imputation}
+\subsection{ANOVA Initial Imputation}\label{anova-initial-imputation}
 
 Impute the initial values for the missing \(y^{(k)}_{i,j}\) observations
 \(1 \leq i \leq m, 1 \leq j \leq n\): In general an additive model is
@@ -543,9 +543,6 @@ itself.
 
 \subsection{Implementation}\label{implementation}
 
-\section{Assessing Imputation
-Strategy}\label{assessing-imputation-strategy}
-
 \subsection{Leave One Out Cross
 Validation}\label{leave-one-out-cross-validation}
 
@@ -559,33 +556,80 @@ value. In this case, the algorithm records absolute error
 \(\sqrt{\frac{\sum (\hat y_{i,j} - y_{i,j})^2}{n}}\) where \(n\) is the
 number of observations not missing.
 
-\subsection{Implementation}\label{implementation-1}
-
-\subsection{Results}\label{results}
-
-While matrix completion via singular value decomposition presents valid
-missing value imputations, and the algorithm converges relatively
-quickly, the error generated from leave one out cross validation
-reflects that the imputation performs rather poorly for low rank
-solutions to the data. Moreover, the errors are minimized at a rank
-approximation of 3, but even at this rank, the errors are relatively
-high considering the data was first normal transformed.
-
-This poor performance may largely be due to the fact the algorithm does
-not account for the variability in the number of observed solutions for
-each cell being imputed. Unlike the Netflix Competition, in which each
-cell of the matrix being completed contained only a single user rating
-of a movie, the matrix in this problem contains the average of a
-variable number of observations in each cell.
-
 \section{Validation Against Simulated
 Data}\label{validation-against-simulated-data}
+
+Before applying the algorithm on the real data it is useful to validate
+the algorithmic approach against simulated data where the true rank is
+known.
 
 \subsection{Simulating a Low Rank
 Matrix}\label{simulating-a-low-rank-matrix}
 
+Taking the Kronecker product of two lower dimension matrices yields a
+higher dimension matrix with low rank. Explicitly, given matrix
+\(A \in \mathbb{R}_{m \times r}\) and \(B \in \mathbb{R}_{r \times n}\),
+\(A \otimes B = C\) where \(C \in \mathbb{R}_{m \times n}\) with rank
+\(r\). Thus, when \(r < m, r < n\) the matrix \(C\) has an optimal low
+rank that minimizes the root mean square error from the leave one out
+cross validation procedure. To add noise to the simulated matrix, \(C\),
+simply add an error matrix, \(E \in \mathbb{R}\) where
+\(e_{i,j} \sim N(0,1)\).
+
+Moreover, this procedure provides a computationally efficient way to
+simulate many random low rank matrices to use as inputs for the
+validation procedure. In the case of simulated matrices, there is no
+missing entries, so the leave one out cross validation procedure
+sequentially removes each cell in the matrix, imputes its value using
+the rank being investigated, and considers the error as a function of
+the difference between the true value and the imputed value.
+
+WHAT PLOTS OR VISUALIZATIONS DO I USE FOR RESULTS? HISTOGRAM OF
+PERCENTAGES FOR RANK APPROXIMATIONS? 1-4 100\%, higher ranks arent that
+relevant; effects of noise
+
+USE THIS TECHNIQUE TO SHOW DIFFERENT EFFECTS OF NOISE?
+
 \subsection{Approximating Optimal
 Rank}\label{approximating-optimal-rank}
+
+\section{Results on Real Data}\label{results-on-real-data}
+
+The above plot displays the root mean square errors from leave one out
+cross validation across different rank inputs into the algorithm. It's
+clear that rank 2 provides the best low-rank solution for the
+alternating least squares imputation algorithm. Thus rank 2 is used in
+the algorithm to impute the missing values in \(Y\).
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+The two plots above display the true values of the \(Y\) matrix
+(i.e.~the non-missing values) versus their corresponding fitted values
+using the alternating least squares algorithm with an input of rank 2.
+The first plot displays all values and shows a somewhat positive linear
+trend (an ideal fit of the true values would be a scatter of points
+following the 45 degree angled line represented in red). However,
+several outliers with large true values skew this dataset and cause the
+plot to appear linear. Closer examination of the true and fitted values
+smaller than 1000 (the plot on the right) reveals the relationship is
+far from the linear pattern.
+
+\subsection{Scale Transformations}\label{scale-transformations}
+
+The poorly fitted results motivates a consideration of the scale of the
+data. The present algorithm uses the sample averages of the overall
+matrix as well as the row and column means when imputing each missing
+cell value. This reliance upon sample means leads to susceptiblity to
+outliers. Moreover exploratory data analysis reveals the dataset
+contains outliers, particularly in the SrcBytes and DstBytes
+measurements. Thus, a transformation of features in the model may be
+appropriate for improving the fit of the algorithm.
+
+When a natural log transformation is applied to the raw dataset before
+any imputation steps are taken, the alternating least squares imputation
+algorithm yields the following root mean square errors varied by rank.
+Note, these errors have been reverse transformed with exponentiation to
+remain on the same scale as the errors from the non-transformed dataset.
 
 \chapter{A Bayesian Approach to Two Dimensional Matrix
 Completion}\label{a-bayesian-approach-to-two-dimensional-matrix-completion}

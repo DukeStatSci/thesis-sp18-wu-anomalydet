@@ -35,7 +35,7 @@ for (s in 1:n_Sport){
   for (d in 1:n_Dport){
     combination = argus[is.element(argus$Sport, top_Sport[s])
                         & is.element(argus$Dport, top_Dport[d]),]
-    obs = combination$DstPkts
+    obs = log(combination$DstPkts)
     n_obs = length(obs) #ignores NA values
     if (n_obs > 0){
       #obs = nscore(obs)$nscore #normal transformation

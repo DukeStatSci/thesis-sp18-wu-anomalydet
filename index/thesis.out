@@ -1,0 +1,31 @@
+\BOOKMARK [0][-]{chapter.1}{Chapter 1: Introduction}{}% 1
+\BOOKMARK [1][-]{section.1.1}{Anomaly Detection}{chapter.1}% 2
+\BOOKMARK [1][-]{section.1.2}{Network Attacks}{chapter.1}% 3
+\BOOKMARK [2][-]{subsection.1.2.1}{Status Quo Solution}{section.1.2}% 4
+\BOOKMARK [1][-]{section.1.3}{Network Dataset}{chapter.1}% 5
+\BOOKMARK [2][-]{subsection.1.3.1}{Features}{section.1.3}% 6
+\BOOKMARK [2][-]{subsection.1.3.2}{Argus}{section.1.3}% 7
+\BOOKMARK [0][-]{chapter.2}{Chapter 2: Modeling Port Relationships}{}% 8
+\BOOKMARK [1][-]{section.2.1}{Motivation}{chapter.2}% 9
+\BOOKMARK [1][-]{section.2.2}{Tensor Properties}{chapter.2}% 10
+\BOOKMARK [2][-]{subsection.2.2.1}{Correlations}{section.2.2}% 11
+\BOOKMARK [2][-]{subsection.2.2.2}{Missingness}{section.2.2}% 12
+\BOOKMARK [2][-]{subsection.2.2.3}{Row and Column Properties}{section.2.2}% 13
+\BOOKMARK [2][-]{subsection.2.2.4}{Port Connections}{section.2.2}% 14
+\BOOKMARK [2][-]{subsection.2.2.5}{Matrix Slice Properties}{section.2.2}% 15
+\BOOKMARK [0][-]{chapter.3}{Chapter 3: Alternating Least Squares Applied to Two Dimensional Matrices}{}% 16
+\BOOKMARK [1][-]{section.3.1}{Motivation}{chapter.3}% 17
+\BOOKMARK [1][-]{section.3.2}{Matrix Completion Algorithm}{chapter.3}% 18
+\BOOKMARK [2][-]{subsection.3.2.1}{ANOVA Initial Imputation}{section.3.2}% 19
+\BOOKMARK [2][-]{subsection.3.2.2}{Repeated Imputation}{section.3.2}% 20
+\BOOKMARK [2][-]{subsection.3.2.3}{Convergence Criterion}{section.3.2}% 21
+\BOOKMARK [2][-]{subsection.3.2.4}{Implementation}{section.3.2}% 22
+\BOOKMARK [2][-]{subsection.3.2.5}{Leave One Out Cross Validation}{section.3.2}% 23
+\BOOKMARK [1][-]{section.3.3}{Validation Against Simulated Data}{chapter.3}% 24
+\BOOKMARK [2][-]{subsection.3.3.1}{Simulating a Low Rank Matrix}{section.3.3}% 25
+\BOOKMARK [2][-]{subsection.3.3.2}{Approximating Optimal Rank}{section.3.3}% 26
+\BOOKMARK [1][-]{section.3.4}{Results on Real Data}{chapter.3}% 27
+\BOOKMARK [2][-]{subsection.3.4.1}{Scale Transformations}{section.3.4}% 28
+\BOOKMARK [0][-]{chapter.4}{Chapter 4: A Bayesian Approach to Two Dimensional Matrix Completion}{}% 29
+\BOOKMARK [1][-]{section.4.1}{Motivation}{chapter.4}% 30
+\BOOKMARK [1][-]{section.4.2}{Statistical Model for Port Relationships}{chapter.4}% 31

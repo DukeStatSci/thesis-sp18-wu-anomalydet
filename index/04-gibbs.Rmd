@@ -2,7 +2,7 @@
 
 ## Motivation
 
-The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell (source port $i$, destination port $j$), so the algorithm treated each $y_{ij}^{k}$, which represents the mean of all observations in cell $(i,j)$ for continuous feature $k$, as a single value with no consideration of differing sample sizes and variances between cells. The following section constructs a statistical model that takes frequency of observations for each cell into account and repeatedly samples from that statistical model to complete the matrix.
+The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell (source port $i$, destination port $j$), so the algorithm treated each $y_{ij}^{k}$, which represents the mean of all observations in cell $(i,j)$ for continuous feature $k$, as a single value with no consideration of differing sample sizes and variances between cells. The following section constructs a statistical model that takes frequency of observations and variances for each cell into account and repeatedly samples from that statistical model to complete the matrix.
 
 ## Statistical Model for Port Relationships
 
@@ -10,20 +10,23 @@ Additive Main Effects and Multiplicative Interaction Models (AMMI models) provid
 
 The following statistical model is defined for imputing port relationships: $$y_{i,j} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{n_{ij}}}\epsilon_{ij}$$ where $u_i$ represents ______, $v_j$ represents _____, $\sigma_i$ represents the MEAN??? of the standard deviations of each row in the matrix, $\tau_j$ represents the MEAN??? of the standard deviations of each column in the matrix, and $\epsilon_{ij} \sim N(0,1)$. Fixing specific rows or columns in the analysis enables the model to be rewritten in the form of a weighted least squares. In particular, fixing the $j$th row of the matrix yields: $$y_i = \beta^Tx_i + \sigma w_i\epsilon_{ij}$$ where $w_i = (\frac{\tau_j}{\sqrt(n_{ij}})^2$, and $\beta^T = u_i$. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}$, and the model can be applied to each matrix $Y^{(k)}$ separately.
 
-### Generalized Least Squares Model
-
 Vectorizing the above model yields $$\tilde{y} = X\beta + \sigma W^{1/2} \epsilon$$ where $W \in \mathbb{R}_{m \times n}$ is the diagonal matrix of weights, such that $$
   W =
   \begin{bmatrix}
-    w^{-1}_{1} & & \\
+    w^_{1} & & \\
     & \ddots & \\
-    & & w^{-1}_{m}
+    & & w^_{m}
   \end{bmatrix} 
   = \begin{bmatrix}
-    \frac{n_{11}}{\tau_1^2} & & \\
+    \frac{\tau_1^2}{n_{11}} & & \\
     & \ddots & \\
-    & & \frac{n_{mn}}{\tau_n^2}
+    & & \frac{\tau_n^2}{n_{mn}}
   \end{bmatrix}$$
+
+Thus in matrix form the full model is expressed: 
+
+With no errors or missing values this matrix of $v_j^T$ is the right singular matrix $V$ of the singular value decomposition of $Y$.
+
 
 This is a specific form of the Generalized Least Squares Model (GLS), which gives a weighted least squares estimate of $\beta$, and it is appropriate when the error terms are not independent and identically distributed. Bayesian analysis of this problem provides similar parameter estimates to GLS, and both ordinary least squares and GLS provide unbiased parameter estimates of $\beta$ with the latter giving estimates with a lower variance. 
 
@@ -44,18 +47,25 @@ $$\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)$$
 The initial values for the prior distributions are set as: $\beta_0 = 0$, $W_0 = \gamma^2I$ where $\gamma^2$ is a large number and $I$ is the $m \times n$ identity matrix, $\nu_0 = 2$, $\sigma_0^2 = 1$. This results in a diffuse prior for $\beta$ that spreads out the density, and a noninformative prior for $\sigma^2_0$. 
 
 
-## Gibbs Sampling
+## Gibbs Sampler
 
 Following the formulation of the model, a Gibbs Sampling is created to repeatedly generate samples from the full conditional of each parameter in the statistical model, which iteratively creates an approximate value for each cell. 
 
 The Gibbs Sampler algorithm progresses as follows: 
 
-Let the set of parameter samples at step $s$ in the algorithm be defined as $\phi^{(s)} = \{\beta^{(s)}, \sigma^{2(k)}\}$
+Let the set of parameter samples at step $s$ in the algorithm be defined as $\phi^{(s)} = \{\beta^{(s)}, \sigma^{2(k)}\}$. 
 
 1. Sample $\beta^{(s+1)} \sim P(\beta \mid X, \vec{y}, \sigma^{2(k)})$
 
 2. Sample $\sigma^2 \sim P(\sigma^2 \mid X, \vec{y}, \beta^{(s+1)})$
 
 Set $\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}$
+
+
+## Full Gibbs Sampler for Imputing Missing Values
+
+The Gibbs Sampler described represents the steps to sampling for $u_i$
+
+Initialize $\sigma_i$ and $\tau_j$ as the overall standard deviation of the $Y$ matrix. 
 
 

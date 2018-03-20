@@ -4,7 +4,7 @@
 library(lattice)
 library(reshape)
 library(igraph)
-setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/")
+setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index")
 argus = readRDS("data/argus_complete.rds")
 means = readRDS("data/means.RDS")
 vars = readRDS("data/vars.RDS")
@@ -29,9 +29,9 @@ top_Dport = (head(Dport_table$Var1, n_Dport))
 
   Preliminary data analysis signaled that there may exist trends between different port combinations. For instance, a particular source and destination port may frequently contain large byte transactions in their connections. Devising a systematic way to identify these combinations may present outliers that can be further investigated for scanner behavior. 
 
-  This approach to the anomaly detection problem reduces the dataset to the values of the four continuous features, SrcBytes, SrcPkts, DstBytes, DstPkts, observed across different source port and destination port combinations. The data can be represented as a 3-dimensional tensor $Y \in \mathbb{R_{m \times n \times 4}}$ where $m$ represents the number of source ports, $n$ represents the number of destination ports, and $4$ accounts for the four continuous features in the dataset. Each cell, $y_{ijk}$, contains the mean of all the observations observed for source port, $i$, and destination port $j$. In the cases where the combination of $i$ and $j$ is not observed in the dataset, $y_{ijk}$ is missing.
+  This approach to the anomaly detection problem reduces the dataset to the values of the four continuous features, SrcBytes, SrcPkts, DstBytes, DstPkts, observed across different source port and destination port combinations. The data can be represented as a 3-dimensional tensor $Y \in \mathbb{R}_{m \times n \times 4}$ where $m$ represents the number of source ports, $n$ represents the number of destination ports, and $4$ accounts for the four continuous features in the dataset. Each cell, $y_{ijk}$, contains the mean of all the observations observed for source port, $i$, and destination port $j$. In the cases where the combination of $i$ and $j$ is not observed in the dataset, $y_{ijk}$ is missing.
 
-  The goal of this paper is to devise an optimal strategy for imputing the missing cells in $Y$ to create the completed tensor $Y' \in \mathbb{R_{m \times n \times 4}}$. As new observations are observed for combinations of ports $i$ and $j$, the $y'_{ijk}$ values can be interpreted as an approximation for the expected behavior for that particular port combination. Observations with continuous features that are a certain threshold away from $y'_{ijk}$ may be marked as anomalies and investigated further.
+  The goal of this paper is to devise an optimal strategy for imputing the missing cells in $Y$ to create the completed tensor $Y' \in \mathbb{R}_{m \times n \times 4}$. As new observations are observed for combinations of ports $i$ and $j$, the $y'_{ijk}$ values can be interpreted as an approximation for the expected behavior for that particular port combination. Observations with continuous features that are a certain threshold away from $y'_{ijk}$ may be marked as anomalies and investigated further.
 
   Imputing values for each of the four continuous features in the dataset for all possible source and destination port combinations yields a reasonable expected value in each cell of the ports matrix that can then be compared to actual connection values when they are observed. New observations that differ greatly from the imputed values are flagged as anomalies and require further investigation. 
 
@@ -88,7 +88,7 @@ for (s in 1:n_Sport){
     }
   }
 }
-levelplot(missing,xlab = "Source Ports", ylab = "Destination Ports", 
+levelplot(missing,xlab = "Source Ports", ylab = "Destination Ports", scales=list(x=list(rot=90)),
           main = "Missingness in Ports Matrix", col.regions=gray(0:1,1),cuts=1)
 ```
 
@@ -108,7 +108,7 @@ barplot(col_means, las=2, xlab = "Destination Port", ylab = "Mean (SrcBytes)",
         main = "Column Means of SrcBytes Matrix")
 ```
 
-The bar plots above represent the row and column means of the continuous features for each slice of the tensor. These row means and column means inform imputation techniques for the missing cells within those respective rows and columns. COMMENT ON DISPROPORTIONATE MEANS BASED ON MISSING VARIANCES
+The bar plots above represent the row and column means of the continuous features for each slice of the tensor. These row means and column means inform imputation techniques for the missing cells within those respective rows and columns. There exist clear outliers in the means for certain ports. These outliers may cause problems with imputing missing values in that row or column combination because the outliers will tend to have a larger effect on the imputed value than other means that are more close to the median in the imputed values row or column. This further suggests imputation techniques that take into account variances among the row and column means and the number of samples observed for each port combination will result in more accurate imputations.
 
 ### Port Connections
 
@@ -155,7 +155,7 @@ plot(g,
 )
 ```
 
-Describe Ports network graph
+The above ports network graph displays the pairings between the top source ports (red cirlces) and the the top destination ports (blue squares). The size of each node reflects the number of paired observations that were observed using that particular port. It is important to note that not every source port is paired with a destination port and vice versa (not every node is connected to every other node). These missing combinations reflect missing values in the $Y$ tensor, and consequently they correspond to the combinations that require values to be imputed. 
 
 ### Matrix Slice Properties
 
@@ -165,9 +165,10 @@ Describe Ports network graph
 # levelplot(means, xlab = "Source Ports", ylab = "Destination Ports", 
 #           main = "Means of SrcBytes By Ports", 
 #           col.regions=rgb.palette(120))
-levelplot(freqs, xlab = "Source Ports", ylab = "Destination Ports",  
+freqs20 = readRDS("data/freqs_20.RDS")
+levelplot(freqs20, xlab = "Source Ports", ylab = "Destination Ports",  
           col.regions = heat.colors(16)[length(heat.colors(16)):1],
-          main = "Sample Sizes of Port Combinations")
+          main = "Sample Sizes of Port Combinations",scales=list(x=list(rot=90)))
 ```
 
-Variance in sample size 0 to 35000
+Finally, to better visualize the sample sizes first displayed in the network graph (section 2.2.4), the above heat plot represents the sample sizes for each source-destination port combination. It is again clear there are certain combinations that have many observations (range of 35000), while most of the observations are 0, indicating no observations were observed and the corresponding cell in $Y$ is missing, or near 0, indicating few observations were observed. The large variation in sample sizes suggests an imputation technique that accounts for sample size of a missing cell's related row and column cells is necessary.

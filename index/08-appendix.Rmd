@@ -21,7 +21,7 @@ argus = readRDS("data/argus_complete.rds")
 # combinations = readRDS("/data/combinations.rds")
 ```
 
-```{r}
+```{r,echo=FALSE}
 sapply(argus, class)
 argus = transform(argus,
                   Sport = as.factor(argus$Sport),
@@ -51,7 +51,7 @@ element_counts(State)
 ```
 
 ### Continuous Features: Distributions and Relationships
-```{r}
+```{r,echo=FALSE}
 par(mfrow=c(2,2))
 hist(SrcBytes); hist(SrcPkts); hist(DstBytes); hist(DstPkts) #clearly some very large values
 largest_n = function(x, n){
@@ -67,7 +67,7 @@ The histograms and the largest 10 values in each of the continuous variables sho
 
 We will now try to investigate whether the largest continuous predictor values correspond to any particular addresses or ports. 
 
-```{r}
+```{r,echo=FALSE}
 max.SrcBytes = argus[with(argus,order(-SrcBytes)),][1:20,]
 max.SrcPkts = argus[with(argus,order(-SrcPkts)),][1:20,]
 max.DstBytes = argus[with(argus,order(-DstBytes)),][1:20,]
@@ -119,7 +119,7 @@ The continuous features are still unevenly distributed even with the 20% most ex
 
 ### Log Transformation
 
-```{r}
+```{r, echo=FALSE}
 par(mfrow=c(2,2))
 hist(log(SrcBytes)); hist(log(SrcPkts)); hist(log(DstBytes)); hist(log(DstPkts))
 plot(log(SrcPkts), log(SrcBytes)); plot(log(DstPkts), log(DstBytes))

@@ -13,9 +13,9 @@ The following statistical model is defined for imputing port relationships: $$y_
 Vectorizing the above model yields $$y_i = X\beta + \sigma W^{1/2} \epsilon$$ where $W \in \mathbb{R}_{m \times n}$ is the diagonal matrix of weights, such that $$
   W =
   \begin{bmatrix}
-    w^_{1} & & \\
+    w_{1} & & \\
     & \ddots & \\
-    & & w^_{m}
+    & & w_{m}
   \end{bmatrix} 
   = \begin{bmatrix}
     \frac{\tau_1^2}{n_{11}} & & \\
@@ -70,6 +70,6 @@ Using the generalized Gibbs Sampler it is possible to define a procedure for ite
 1. Initialize $\sigma_i$ and $\tau_j$ as the overall standard deviation of the $Y^{(k)}$ matrix. 
 2. Simulate $u_i$ and $\sigma_i$ using the generalized Gibbs Sampler. Set random values for the starting value of $X$, the algorithm will naturally converge to the true values of $v_j$.
 3. Simulate $v_j$ and $\tau_j$ using the generalized Gibbs Sampler. Set random values for the starting value of $X$, the algorithm will naturally converge to the true values of $u_i$.
-4. Fill in the missing values $y_{ij}$ in $Y^{(k)}$ by sampling from the normal distribution $$y_{ij} \sim (u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{\sqrt{(n_ij)}})$$
+4. Fill in the missing values $y_{ij}$ in $Y^{(k)}$ by sampling from the normal distribution $$y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{\sqrt{(n_ij)}})$$
 
 

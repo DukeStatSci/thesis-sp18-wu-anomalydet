@@ -24,8 +24,6 @@ The Eckart-Young-Mirsky (EYM) Theorem provides the best rank-k approximation for
 
 The EYM rank approximation imputation steps are repeated until the relative difference between $Y^{(s+1)}$ and $Y^{(s)}$ falls below a set threshold, $T$. The relative difference threshold is expressed: $$\frac{\|Y^{(s+1)}-Y^{(s)}\|_2}{\|Y^{(s)}\|_2} < T$$ where $\|Y\|_2$ is the Frobenius norm. The denominator of the expression ensures the convergence criterion is invariate to a scale change in the matrix itself. 
 
-### Implementation
-
 ```{r,include=FALSE}
 Y = readRDS("data/means_SB.rds")
 M = readRDS("data/freqs.rds")
@@ -277,6 +275,7 @@ OUTLIERS DRIVE SUM OF SQUARES
 When a natural log transformation is applied to the raw dataset before any imputation steps are taken, the alternating least squares imputation algorithm yields the following root mean square errors varied by rank.
 
 ```{r, echo = FALSE}
+Y = readRDS("data/log_src_byte_Y.rds")
 # > RMSEs = lapply(seq(1,8,1), function(k) loocv(250,k, nrow(Y), ncol(Y), Y, M)$RMSE)
 # > RMSEs
 # [[1]]
@@ -304,7 +303,7 @@ When a natural log transformation is applied to the raw dataset before any imput
 # [1] 3.541428
 rmses_log = c(1.444161,1.913014, 2.249744, 2.285776, 
               2.483833, 2.72687,3.167227, 3.541428)
-plot (seq(1,8,1), rmses)
+plot (seq(1,8,1), rmses_log)
 ```
 
 ```{r, echo = FALSE}

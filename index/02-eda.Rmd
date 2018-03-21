@@ -4,6 +4,8 @@
 library(lattice)
 library(reshape)
 library(igraph)
+library(ggbiplot)
+library(gridExtra)
 setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index")
 argus = readRDS("data/argus_complete.rds")
 means = readRDS("data/means.RDS")
@@ -36,12 +38,10 @@ top_Dport = (head(Dport_table$Var1, n_Dport))
   Imputing values for each of the four continuous features in the dataset for all possible source and destination port combinations yields a reasonable expected value in each cell of the ports matrix that can then be compared to actual connection values when they are observed. New observations that differ greatly from the imputed values are flagged as anomalies and require further investigation. 
 
 ## Tensor Properties
-
 The following properties of $Y$ inform the imputation strategies in following sections.
 
 ### Correlations
-
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.height = 5, fig.width = 5}
 ### CORRELATIONS
 kendall_cors = matrix(c(1.0000000, 0.7227563, 0.5729918, 0.6367907,
                 0.7227563, 1.0000000, 0.7425211, 0.8108184,
@@ -63,15 +63,12 @@ levelplot(kendall_cors, main = "Kendall Correlations Between Continuous
 # DstPkts  0.6367907 0.8108184 0.8827988 1.0000000
 
 ```
-
 The matrix above describes the Kendall rank correlations (commonly referred to as Kendall's tau coefficent) between the four continuous features in the dataset.
 <!-- A tau test is a non-parametric hypothesis test for statistical dependence based on the tau coefficient. -->
-
 Intuitively, the Kendall correlation between two features will be high when observations have a similar rank (i.e. relative position label of observations within the variable: 1st, 2nd, 3rd, etc.) between the two variables, and low when observations have a dissimilar rank between the two variables. The range of correlations is [-1, 1]. Kendall correlation was selected as a measure because it evaluates ranks between observations, as opposed to Pearson, which is more susceptible to outliers in the dataset (large byte and packet observations in the continuous feautres skewed the Pearson measures). 
 
 ### Missingness
-
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.height = 5, fig.width = 5}
 ### MISSINGNESS VISUALIZATIONS
 
 #sum(apply(means, MARGIN = 1, FUN = function(x) length(x[is.na(x)])))
@@ -96,23 +93,52 @@ The above matrix represents the missingness in the port combinations for pairing
 
 ### Row and Column Properties
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.height=9, fig.width=6.5}
+sbyte_means = readRDS("data/means_SB.rds")[1:20, 1:20]
+spkt_means = readRDS("data/means_SP.rds")[1:20, 1:20]
+dbyte_means = readRDS("data/means_DB.rds")[1:20, 1:20]
+dpkt_means = readRDS("data/means_DP.rds")[1:20, 1:20]
 ### ROW MEANS/COL MEANS VISUALIZATION
-row_means = rowMeans(means, na.rm = TRUE)
-col_means = colMeans(means, na.rm = TRUE)
+sb_row_means = rowMeans(sbyte_means, na.rm = TRUE)
+sb_col_means = colMeans(sbyte_means, na.rm = TRUE)
 
-par(mfrow=c(2,1))
-barplot(row_means, las=2, xlab = "Source Port", ylab = "Mean (SrcBytes)",
+sp_row_means = rowMeans(spkt_means, na.rm = TRUE)
+sp_col_means = colMeans(spkt_means, na.rm = TRUE)
+
+db_row_means = rowMeans(dbyte_means, na.rm = TRUE)
+db_col_means = colMeans(dbyte_means, na.rm = TRUE)
+
+dp_row_means = rowMeans(dpkt_means, na.rm = TRUE)
+dp_col_means = colMeans(dpkt_means, na.rm = TRUE)
+#geombarplot, ggextra - grid arrange use ggplot use ggplot
+par(mfrow=c(4,2))
+barplot(sb_row_means, las=2, xlab = "Source Port", cex.names=0.8,
         main = "Row Means of SrcBytes Matrix")
-barplot(col_means, las=2, xlab = "Destination Port", ylab = "Mean (SrcBytes)",
+barplot(sb_col_means, las=2, xlab = "Destination Port", cex.names=0.8,
         main = "Column Means of SrcBytes Matrix")
+
+barplot(sp_row_means, las=2, xlab = "Source Port", cex.names=0.8,
+        main = "Row Means of SrcPkts Matrix")
+barplot(sp_col_means, las=2, xlab = "Destination Port",cex.names=0.8,
+        main = "Column Means of SrcPkts Matrix")
+
+barplot(db_row_means, las=2, xlab = "Source Port", cex.names=0.8,
+        main = "Row Means of DstBytes Matrix")
+barplot(db_col_means, las=2, xlab = "Destination Port", cex.names=0.8,
+        main = "Column Means of DstBytes Matrix")
+
+barplot(dp_row_means, las=2, xlab = "Source Port", cex.names=0.8,
+        main = "Row Means of SrcBytes Matrix")
+barplot(dp_col_means, las=2, xlab = "Destination Port",cex.names=0.8,
+        main = "Column Means of SrcBytes Matrix")
+
 ```
 
 The bar plots above represent the row and column means of the continuous features for each slice of the tensor. These row means and column means inform imputation techniques for the missing cells within those respective rows and columns. There exist clear outliers in the means for certain ports. These outliers may cause problems with imputing missing values in that row or column combination because the outliers will tend to have a larger effect on the imputed value than other means that are more close to the median in the imputed values row or column. This further suggests imputation techniques that take into account variances among the row and column means and the number of samples observed for each port combination will result in more accurate imputations.
 
 ### Port Connections
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height = 7, fig.width = 6.5}
 ### PORTS NETWORK GRAPH
 # net = graph_from_adjacency_matrix(missing)
 # net <- simplify(net, remove.multiple = T, remove.loops = T) 
@@ -172,3 +198,63 @@ levelplot(freqs20, xlab = "Source Ports", ylab = "Destination Ports",
 ```
 
 Finally, to better visualize the sample sizes first displayed in the network graph (section 2.2.4), the above heat plot represents the sample sizes for each source-destination port combination. It is again clear there are certain combinations that have many observations (range of 35000), while most of the observations are 0, indicating no observations were observed and the corresponding cell in $Y$ is missing, or near 0, indicating few observations were observed. The large variation in sample sizes suggests an imputation technique that accounts for sample size of a missing cell's related row and column cells is necessary.
+
+<!-- ### Principal Component Analysis/Dimensionality Reduction -->
+
+<!-- ```{r, echo=FALSE} -->
+<!-- nscore = function(x) { -->
+<!--    # Takes a vector of values x and calculates their normal scores. Returns  -->
+<!--    # a list with the scores and an ordered table of original values and -->
+<!--    # scores, which is useful as a back-transform table. See backtr(). -->
+<!--    nscore = qqnorm(x, plot.it = FALSE)$x  # normal score  -->
+<!--    trn.table = data.frame(x=sort(x),nscore=sort(nscore)) -->
+<!--    return (list(nscore=nscore, trn.table=trn.table)) -->
+<!-- } -->
+<!-- #principal component analysis and visualizing results -->
+<!-- pca_analysis = function(SrcBytes, SrcPkts, DstBytes, DstPkts){ -->
+<!--   pca_cont_vars = cbind(SrcBytes, SrcPkts, DstBytes, DstPkts) -->
+<!--   pca = prcomp(pca_cont_vars, center = TRUE, scale. = TRUE) -->
+<!--   print(pca$rotation) -->
+<!--   print((summary(pca))) -->
+<!--   #screeplot(pca, type="lines",col=3) -->
+<!--   g = ggbiplot(pca, obs.scale = 1, var.scale = 1, -->
+<!--                 ellipse = TRUE, -->
+<!--                 circle = TRUE) -->
+<!--   g = g + scale_color_discrete(name = '') -->
+<!--   g = g + theme(legend.direction = 'horizontal', -->
+<!--                  legend.position = 'top') -->
+<!--   return(g) -->
+<!-- } -->
+<!-- combinations = readRDS("data/pca_combo.rds") -->
+<!-- combo_table = combinations[1] -->
+<!-- combo_table = transform(combo_table, -->
+<!--                         SrcBytes = as.numeric(SrcBytes), -->
+<!--                         SrcPkts = as.numeric(SrcPkts), -->
+<!--                         DstBytes = as.numeric(DstBytes), -->
+<!--                         DstPkts = as.numeric(DstPkts)) -->
+<!-- # cat("Sport:", combo_table$Sport[1],"\t") -->
+<!-- # cat("Dport:", combo_table$Dport[1],"\n") -->
+<!-- SrcBytes_norm =  nscore(combo_table$SrcBytes)$nscore -->
+<!-- SrcPkts_norm =  nscore(combo_table$SrcPkts)$nscore -->
+<!-- DstBytes_norm =  nscore(combo_table$DstBytes)$nscore -->
+<!-- DstPkts_norm =  nscore(combo_table$DstPkts)$nscore -->
+<!-- g1 = pca_analysis(SrcBytes_norm, SrcPkts_norm, DstBytes_norm, DstPkts_norm) -->
+
+<!-- combo_table = combinations[20] -->
+<!-- combo_table = transform(combo_table, -->
+<!--                         SrcBytes = as.numeric(SrcBytes), -->
+<!--                         SrcPkts = as.numeric(SrcPkts), -->
+<!--                         DstBytes = as.numeric(DstBytes), -->
+<!--                         DstPkts = as.numeric(DstPkts)) -->
+<!-- # cat("Sport:", combo_table$Sport[1],"\t") -->
+<!-- # cat("Dport:", combo_table$Dport[1],"\n") -->
+<!-- SrcBytes_norm =  nscore(combo_table$SrcBytes)$nscore -->
+<!-- SrcPkts_norm =  nscore(combo_table$SrcPkts)$nscore -->
+<!-- DstBytes_norm =  nscore(combo_table$DstBytes)$nscore -->
+<!-- DstPkts_norm =  nscore(combo_table$DstPkts)$nscore -->
+<!-- g20 = pca_analysis(SrcBytes_norm, SrcPkts_norm, DstBytes_norm, DstPkts_norm) -->
+
+<!-- grid.arrange(g1, g20, ncol = 2) -->
+
+<!-- ``` -->
+

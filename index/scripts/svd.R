@@ -35,7 +35,7 @@ for (s in 1:n_Sport){
   for (d in 1:n_Dport){
     combination = argus[is.element(argus$Sport, top_Sport[s])
                         & is.element(argus$Dport, top_Dport[d]),]
-    obs = log(combination$DstPkts)
+    obs = log(combination$SrcBytes + 0.0001)
     n_obs = length(obs) #ignores NA values
     if (n_obs > 0){
       #obs = nscore(obs)$nscore #normal transformation
@@ -69,6 +69,9 @@ for (s in 1:n_Sport){
   }
 }
 
+Y = ports_mean_matrix 
+M = ports_freq_matrix
+V = ports_variance_matrix
 
 ### Filtering NA's
 Y = Y[, colSums(is.na(Y)) != nrow(Y)] #remove NA cols

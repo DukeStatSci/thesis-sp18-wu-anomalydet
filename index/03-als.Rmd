@@ -272,11 +272,52 @@ DISCUSS THE NEED TO HAVE DATA WHERE THE ENTIRE ROW OR COLUMN CANT BE MISSING
 
 The poorly fitted results motivates a consideration of the scale of the data. The present algorithm uses the sample averages of the overall matrix as well as the row and column means when imputing each missing cell value. This reliance upon sample means leads to susceptiblity to outliers. Moreover exploratory data analysis reveals the dataset contains outliers, particularly in the SrcBytes and DstBytes measurements. Thus, a transformation of features in the model may be appropriate for improving the fit of the algorithm.
 
-When a natural log transformation is applied to the raw dataset before any imputation steps are taken, the alternating least squares imputation algorithm yields the following root mean square errors varied by rank. Note, these errors have been reverse transformed with exponentiation to remain on the same scale as the errors from the non-transformed dataset.
+OUTLIERS DRIVE SUM OF SQUARES
 
+When a natural log transformation is applied to the raw dataset before any imputation steps are taken, the alternating least squares imputation algorithm yields the following root mean square errors varied by rank.
 
+```{r, echo = FALSE}
+# > RMSEs = lapply(seq(1,8,1), function(k) loocv(250,k, nrow(Y), ncol(Y), Y, M)$RMSE)
+# > RMSEs
+# [[1]]
+# [1] 1.444161
+# 
+# [[2]]
+# [1] 1.913014
+# 
+# [[3]]
+# [1] 2.249744
+# 
+# [[4]]
+# [1] 2.285776
+# 
+# [[5]]
+# [1] 2.483833
+# 
+# [[6]]
+# [1] 2.72687
+# 
+# [[7]]
+# [1] 3.167227
+# 
+# [[8]]
+# [1] 3.541428
+rmses_log = c(1.444161,1.913014, 2.249744, 2.285776, 
+              2.483833, 2.72687,3.167227, 3.541428)
+plot (seq(1,8,1), rmses)
+```
 
-
+```{r, echo = FALSE}
+Y_imputed = matrix_complete(250, 1, nrow(Y), ncol(Y), Y, M)
+par(mfrow = c(1,2))
+exp_Y = exp(Y)
+exp_Y_imp = exp(Y_imputed)
+plot(exp_Y[!is.na(exp_Y)], exp_Y_imp[!is.na(exp_Y)])
+abline(0,1, col = "red")
+plot(exp_Y[!is.na(exp_Y)], exp_Y_imp[!is.na(exp_Y)], 
+     xlim = c(0,1000), ylim = c(0,1000))
+abline(0,1, col = "red")
+```
 
 
 

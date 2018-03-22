@@ -10,7 +10,7 @@ The previous section's results reflected the need for an imputation strategy tha
 
 The following statistical model is defined for imputing port relationships: $$y_{i,j} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{n_{ij}}}\epsilon_{ij}$$ where $u_i$ represents ______, $v_j$ represents _____, $\sigma_i$ represents the MEAN??? of the standard deviations of each row in the matrix, $\tau_j$ represents the MEAN??? of the standard deviations of each column in the matrix, and $\epsilon_{ij} \sim N(0,1)$. Fixing the $j$ values in the analysis (i.e. $v_j$ and $\tau_j$ are known) enables the model to be rewritten in the form of a weighted least squares model for imputing $u_i$ and $\sigma_i$. Similarly, when $i$ is fixed, the model can be rewritten to simulate $v_j$ and $\tau_j$. In particular, fixing the $j$th row of the matrix yields: $$y_i = \beta^Tx_i + \sigma w_i\epsilon_{ij}$$ where $w_i = (\frac{\tau_j}{\sqrt(n_{ij}})^2$, and $\beta^T = u_i$. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}$, and the model can be applied to each matrix $Y^{(k)}$ separately.
 
-Vectorizing the above model yields $$y_i = X\beta + \sigma W^{1/2} \epsilon$$ where $W \in \mathbb{R}_{m \times n}$ is the diagonal matrix of weights, such that $$
+Vectorizing the above model yields $$y_i = X\beta + \sigma W^{1/2} \epsilon$$ where $W \in \mathbb{R}_{m \times m}$ is the diagonal matrix of weights, such that $$
   W =
   \begin{bmatrix}
     w_{1} & & \\
@@ -31,11 +31,11 @@ This is a specific form of the Generalized Least Squares Model (GLS), which give
 
 The full conditional distributions of the random variables $\beta$ and $\sigma^2$ for this case of GLS are described below: 
 $$\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)$$
-$$\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})$$
+$$\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + m}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})$$
 where MVN represents the Multivariate Normal Distribution, IG represents the Inverse Gamma distribution, W is described above, and 
 $$ \begin{cases}
-      \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
-      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^{-1} \beta_0)
+      \Sigma_n = (X^TW^{-1}X/\sigma^2+W_0^{-1})^{-1}\\
+      \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + W_0^{-1} \beta_0)
     \end{cases}$$
 $$SSR_W = (y - X\beta)^TW(y-X\beta)$$
 
@@ -44,6 +44,8 @@ $$\beta \sim MVN (\beta_0, W_0)$$
 $$\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)$$
 
 The initial values for the prior distributions are set as: $\beta_0 = 0$, $W_0 = \gamma^2I$ where $\gamma^2$ is a large number and $I$ is the $m \times n$ identity matrix, $\nu_0 = 2$, $\sigma_0^2 = 1$. This results in a diffuse prior for $\beta$ that spreads out the density, and a noninformative prior for $\sigma^2_0$. 
+
+SHOW THAT GENERALIZED LINEAR MODEL IS (X^T W^-1 X )^-1 X^TW^-1y
 
 The derivation of the general case can be found in APPENDIX????
 

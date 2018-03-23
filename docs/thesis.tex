@@ -627,6 +627,8 @@ When a noise matrix \(E\) is added to each simulated matrix \(C\)
 
 \section{Results on Real Data}\label{results-on-real-data}
 
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-11-1.pdf}
+
 The above plot displays the root mean square errors from leave one out
 cross validation across different rank inputs into the algorithm. It's
 clear that rank 2 provides the best low-rank solution for the
@@ -712,7 +714,7 @@ the model can be applied to each matrix \(Y^{(k)}\) separately.
 
 Vectorizing the above model yields
 \[y_i = X\beta + \sigma W^{1/2} \epsilon\] where
-\(W \in \mathbb{R}_{m \times n}\) is the diagonal matrix of weights,
+\(W \in \mathbb{R}_{m \times m}\) is the diagonal matrix of weights,
 such that \[
   W =
   \begin{bmatrix}
@@ -743,12 +745,12 @@ as a limit of the Bayes estimator.
 The full conditional distributions of the random variables \(\beta\) and
 \(\sigma^2\) for this case of GLS are described below:
 \[\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)\]
-\[\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})\]
+\[\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + m}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})\]
 where MVN represents the Multivariate Normal Distribution, IG represents
 the Inverse Gamma distribution, W is described above, and
 \[ \begin{cases}
-      \Sigma_n = (X^TWX\sigma^2+W_0^{-1})^{-1}\\
-      \beta_n = \Sigma_n(X^TWy\sigma^2 + W_0^{-1} \beta_0)
+      \Sigma_n = (X^TW^{-1}X/\sigma^2+W_0^{-1})^{-1}\\
+      \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + W_0^{-1} \beta_0)
     \end{cases}\] \[SSR_W = (y - X\beta)^TW(y-X\beta)\]
 The remaining variables in the closed form full conditionals come from
 the random variables prior distributions, which are defined as follows:
@@ -760,6 +762,9 @@ The initial values for the prior distributions are set as:
 number and \(I\) is the \(m \times n\) identity matrix, \(\nu_0 = 2\),
 \(\sigma_0^2 = 1\). This results in a diffuse prior for \(\beta\) that
 spreads out the density, and a noninformative prior for \(\sigma^2_0\).
+
+SHOW THAT GENERALIZED LINEAR MODEL IS (X\^{}T W\^{}-1 X )\^{}-1
+X\textsuperscript{TW}-1y
 
 The derivation of the general case can be found in APPENDIX????
 

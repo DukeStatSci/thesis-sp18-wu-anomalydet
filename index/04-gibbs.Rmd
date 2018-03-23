@@ -2,15 +2,33 @@
 
 ## Motivation
 
-The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell (source port $i$, destination port $j$), so the algorithm treated each $y_{ij}^{k}$, which represents the mean of all observations in cell $(i,j)$ for continuous feature $k$, as a single value with no consideration of differing sample sizes and variances between cells. The following section constructs a statistical model that takes frequency of observations and variances for each cell into account and repeatedly samples from that statistical model to complete the matrix.
+The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell (source port $i$, destination port $j$), so the algorithm treated each $y_{ij}^{k}$, which represents the mean of all observations in cell $(i,j)$ for continuous feature $k$, as a single value with no consideration of differing sample sizes and variances between cells. The following section constructs a statistical model that takes frequency of observations and variances for each cell into account and repeatedly samples using a nested Gibbs Sampling procedure built upon the full conditionals of the parameters of the statistical model to impute missing values in the matrix. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}$, and the model can be applied to each matrix $Y^{(k)}$ separately.
+
 
 ## Statistical Model for Port Relationships
 
 <!-- Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination.  -->
 
-The following statistical model is defined for imputing port relationships: $$y_{i,j} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{n_{ij}}}\epsilon_{ij}$$ where $u_i$ represents ______, $v_j$ represents _____, $\sigma_i$ represents the MEAN??? of the standard deviations of each row in the matrix, $\tau_j$ represents the MEAN??? of the standard deviations of each column in the matrix, and $\epsilon_{ij} \sim N(0,1)$. Fixing the $j$ values in the analysis (i.e. $v_j$ and $\tau_j$ are known) enables the model to be rewritten in the form of a weighted least squares model for imputing $u_i$ and $\sigma_i$. Similarly, when $i$ is fixed, the model can be rewritten to simulate $v_j$ and $\tau_j$. In particular, fixing the $j$th row of the matrix yields: $$y_i = \beta^Tx_i + \sigma w_i\epsilon_{ij}$$ where $w_i = (\frac{\tau_j}{\sqrt(n_{ij}})^2$, and $\beta^T = u_i$. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}$, and the model can be applied to each matrix $Y^{(k)}$ separately.
+The following statistical model is defined for the cells in $Y$: $$y_{ij} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}$$ where $u_i$ represents the row factors, $v_j$ represents the column factors, 
+<!-- $\sigma_i$ represents the standard deviation of each row in the matrix, $\tau_j$ represents the standard deviations of each column in the matrix,  -->
+$s_{ij}$ represents the sample size of observations observed for source port $i$ and destination port $j$, and $\epsilon_{ij} \sim N(0,1)$. Fixing the $j$ values in the analysis (i.e. $v_j$ and $\tau_j$ are known) enables the model to be rewritten in the form of a weighted least squares model for imputing $u_i$ and $\sigma_i$. Similarly, when $i$ is fixed, the model can be rewritten to simulate $v_j$ and $\tau_j$. To demonstrate this property, the procedure for simulating $u_i$ and $\tau_j$ given known values for $v_j$ and $\tau_j$ is described below. The same procedure is possible for $v_j$ and $\tau_j$ when $u_i$ and $\sigma_i$ are known.
 
-Vectorizing the above model yields $$y_i = X\beta + \sigma W^{1/2} \epsilon$$ where $W \in \mathbb{R}_{m \times m}$ is the diagonal matrix of weights, such that $$
+## General Model for Simulating Row and Column Factors
+
+Varying $j = 1 ... n$ the model above yields the following cell values: 
+$$y_{i1} = u_i^Tv_1 + \frac{\sigma_1 \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}$$ 
+$$ ... $$ 
+
+$$ y_{in} = u_i^Tv_n + \frac{\sigma_1 \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij} $$
+
+Vectorizing all of these equations varied across $j = 1...n$ yields:
+
+$$\vec{y_i} = Vu_i + \sigma_i W^{1/2}\vec{\epsilon}$$ 
+
+<!-- $$\vec{y_i} = \beta^Tx_i + \sigma w_i^{1/2}\epsilon_{ij}$$  -->
+<!-- where $w_i = (\frac{\tau_j}{\sqrt(n_{ij}})^2$, and $\beta^T = u_i$. -->
+<!-- Vectorizing the above model yields $$\vec{y} = X\beta + \sigma W^{1/2} \epsilon$$  -->
+where $V \in \mathbb{R}_W \in \mathbb{R}_{m \times m}$ is the diagonal matrix of weights, such that $$
   W =
   \begin{bmatrix}
     w_{1} & & \\
@@ -37,7 +55,7 @@ $$ \begin{cases}
       \Sigma_n = (X^TW^{-1}X/\sigma^2+W_0^{-1})^{-1}\\
       \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + W_0^{-1} \beta_0)
     \end{cases}$$
-$$SSR_W = (y - X\beta)^TW(y-X\beta)$$
+$$SSR_W = (y - X\beta)^TW^{-1}(y-X\beta)$$
 
 The remaining variables in the closed form full conditionals come from the random variables prior distributions, which are defined as follows: 
 $$\beta \sim MVN (\beta_0, W_0)$$
@@ -49,21 +67,7 @@ SHOW THAT GENERALIZED LINEAR MODEL IS (X^T W^-1 X )^-1 X^TW^-1y
 
 The derivation of the general case can be found in APPENDIX????
 
-### Generalized Gibbs Sampler
 
-Following the formulation of the model and the definition of the priors, a Gibbs Sampler is created to repeatedly generate samples from the full conditional of each parameter in the statistical model, which iteratively creates an approximate value for each cell. 
-
-The Gibbs Sampler algorithm progresses as follows: 
-
-Let the set of parameter samples at step $s$ in the algorithm be defined as $\phi^{(s)} = \{\beta^{(s)}, \sigma^{2(k)}\}$. 
-
-1. Sample $\beta^{(s+1)} \sim P(\beta \mid X, \vec{y}, \sigma^{2(k)})$
-
-2. Sample $\sigma^2 \sim P(\sigma^2 \mid X, \vec{y}, \beta^{(s+1)})$
-
-Set $\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}$
-
-This Gibbs Sampler serves as a general technique that can be used to simulate both the values of $u_i$ and $\sigma_i$ or $v_j$ and $\tau_j$ depending on the inputs it is given because the formulation of both models are identical; they only differ by the calculations of the inputs, $X$ and $W$. In the context of the problem, it can first be called to simulate all of the rows of the matrix $Y^{(k)}$, then called to simulate all of the columns of the matrix, and the process repeats from there. 
 
 ## Procedure for Imputing Missing Values
 
@@ -73,5 +77,9 @@ Using the generalized Gibbs Sampler it is possible to define a procedure for ite
 2. Simulate $u_i$ and $\sigma_i$ using the generalized Gibbs Sampler. Set random values for the starting value of $X$, the algorithm will naturally converge to the true values of $v_j$.
 3. Simulate $v_j$ and $\tau_j$ using the generalized Gibbs Sampler. Set random values for the starting value of $X$, the algorithm will naturally converge to the true values of $u_i$.
 4. Fill in the missing values $y_{ij}$ in $Y^{(k)}$ by sampling from the normal distribution $$y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{\sqrt{(n_ij)}})$$
+
+
+$$y_{ijk}$$
+
 
 

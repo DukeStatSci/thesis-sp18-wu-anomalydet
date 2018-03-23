@@ -1,10 +1,9 @@
 library(MASS)
 
-gibbs_sampler = function (X, y, W, S = 1000){
+gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 10){
   m = nrow(X)
   ### prior values 
   nu_0 = 2
-  sigma2_0 = 1
   beta_0 = numeric(m)  
   gamma2 = 100
   W_0 = diag(m) * gamma2 #W is m x m
@@ -12,7 +11,7 @@ gibbs_sampler = function (X, y, W, S = 1000){
   ### starting values
   set.seed(1)
   BETAs = list()
-  INV_SIGMAs = list()
+  INV_SIGMAs = list() # CHANGE VECTOR, RENAME TO INV_SIGMA2 
   beta = beta_0
   BETAs[[1]] = beta
   inv_sigma2 = 1 / sigma2_0
@@ -26,7 +25,7 @@ gibbs_sampler = function (X, y, W, S = 1000){
     beta = mvrnorm( 1, beta_n, Sigma_n ) 
     
     # generate a new 1/sigma2 value from its full conditional
-    SSR_W = ( ginv( y - X %*% beta ) %*% W  %*% ( y - X %*% beta ))
+    SSR_W = ( t( y - X %*% beta ) %*% ginv(W)  %*% ( y - X %*% beta ))
     inv_sigma2 = rgamma(1, ( nu_0 + m )/2, ( nu_0 * sigma2_0 + SSR_W) / 2)
     
     BETAs[[s]] = beta
@@ -36,9 +35,17 @@ gibbs_sampler = function (X, y, W, S = 1000){
 }
 
 #testing gibbs sampler
-# X = matrix(rnorm(m * m, mean=0, sd=1), m, m) 
-# W = diag(x = rnorm(m, mean=0, sd=1), nrow = m, ncol = m)
-# y = matrix(rnorm(m * 1, mean=0, sd=1), m, 1) 
+p<-5
+beta<-rnorm(p)
+X = matrix(rnorm(m * p, mean=0, sd=1), m, p)
+W = diag(x = rexp(m), nrow = m, ncol = m)
+y = X%*%beta  + matrix(rnorm(m * 1, mean=0, sd=1), m, 1)
+
+plot(beta, lm(y~ -1+ X)$coef)
+abline(0,1)
+
+#run the algorithm more than 10 times, check that the beta posterior mean (column means of the beta matrix object)
+#get a distribution of betas, calculate the posterior mean of those, get a distribution of sigma2 (make sure it is, dont use variance of 1)
 # 
 # 
 # X = matrix(1, m, m) 
@@ -46,7 +53,7 @@ gibbs_sampler = function (X, y, W, S = 1000){
 # y = matrix(1, m, 1) 
 # 
 # 
-# gibbs_sampler(X, y, W, 100)
+gibbs_sampler(X, y, W)
 
 ##FULL procedure
 

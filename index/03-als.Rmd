@@ -184,7 +184,7 @@ When a noise matrix $E$ is added to each simulated matrix $C$
 
 ## Results on Real Data
 
-```{r,eval = FALSE,echo=FALSE}
+```{r,echo=FALSE}
 # RMSEs = lapply(seq(1,8,1), function(k) loocv(250,k, nrow(Y), ncol(Y), Y, M)$RMSE)
 # [[1]]
 # [1] 42727.19
@@ -209,7 +209,7 @@ When a noise matrix $E$ is added to each simulated matrix $C$
 # 
 # [[8]]
 # [1] 48136.36
-rmses = c( 42727.19, 331878.69, 44605.58, 48193.36, 46903.49, 47509.22, 47807.57, 48136.36 )
+rmses = c( 42727.19, 33187.69, 44605.58, 48193.36, 46903.49, 47509.22, 47807.57, 48136.36 )
 plot (seq(1,8,1), rmses)
 ```
 

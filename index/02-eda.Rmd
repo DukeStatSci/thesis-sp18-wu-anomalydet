@@ -113,24 +113,24 @@ dp_col_means = colMeans(dpkt_means, na.rm = TRUE)
 #geombarplot, ggextra - grid arrange use ggplot use ggplot
 par(mfrow=c(4,2))
 barplot(sb_row_means, las=2, xlab = "Source Port", cex.names=0.8,
-        main = "Row Means of SrcBytes Matrix")
+        main = "Row Means of SrcBytes Matrix", col = "green")
 barplot(sb_col_means, las=2, xlab = "Destination Port", cex.names=0.8,
-        main = "Column Means of SrcBytes Matrix")
+        main = "Column Means of SrcBytes Matrix", col = "orange")
 
 barplot(sp_row_means, las=2, xlab = "Source Port", cex.names=0.8,
-        main = "Row Means of SrcPkts Matrix")
+        main = "Row Means of SrcPkts Matrix", col = "green")
 barplot(sp_col_means, las=2, xlab = "Destination Port",cex.names=0.8,
-        main = "Column Means of SrcPkts Matrix")
+        main = "Column Means of SrcPkts Matrix", col = "orange")
 
 barplot(db_row_means, las=2, xlab = "Source Port", cex.names=0.8,
-        main = "Row Means of DstBytes Matrix")
+        main = "Row Means of DstBytes Matrix", col = "green")
 barplot(db_col_means, las=2, xlab = "Destination Port", cex.names=0.8,
-        main = "Column Means of DstBytes Matrix")
+        main = "Column Means of DstBytes Matrix", col = "orange")
 
 barplot(dp_row_means, las=2, xlab = "Source Port", cex.names=0.8,
-        main = "Row Means of SrcBytes Matrix")
+        main = "Row Means of SrcBytes Matrix", col = "green")
 barplot(dp_col_means, las=2, xlab = "Destination Port",cex.names=0.8,
-        main = "Column Means of SrcBytes Matrix")
+        main = "Column Means of SrcBytes Matrix", col = "orange")
 
 ```
 
@@ -138,7 +138,7 @@ The bar plots above represent the row and column means of the continuous feature
 
 ### Port Connections
 
-```{r, echo=FALSE, fig.height = 7, fig.width = 6.5}
+```{r, echo=FALSE, fig.height = 7, fig.width = 7}
 ### PORTS NETWORK GRAPH
 # net = graph_from_adjacency_matrix(missing)
 # net <- simplify(net, remove.multiple = T, remove.loops = T) 
@@ -192,9 +192,9 @@ The above ports network graph displays the pairings between the top source ports
 #           main = "Means of SrcBytes By Ports", 
 #           col.regions=rgb.palette(120))
 freqs20 = readRDS("data/freqs_20.RDS")
-levelplot(freqs20, xlab = "Source Ports", ylab = "Destination Ports",  
+levelplot(log(freqs20), xlab = "Source Ports", ylab = "Destination Ports",  
           col.regions = heat.colors(16)[length(heat.colors(16)):1],
-          main = "Sample Sizes of Port Combinations",scales=list(x=list(rot=90)))
+          main = "Sample Sizes of Port Combinations (Log Scale)",scales=list(x=list(rot=90)))
 ```
 
 Finally, to better visualize the sample sizes first displayed in the network graph (section 2.2.4), the above heat plot represents the sample sizes for each source-destination port combination. It is again clear there are certain combinations that have many observations (range of 35000), while most of the observations are 0, indicating no observations were observed and the corresponding cell in $Y$ is missing, or near 0, indicating few observations were observed. The large variation in sample sizes suggests an imputation technique that accounts for sample size of a missing cell's related row and column cells is necessary.
@@ -257,4 +257,6 @@ Finally, to better visualize the sample sizes first displayed in the network gra
 <!-- grid.arrange(g1, g20, ncol = 2) -->
 
 <!-- ``` -->
+
+
 

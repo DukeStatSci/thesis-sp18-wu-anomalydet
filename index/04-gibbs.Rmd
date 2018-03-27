@@ -50,7 +50,7 @@ $$V =
 
 This model can be rewritten in a general form: 
 
-$$\vec{y} = X\beta + \sigmaW^{1/2}\epsilon$$ where $X$ represents $V$, $\beta$ represents $u_i$ and $sigma$ represents $\sigma_i$.
+$$\vec{y} = X\beta + \sigma W^{1/2}\epsilon$$ where $X$ represents $V$, $\beta$ represents $u_i$ and $sigma$ represents $\sigma_i$.
 
 This is a specific form of the Generalized Least Squares Model (GLS), which gives a weighted least squares estimate of $\beta$, and it is appropriate when the error terms are not independent and identically distributed. Bayesian analysis of this problem provides similar parameter estimates to GLS, and both ordinary least squares and GLS provide unbiased parameter estimates of $\beta$ with the latter giving estimates with a lower variance because the non-Bayes estimator serves as a limit of the Bayes estimator. 
 
@@ -80,13 +80,15 @@ Following the formulation of the model and the definition of the priors, a Gibbs
 
 The Gibbs Sampler algorithm progresses as follows:
 
-Let the set of parameter samples at step $s$ in the algorithm be defined as $\phi^{(s)} = {\beta^{(s)}, \sigma^{2(s)}}$.
+Let the parameters at step $s$ be:
+
+$\phi^{(s)} = \{\beta^{(s)}, \sigma^{2(s)}\}$
 
 Sample $\beta^{(s+1)} \sim P(\beta \mid X, \vec{y}, \sigma^{2(k)})$
 
 Sample $\sigma^2 \sim P(\sigma^2 \mid X, \vec{y}, \beta^{(s+1)})$
 
-Set $\phi^{(s+1)} = {\beta^{(s+1)}, \sigma^{2(k+1)}}$
+Set $\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}$
 
 This Gibbs Sampler serves as a general technique that can be used to simulate both the values of $u_i$ and $\sigma_i$ or $v_j$ and $\tau_j$ depending on the inputs it is given because the formulation of both models are identical; they only differ by the calculations of the inputs, $X$ and $W$. In the context of the problem, it can first be called repeatedly to simulate all of the rows of the matrix $Y^{(k)}$, then called repeatedly with updated inputs to simulate all of the columns of the matrix. 
 
@@ -111,7 +113,7 @@ $$\beta =
 
 Using random sampled values from the normal distribution for $X$ and $y$, and random sampled values from the exponential distribution for $W$ (exponential distribution is used to ensure $\Sigma_n$ is positive definite), its possible to generate a distribution of $\beta$ and $\sigma^2$. The posterior means of these distributions are then compared to the actual values in the distributions. 
 
-```{r}
+```{r, eval = FALSE}
 p<-5
 beta<-rnorm(p)
 X = matrix(rnorm(m * p, mean=0, sd=1), m, p)

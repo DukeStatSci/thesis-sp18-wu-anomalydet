@@ -487,7 +487,7 @@ Matrices}\label{alternating-least-squares-applied-to-two-dimensional-matrices}
 
 The preliminary tensor imputation technique slices the tensor into four
 separate matrices,
-\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}\). Each
+\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}\). Each
 matrix has dimensions defined by the number of source ports by the
 number of destination ports. Each cell, \(Y^{(k)}_{ij}\) contains the
 mean of the observations observed for continuous feature \(k\) and
@@ -503,10 +503,10 @@ movies.
 \section{Matrix Completion Algorithm}\label{matrix-completion-algorithm}
 
 Each \(Y^{(k)}\) has missingness because not every source port interacts
-with every destination port. \(F \in \mathbb{R}_{m \times n}\) is a
+with every destination port. \(F \in \mathbb{R}^{m \times n}\) is a
 sparse matrix that represents the frequencies of combinations, i.e
 \(F[32242,12312]\) represents the number of observations for the 32242
-12312 port interaction. \(M \in \mathbb{R}_{m \times n}\) represents a
+12312 port interaction. \(M \in \mathbb{R}^{m \times n}\) represents a
 boolean matrix of whether the corresponding \(Y\) values are missing.
 \(Y^{(k)}[M]\) represents all of the missing values of \(Y^{(k)}\).
 Moreover because each non-missing observation contains all four
@@ -585,8 +585,8 @@ Matrix}\label{simulating-a-low-rank-matrix}
 
 Taking the Kronecker product of two lower dimension matrices yields a
 higher dimension matrix with low rank. Explicitly, given matrix
-\(A \in \mathbb{R}_{m \times r}\) and \(B \in \mathbb{R}_{r \times n}\),
-\(A \otimes B = C\) where \(C \in \mathbb{R}_{m \times n}\) with rank
+\(A \in \mathbb{R}^{m \times r}\) and \(B \in \mathbb{R}^{r \times n}\),
+\(A \otimes B = C\) where \(C \in \mathbb{R}^{m \times n}\) with rank
 \(r\). Thus, when \(r < m, r < n\) the matrix \(C\) has an optimal low
 rank that minimizes the root mean square error from the leave one out
 cross validation procedure. To add noise to the simulated matrix, \(C\),
@@ -672,6 +672,13 @@ algorithm yields the following root mean square errors varied by rank.
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-14-1.pdf}
 
+\[min \sum_{i,j:F_{i,j} > 0} (y_{i,j} - u_iDv^T_j)^2\]
+\[y_{ij} =  a_i + b_j - \mu + \epsilon_{ij}\]
+
+\[UDV^T\]
+
+\[Y^{(s+1)} = (U^{(s)}[,1 : r]D^{(s)}[,1 : r]V^{(s)}[,1 : r]^T)\]
+
 \chapter{A Bayesian Approach to Two Dimensional Matrix
 Completion}\label{a-bayesian-approach-to-two-dimensional-matrix-completion}
 
@@ -688,50 +695,71 @@ account the differing sample size and variance in each cell (source port
 consideration of differing sample sizes and variances between cells. The
 following section constructs a statistical model that takes frequency of
 observations and variances for each cell into account and repeatedly
-samples from that statistical model to complete the matrix.
+samples using a nested Gibbs Sampling procedure built upon the full
+conditionals of the parameters of the statistical model to impute
+missing values in the matrix. Note, this technique again slices the
+tensor into the four separate matrices,
+\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}\), and
+the model can be applied to each matrix \(Y^{(k)}\) separately.
 
 \section{Statistical Model for Port
 Relationships}\label{statistical-model-for-port-relationships}
 
-The following statistical model is defined for imputing port
-relationships:
-\[y_{i,j} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{n_{ij}}}\epsilon_{ij}\]
-where \(u_i\) represents \_\_\_\_\_\_, \(v_j\) represents \_\_\_\_\_,
-\(\sigma_i\) represents the MEAN??? of the standard deviations of each
-row in the matrix, \(\tau_j\) represents the MEAN??? of the standard
-deviations of each column in the matrix, and
+The following statistical model is defined for the cells in \(Y\):
+\[y_{ij} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}\]
+where \(u_i\) represents the row factors, \(v_j\) represents the column
+factors, \(s_{ij}\) represents the sample size of observations observed
+for source port \(i\) and destination port \(j\), and
 \(\epsilon_{ij} \sim N(0,1)\). Fixing the \(j\) values in the analysis
 (i.e. \(v_j\) and \(\tau_j\) are known) enables the model to be
 rewritten in the form of a weighted least squares model for imputing
 \(u_i\) and \(\sigma_i\). Similarly, when \(i\) is fixed, the model can
-be rewritten to simulate \(v_j\) and \(\tau_j\). In particular, fixing
-the \(j\)th row of the matrix yields:
-\[y_i = \beta^Tx_i + \sigma w_i\epsilon_{ij}\] where
-\(w_i = (\frac{\tau_j}{\sqrt(n_{ij}})^2\), and \(\beta^T = u_i\). Note,
-this technique again slices the tensor into the four separate matrices,
-\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}_{m \times n}\), and
-the model can be applied to each matrix \(Y^{(k)}\) separately.
+be rewritten to simulate \(v_j\) and \(\tau_j\). To demonstrate this
+property, the procedure for simulating \(u_i\) and \(\tau_j\) given
+known values for \(v_j\) and \(\tau_j\) is described below. The same
+procedure is possible for \(v_j\) and \(\tau_j\) when \(u_i\) and
+\(\sigma_i\) are known.
 
-Vectorizing the above model yields
-\[y_i = X\beta + \sigma W^{1/2} \epsilon\] where
-\(W \in \mathbb{R}_{m \times m}\) is the diagonal matrix of weights,
-such that \[
+\section{General Model for Simulating Row and Column
+Factors}\label{general-model-for-simulating-row-and-column-factors}
+
+Varying \(j = 1 ... n\) the model above yields the following cell
+values:
+\[y_{i1} = u_i^Tv_1 + \frac{\sigma_1 \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}\]
+\[ ... \]
+
+\[ y_{in} = u_i^Tv_n + \frac{\sigma_1 \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij} \]
+
+Vectorizing all of these equations varied across \(j = 1...n\) yields:
+
+\[\vec{y_i} = Vu_i + \sigma_i W^{1/2}\vec{\epsilon}\]
+
+where \(V \in \mathbb{R}^{n \times r}\) is the matrix of column factors
+(\(r\) is the dimension of the latent factors), and
+\(W \in \mathbb{R}^{n \times n}\) is the diagonal matrix of weights,
+such that \[V =
+  \begin{bmatrix}
+    v_1^T- \\
+    v_2^T- \\
+    ... \\
+    v_n^T- \\
+  \end{bmatrix},
   W =
   \begin{bmatrix}
     w_{1} & & \\
     & \ddots & \\
-    & & w_{m}
+    & & w_{n}
   \end{bmatrix} 
   = \begin{bmatrix}
-    \frac{\tau_1^2}{n_{11}} & & \\
+    \frac{\tau_1^2}{s_{11}} & & \\
     & \ddots & \\
-    & & \frac{\tau_n^2}{n_{mn}}
+    & & \frac{\tau_n^2}{s_{nn}}
   \end{bmatrix}\]
-\(X\) is set as the matrix of \(u_i\)'s for all \(i\) if \(j\) is fixed
-or the matrix of \(v_j\)'s for all \(j\) if \(i\) is fixed.
+This model can be rewritten in a general form:
 
-Note \(X\) and \(W\) do not depend on \(i\), so they are used in the
-imputation for \(u_i\) and \(\sigma_i\).
+\[\vec{y} = X\beta + \sigma W^{1/2}\epsilon\] where \(X\) represents
+\(V\), \(\beta\) represents \(u_i\) and \(sigma\) represents
+\(\sigma_i\).
 
 This is a specific form of the Generalized Least Squares Model (GLS),
 which gives a weighted least squares estimate of \(\beta\), and it is
@@ -743,15 +771,15 @@ estimates with a lower variance because the non-Bayes estimator serves
 as a limit of the Bayes estimator.
 
 The full conditional distributions of the random variables \(\beta\) and
-\(\sigma^2\) for this case of GLS are described below:
+\(\sigma^2\) (note the \(\sigma\) is squared in the model) for this case
+of GLS are described below:
 \[\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)\]
-\[\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + m}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})\]
-where MVN represents the Multivariate Normal Distribution, IG represents
-the Inverse Gamma distribution, W is described above, and
-\[ \begin{cases}
+\[\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})\]
+where MVN represents the Multivariate Normal Distribution, and IG
+represents the Inverse Gamma distribution. \[ \begin{cases}
       \Sigma_n = (X^TW^{-1}X/\sigma^2+W_0^{-1})^{-1}\\
       \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + W_0^{-1} \beta_0)
-    \end{cases}\] \[SSR_W = (y - X\beta)^TW(y-X\beta)\]
+    \end{cases}\] \[SSR_W = (y - X\beta)^TW^{-1}(y-X\beta)\]
 The remaining variables in the closed form full conditionals come from
 the random variables prior distributions, which are defined as follows:
 \[\beta \sim MVN (\beta_0, W_0)\]
@@ -763,29 +791,23 @@ number and \(I\) is the \(m \times n\) identity matrix, \(\nu_0 = 2\),
 \(\sigma_0^2 = 1\). This results in a diffuse prior for \(\beta\) that
 spreads out the density, and a noninformative prior for \(\sigma^2_0\).
 
-SHOW THAT GENERALIZED LINEAR MODEL IS (X\^{}T W\^{}-1 X )\^{}-1
-X\textsuperscript{TW}-1y
-
-The derivation of the general case can be found in APPENDIX????
-
 \subsection{Generalized Gibbs Sampler}\label{generalized-gibbs-sampler}
 
 Following the formulation of the model and the definition of the priors,
-a Gibbs Sampler is created to repeatedly generate samples from the full
-conditional of each parameter in the statistical model, which
-iteratively creates an approximate value for each cell.
+a Gibbs Sampler is created to simulate samples from the full conditional
+of each parameter in the statistical model, which iteratively creates an
+approximate value for each cell.
 
 The Gibbs Sampler algorithm progresses as follows:
 
-Let the set of parameter samples at step \(s\) in the algorithm be
-defined as \(\phi^{(s)} = \{\beta^{(s)}, \sigma^{2(k)}\}\).
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\item
-  Sample \(\beta^{(s+1)} \sim P(\beta \mid X, \vec{y}, \sigma^{2(k)})\)
-\item
-  Sample \(\sigma^2 \sim P(\sigma^2 \mid X, \vec{y}, \beta^{(s+1)})\)
-\end{enumerate}
+Let the parameters at step \(s\) be:
+
+\(\phi^{(s)} = \{\beta^{(s)}, \sigma^{2(s)}\}\)
+
+Sample \(\beta^{(s+1)} \sim P(\beta \mid X, \vec{y}, \sigma^{2(k)})\)
+
+Sample \(\sigma^2 \sim P(\sigma^2 \mid X, \vec{y}, \beta^{(s+1)})\)
+
 Set \(\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}\)
 
 This Gibbs Sampler serves as a general technique that can be used to
@@ -793,35 +815,94 @@ simulate both the values of \(u_i\) and \(\sigma_i\) or \(v_j\) and
 \(\tau_j\) depending on the inputs it is given because the formulation
 of both models are identical; they only differ by the calculations of
 the inputs, \(X\) and \(W\). In the context of the problem, it can first
-be called to simulate all of the rows of the matrix \(Y^{(k)}\), then
-called to simulate all of the columns of the matrix, and the process
-repeats from there.
+be called repeatedly to simulate all of the rows of the matrix
+\(Y^{(k)}\), then called repeatedly with updated inputs to simulate all
+of the columns of the matrix.
 
-\section{Procedure for Imputing Missing
-Values}\label{procedure-for-imputing-missing-values}
+\subsection{Validating the General Gibbs
+Sampler}\label{validating-the-general-gibbs-sampler}
 
-Using the generalized Gibbs Sampler it is possible to define a procedure
-for iteratively simulating missing values for the entire matrix
-\(Y^{(k)}\).
+Before using the general Gibbs sampler function in the overall procedure
+for imputing missing values in \(Y\), it is necessary to validate the
+procedure's validity on simulated data. As the algorithm runs, it stores
+a matrix \(\beta\) vectors and a vector of \(\sigma^2\) scalars. Thus,
+if \(S = 50\), i.e.~the algorithm samples 50 \(\beta\) and 50
+\(\sigma\), the final returned output will be \[\beta =
+  \begin{bmatrix}
+    \beta_1^T- \\
+    \beta_2^T- \\
+    ... \\
+    \beta_{50}^T- \\
+  \end{bmatrix},
+  \vec{\sigma^2} =
+  \begin{bmatrix}
+    \sigma_1^2 \\
+    . \\
+    . \\
+    \sigma_{50}^2\\
+  \end{bmatrix}\]
+Using random sampled values from the normal distribution for \(X\) and
+\(y\), and random sampled values from the exponential distribution for
+\(W\) (exponential distribution is used to ensure \(\Sigma_n\) is
+positive definite), its possible to generate a distribution of \(\beta\)
+and \(\sigma^2\). The posterior means of these distributions are then
+compared to the actual values in the distributions.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p<-}\DecValTok{5}
+\NormalTok{beta<-}\KeywordTok{rnorm}\NormalTok{(p)}
+\NormalTok{X =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rnorm}\NormalTok{(m *}\StringTok{ }\NormalTok{p, }\DataTypeTok{mean=}\DecValTok{0}\NormalTok{, }\DataTypeTok{sd=}\DecValTok{1}\NormalTok{), m, p)}
+\NormalTok{W =}\StringTok{ }\KeywordTok{diag}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{rexp}\NormalTok{(m), }\DataTypeTok{nrow =} \NormalTok{m, }\DataTypeTok{ncol =} \NormalTok{m)}
+\NormalTok{y =}\StringTok{ }\NormalTok{X%*%beta  +}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rnorm}\NormalTok{(m *}\StringTok{ }\DecValTok{1}\NormalTok{, }\DataTypeTok{mean=}\DecValTok{0}\NormalTok{, }\DataTypeTok{sd=}\DecValTok{1}\NormalTok{), m, }\DecValTok{1}\NormalTok{)}
+
+\KeywordTok{plot}\NormalTok{(beta, }\KeywordTok{lm}\NormalTok{(y~}\StringTok{ }\NormalTok{-}\DecValTok{1}\NormalTok{+}\StringTok{ }\NormalTok{X)$coef)}
+\KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\section{Gibbs Sampling Procedure for Imputing Missing
+Values}\label{gibbs-sampling-procedure-for-imputing-missing-values}
+
+The complete Gibbs Sampler for imputing missing values uses the
+generalized Gibbs Sampler defined above to iteratively simulate missing
+values for the entire matrix \(Y^{(k)}\). The procedure is described
+below:
+
+Initialize \(\sigma_i\) for \(i = 1 ... m\) and \(\tau_j\) for
+\(j = 1 ... n\) as the overall standard deviation of the \(Y^{(k)}\)
+matrix. Initialize missing values of \(Y\) using the ANOVA imputation
+described in the previous section.
+
+Repeat the following:
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Initialize \(\sigma_i\) and \(\tau_j\) as the overall standard
-  deviation of the \(Y^{(k)}\) matrix.
+  For \(i = 1 ... m\): Simulate \(u_i\) and \(\sigma_i\) using the
+  generalized Gibbs Sampler. For the first iteration of the sampler, set
+  \(X\) to the \(V\) matrix in the singular value decomposition of
+  \(Y\). For all future iterations, the use the stored \(V\) from the
+  pervious iteration as \(X\). For the first iteration, use the
+  initialized \(\tau_j\) for \(j = 1 ... n\) to calculate the diagonals
+  for the \(W\) matrix. For all future iterations use the stored
+  \(\tau_j\) values from the previous iteration to calculate \(W\). Take
+  the corresponding \(y_i\) directly from the \(Y\) matrix. Store the
+  resulting sampled \(u_i\)'s in a matrix \(U\), and the \(\sigma_i\) in
+  a vector, to use for simulating \(v_j\) and \(\tau_j\).
 \item
-  Simulate \(u_i\) and \(\sigma_i\) using the generalized Gibbs Sampler.
-  Set random values for the starting value of \(X\), the algorithm will
-  naturally converge to the true values of \(v_j\).
+  For \(j = 1 ... n\): Simulate \(v_j\) and \(\tau_j\) using the
+  generalized Gibbs Sampler. Use the stored \(U\) from the previous step
+  as the \(X\) input and use the stored \(\tau_j\) to calculate the
+  \(W\) input. Take the corresponding \(y_j\) directly from the \(Y\)
+  matrix. Store the resulting sampled \(v_j\)'s in a matrix \(V\), and
+  the \(\tau_j\) in a vector, to use for simulating \(u_i\) and
+  \(\sigma_j\).
 \item
-  Simulate \(v_j\) and \(\tau_j\) using the generalized Gibbs Sampler.
-  Set random values for the starting value of \(X\), the algorithm will
-  naturally converge to the true values of \(u_i\).
-\item
-  Fill in the missing values \(y_{ij}\) in \(Y^{(k)}\) by sampling from
-  the normal distribution
-  \[y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{\sqrt{(n_ij)}})\]
+  Impute values for \(y_{ij}\) in \(Y^{(k)}\) that were missing in the
+  original dataset by sampling from the normal distribution
+  \[y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{s_{ij}})\]
 \end{enumerate}
+Should \(s_ij\) increment as the number of iterations increase?
+
 \chapter{Tensor Completion}\label{tensor-completion}
 
 \section{Imputation Strategy}\label{imputation-strategy}

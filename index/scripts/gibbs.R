@@ -1,21 +1,22 @@
 library(MASS)
 
-gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 10){
-  m = nrow(X)
+gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 100){
+  n = nrow(X)
+  r = ncol(X)
   ### prior values 
   nu_0 = 2
-  beta_0 = numeric(m)  
+  beta_0 = numeric(n)  
   gamma2 = 100
-  W_0 = diag(m) * gamma2 #W is m x m
+  W_0 = diag(n) * gamma2 #W is n x n
   
   ### starting values
   set.seed(1)
-  BETAs = list()
-  INV_SIGMAs = list() # CHANGE VECTOR, RENAME TO INV_SIGMA2 
+  BETAs = matrix(nrow = S, ncol = n)
+  INV_SIGMA2s = c()
   beta = beta_0
-  BETAs[[1]] = beta
+  BETAs[1,] = beta
   inv_sigma2 = 1 / sigma2_0
-  INV_SIGMAs[[1]] = inv_sigma2
+  INV_SIGMA2s = c(INV_SIGMA2s, inv_sigma2)
   ### Gibbs sampling
   for(s in 2:S) {
     
@@ -26,61 +27,101 @@ gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 10){
     
     # generate a new 1/sigma2 value from its full conditional
     SSR_W = ( t( y - X %*% beta ) %*% ginv(W)  %*% ( y - X %*% beta ))
-    inv_sigma2 = rgamma(1, ( nu_0 + m )/2, ( nu_0 * sigma2_0 + SSR_W) / 2)
+    inv_sigma2 = rgamma(1, ( nu_0 + n )/2, ( nu_0 * sigma2_0 + SSR_W) / 2)
     
-    BETAs[[s]] = beta
-    INV_SIGMAs[[s]] = inv_sigma2
+    BETAs[s,] = beta
+    INV_SIGMA2s = c(INV_SIGMA2s, inv_sigma2)
   }
-  return (list(BETAs = BETAs, INV_SIGMAs = INV_SIGMAs))
+  return (list(BETAs = BETAs, INV_SIGMA2s = INV_SIGMA2s))
 }
 
 #testing gibbs sampler
-p<-5
-beta<-rnorm(p)
-X = matrix(rnorm(m * p, mean=0, sd=1), m, p)
-W = diag(x = rexp(m), nrow = m, ncol = m)
-y = X%*%beta  + matrix(rnorm(m * 1, mean=0, sd=1), m, 1)
-
-plot(beta, lm(y~ -1+ X)$coef)
-abline(0,1)
+n = 100
+X = matrix(rnorm(n * n, mean=0, sd=1), n, n)
+W = diag(x = rexp(n), nrow = n, ncol = n)
+y = matrix(rnorm(n * 1, mean=0, sd=1), n, 1)
+S = 1000
+sigma2_0 = 1/2
+PHI = gibbs_sampler(X, y, W, sigma2_0, S)
 
 #run the algorithm more than 10 times, check that the beta posterior mean (column means of the beta matrix object)
 #get a distribution of betas, calculate the posterior mean of those, get a distribution of sigma2 (make sure it is, dont use variance of 1)
-# 
-# 
-# X = matrix(1, m, m) 
-# W = diag(1, nrow = m, ncol = m)
-# y = matrix(1, m, 1) 
-# 
-# 
-gibbs_sampler(X, y, W)
+
+#Evaluating Performance for BETA
+BETAs = PHI$BETAs
+beta = BETAs[S,]
+y = X%*%beta  + matrix(rnorm(n * 1, mean=0, sd=1), n, 1)
+
+#beta_samp = rnorm(n)
+plot(beta, lm(y~ -1+ X)$coef)
+abline(0,2, col = "red")
+
+# Evaluating Performance for sigma2
+INV_SIGMA2s = PHI$INV_SIGMA2s
+1/INV_SIGMA2s[1000] #last sigma2, should be close to 1/2
+1/mean(INV_SIGMA2s) #mean sigma2, should be close to 1/2
+1/median(INV_SIGMA2s) #median sigma2, should be close to 1/2
 
 ##FULL procedure
 
-#initialize sigma_i  taU_j as the overall sd 
 Y = readRDS("data/means_SB.rds")
 M = readRDS("data/freqs.rds")
 m = nrow(Y)
 n = ncol(Y)
 
+S = 100 #number of iterations
 
-#calculate W matrix
-sigma_i = sd(Y, na.rm = TRUE)
-tau_j = sd(Y, na.rm = TRUE)
-
-W = diag(sigma_i, nrow = m, ncol = m) # m x m
+##Set initial Values
+#initialize U and V w/ anova and svd
+mu = sum(Y, na.rm = TRUE)/n
+a_i = rowMeans(Y, na.rm = TRUE)
+b_j = colMeans(Y, na.rm = TRUE)
 for (i in 1:m){
   for (j in 1:n){
-    #how to divide by n_ij when the dimensions are different? whats the iteration for j
+    if (M[i,j] == 0){
+      Y[i,j] = a_i[i] + b_j[j] - mu
+    }
   }
 }
+svd_Y = svd(Y)
+U = svd_Y$u
+V = svd_Y$v
 
-# for (s in 1:S){
-#   X =  matrix(nrow = m, ncol = r) ##CODE FOR SETTING X, X IS m x r but how do i get R
-#   for (i in 1:m){
-#     W = 
-#   } 
-# }
+#initialize sigmas  taus as the overall sd 
+SIGMA = rep(sd(Y, na.rm = TRUE), m)
+TAU = rep(sd(Y, na.rm = TRUE), n)
+
+#initial W matrix, impute U first so use tau
+#WHAT TO DO WHEN M IS NOT SQUARE AND NEED TO GET OBSERVATIONS??
+W = diag(TAU[1]^2, nrow = n, ncol = n) 
+for (i in 1:n){
+  for (j in 1:n){
+    if (M[i,j] != 0){
+      W[i,j] = W[i,j] / M[i,j]
+    }
+  }
+}
+##Repeat Imputation
+for (s in 1:S){
+  #impute U
+  for (i in 1:m){
+    
+  }
+  #impute V
+  
+  #impute y
+  for (i in 1:m){
+    for (j in 1:n){
+      if (M[i,j] == 0){
+        u_i = U[i,]
+        v_j = V[j,]
+        sigma_i = SIGMA[i]
+        tau_j = TAU[j]
+        Y[i,j] = rnorm(t(u_i) * v_j, sigma_i^2 * tau_j^2) ##how does u_i and v_j become scalar????
+      }
+    }
+  }
+}
 
 
 

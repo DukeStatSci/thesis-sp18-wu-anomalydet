@@ -91,24 +91,53 @@ V = svd_Y$v
 SIGMA = rep(sd(Y, na.rm = TRUE), m)
 TAU = rep(sd(Y, na.rm = TRUE), n)
 
-#initial W matrix, impute U first so use tau
-#WHAT TO DO WHEN M IS NOT SQUARE AND NEED TO GET OBSERVATIONS??
-W = diag(TAU[1]^2, nrow = n, ncol = n) 
-for (i in 1:n){
-  for (j in 1:n){
-    if (M[i,j] != 0){
-      W[i,j] = W[i,j] / M[i,j]
-    }
-  }
-}
+
 ##Repeat Imputation
 for (s in 1:S){
   #impute U
   for (i in 1:m){
-    
+    W = diag(1, nrow = n, ncol = n) 
+    #WHAT TO DO WHEN M IS NOT SQUARE AND NEED TO GET OBSERVATIONS??
+    ##w_jj = tau_j^2/s[i,j]
+    for (j in 1:n){
+      W[j,j] = W[j,j] * TAU[j]^2
+      if (M[i,j] != 0){ #WHAT HAPPENS WHEN IT IS EQUAL TO 0???
+        W[j,j] = W[j,j] / M[i,j]
+      }
+      # for (j in 1:n){
+      #   if (M[i,j] != 0 && i == j){
+      #     W[i,j] = W[i,j] / M[i,j]
+      #   }
+      # }
+    }
+    y = Y[i,]
+    S_U = 100
+    PHI  = gibbs_sampler(V, y, W, SIGMA[s], S_U)
+    U[i,] = PHI$BETAs[S_U,]
+    SIGMA[i] = mean(sqrt(PHI$INV_SIGMA2s))
   }
   #impute V
-  
+  for (j in 1:m){
+    W = diag(1, nrow = m, ncol = m) 
+    #WHAT TO DO WHEN M IS NOT SQUARE AND NEED TO GET OBSERVATIONS??
+    ##w_jj = tau_j^2/s[i,j]
+    for (i in 1:m){ 
+      W[i,i] = W[i,i] * SIGMA[i]^2
+      if (M[i,j] != 0){ #WHAT HAPPENS WHEN IT IS EQUAL TO 0???
+        W[i,i] = W[i,i] / M[i,j] # IS THIS RIGHT?
+      }
+      # for (j in 1:n){
+      #   if (M[i,j] != 0 && i == j){
+      #     W[i,j] = W[i,j] / M[i,j]
+      #   }
+      # }
+    }
+    y = Y[,j]
+    S_V = 100
+    PHI  = gibbs_sampler(U, y, W, SIGMA[s], S_V)
+    V[j,] = PHI$BETAs[S_V,]
+    SIGMA[i] = mean(PHI$INV_SIGMAs)
+  }
   #impute y
   for (i in 1:m){
     for (j in 1:n){

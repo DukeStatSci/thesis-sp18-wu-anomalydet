@@ -1,17 +1,17 @@
 library(MASS)
 
-gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 100){
+gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 1000){
   n = nrow(X)
   r = ncol(X)
   ### prior values 
   nu_0 = 2
-  beta_0 = numeric(n)  
+  beta_0 = numeric(r)  
   gamma2 = 100
-  W_0 = diag(n) * gamma2 #W is n x n
+  W_0 = diag(r) * gamma2 #W_0 is r x r
   
   ### starting values
   set.seed(1)
-  BETAs = matrix(nrow = S, ncol = n)
+  BETAs = matrix(nrow = S, ncol = r)
   INV_SIGMA2s = c()
   beta = beta_0
   BETAs[1,] = beta
@@ -19,7 +19,6 @@ gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 100){
   INV_SIGMA2s = c(INV_SIGMA2s, inv_sigma2)
   ### Gibbs sampling
   for(s in 2:S) {
-    
     # generate a new Beta value from its full conditional
     Sigma_n = ginv ( ( t(X) %*% ginv(W) %*% X ) / ( 1 / inv_sigma2 ) + ginv(W_0) ) 
     beta_n = Sigma_n %*% ( ( t(X) %*% ginv(W) %*% y ) / ( 1 / inv_sigma2 ) + ginv(W_0) %*% beta_0)
@@ -37,30 +36,36 @@ gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 100){
 
 #testing gibbs sampler
 n = 100
-X = matrix(rnorm(n * n, mean=0, sd=1), n, n)
+r = 5
+beta = rnorm(r)
+X = matrix(rnorm(n * r, mean=0, sd=1), n, r)
 W = diag(x = rexp(n), nrow = n, ncol = n)
-y = matrix(rnorm(n * 1, mean=0, sd=1), n, 1)
-S = 1000
-sigma2_0 = 1/2
-PHI = gibbs_sampler(X, y, W, sigma2_0, S)
+e = rnorm(n,0,1)
+sigma = 1/2
+y = X %*% beta  + sigma * sqrt(W) %*% e
+
+PHI = gibbs_sampler(X, y, W)
+
+#evaluating posterior means of beta
+BETAs = PHI$BETAs
+beta_post = colMeans(BETAs)
+
+#evaluating posterior mean of sigma
+INV_SIGMA2s = PHI$INV_SIGMA2s
+sigma_post = mean(sqrt(1/INV_SIGMA2s))
+
+plot(beta, lm(y~ -1+ X)$coef)
+abline(0,2, col = "red")
+
+
+
+#as you increase n you should get closer to the truth, as 
+#you decrease the effects of sigma*W*e you should get closer to the truth
 
 #run the algorithm more than 10 times, check that the beta posterior mean (column means of the beta matrix object)
 #get a distribution of betas, calculate the posterior mean of those, get a distribution of sigma2 (make sure it is, dont use variance of 1)
 
-#Evaluating Performance for BETA
-BETAs = PHI$BETAs
-beta = BETAs[S,]
-y = X%*%beta  + matrix(rnorm(n * 1, mean=0, sd=1), n, 1)
 
-#beta_samp = rnorm(n)
-plot(beta, lm(y~ -1+ X)$coef)
-abline(0,2, col = "red")
-
-# Evaluating Performance for sigma2
-INV_SIGMA2s = PHI$INV_SIGMA2s
-1/INV_SIGMA2s[1000] #last sigma2, should be close to 1/2
-1/mean(INV_SIGMA2s) #mean sigma2, should be close to 1/2
-1/median(INV_SIGMA2s) #median sigma2, should be close to 1/2
 
 ##FULL procedure
 
@@ -88,16 +93,15 @@ U = svd_Y$u
 V = svd_Y$v
 
 #initialize sigmas  taus as the overall sd 
-SIGMA = rep(sd(Y, na.rm = TRUE), m)
-TAU = rep(sd(Y, na.rm = TRUE), n)
+SIGMA = sqrt(rep(sd(Y, na.rm = TRUE), m))
+TAU = sqrt(rep(sd(Y, na.rm = TRUE), n)) 
 
 
 ##Repeat Imputation
 for (s in 1:S){
-  #impute U
+  #simulate U
   for (i in 1:m){
     W = diag(1, nrow = n, ncol = n) 
-    #WHAT TO DO WHEN M IS NOT SQUARE AND NEED TO GET OBSERVATIONS??
     ##w_jj = tau_j^2/s[i,j]
     for (j in 1:n){
       W[j,j] = W[j,j] * TAU[j]^2
@@ -111,10 +115,10 @@ for (s in 1:S){
       # }
     }
     y = Y[i,]
-    S_U = 100
-    PHI  = gibbs_sampler(V, y, W, SIGMA[s], S_U)
+    S_U = 1
+    PHI  = gibbs_sampler(V, y, W, SIGMA[i], S_U)
     U[i,] = PHI$BETAs[S_U,]
-    SIGMA[i] = mean(sqrt(PHI$INV_SIGMA2s))
+    SIGMA[i] = sqrt(PHI$INV_SIGMA2s[S_U])
   }
   #impute V
   for (j in 1:m){
@@ -133,10 +137,10 @@ for (s in 1:S){
       # }
     }
     y = Y[,j]
-    S_V = 100
+    S_V = 1
     PHI  = gibbs_sampler(U, y, W, SIGMA[s], S_V)
     V[j,] = PHI$BETAs[S_V,]
-    SIGMA[i] = mean(PHI$INV_SIGMAs)
+    SIGMA[i] = sqrt(PHI$INV_SIGMAs[S_V])
   }
   #impute y
   for (i in 1:m){
@@ -146,7 +150,7 @@ for (s in 1:S){
         v_j = V[j,]
         sigma_i = SIGMA[i]
         tau_j = TAU[j]
-        Y[i,j] = rnorm(t(u_i) * v_j, sigma_i^2 * tau_j^2) ##how does u_i and v_j become scalar????
+        Y[i,j] = rnorm(1, t(u_i) * v_j, sigma_i * tau_j) ##how does u_i and v_j become scalar????
       }
     }
   }

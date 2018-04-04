@@ -1,8 +1,6 @@
 # A Bayesian Approach to Two Dimensional Matrix Completion
 
-## Motivation
-
-The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell (source port $i$, destination port $j$), so the algorithm treated each $y_{ij}^{k}$, which represents the mean of all observations in cell $(i,j)$ for continuous feature $k$, as a single value with no consideration of differing sample sizes and variances between cells. The following section constructs a statistical model that takes frequency of observations and variances for each cell into account and repeatedly samples using a nested Gibbs Sampling procedure built upon the full conditionals of the parameters of the statistical model to impute missing values in the matrix. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}$, and the model can be applied to each matrix $Y^{(k)}$ separately.
+The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell (source port $i$, destination port $j$), so the algorithm treated each $y_{ij}$ as a single value with no consideration of differing sample sizes and variances between cells. The following section constructs a statistical model that takes the sample size of observations and their variances for each cell into account and repeatedly simulates values for the missing cells using a Gibbs Sampling procedure. The sampling procedure relies upon first building a general model for simulating the row and column facors with their respective standard deviations. After calculating the full conditionals for the parameters of this general model, the overall procedure repeatedly simulates values from these full conditional distributions, alternating between simulating the matrix of row factors and the matrix of column factors along with their respective standard deviations. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}$ (referred to as $Y$ in general), and the model can be applied to each matrix $Y^{(k)}$ separately.
 
 
 ## Statistical Model for Port Relationships
@@ -139,7 +137,7 @@ Repeat the following:
 2. For $j = 1 ... n$: Simulate $v_j$ and $\tau_j$ using the generalized Gibbs Sampler. Use the stored $U$ from the previous step as the $X$ input and use the stored $\tau_j$ to calculate the $W$ input. Take the corresponding $y_j$ directly from the $Y$ matrix. Store the resulting sampled $v_j$'s in a matrix $V$, and the $\tau_j$ in a vector, to use for simulating $u_i$ and $\sigma_j$. 
 4. Impute values for $y_{ij}$ in $Y^{(k)}$ that were missing in the original dataset by sampling from the normal distribution $$y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{s_{ij}})$$
 
-Should $s_ij$ increment as the number of iterations increase? 
+
 
 
 

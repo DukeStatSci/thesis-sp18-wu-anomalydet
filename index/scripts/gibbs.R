@@ -2,16 +2,16 @@ library(MASS)
 
 gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 1000){
   n = nrow(X)
-  r = ncol(X)
+  p = ncol(X)
   ### prior values 
   nu_0 = 2
-  beta_0 = numeric(r)  
+  beta_0 = numeric(p)  
   gamma2 = 100
-  S_0 = diag(r) * gamma2 #S_0 is r x r
+  S_0 = diag(p) * gamma2 #S_0 is p x p
   
   ### starting values
   set.seed(1)
-  BETAs = matrix(nrow = S, ncol = r)
+  BETAs = matrix(nrow = S, ncol = p)
   INV_SIGMA2s = c()
   beta = beta_0
   BETAs[1,] = beta
@@ -36,9 +36,9 @@ gibbs_sampler = function (X, y, W, sigma2_0 = 1, S = 1000){
 
 #testing gibbs sampler
 n = 100
-r = 5
-beta = rnorm(r)
-X = matrix(rnorm(n * r, mean=0, sd=1), n, r)
+p = 5
+beta = rnorm(p)
+X = matrix(rnorm(n * p, mean=0, sd=1), n, p)
 W = diag(x = rexp(n), nrow = n, ncol = n)
 e = rnorm(n,0,1)
 sigma = 1/2
@@ -56,6 +56,22 @@ sigma_post = mean(sqrt(1/INV_SIGMA2s))
 
 plot(beta, lm(y~ -1+ X)$coef)
 abline(0,2, col = "red")
+
+# The Bayes estimator (posterior mean) should be close to the GLS
+# estimator. There are theoretical results that say how close
+# the GLS estimator should be to the true value. In particular,
+# the variance matrix of the GLS estimator around the true value is
+# (X' V^{-1} X )^{-1}. So if you were to simulate many data sets,
+# and get the posterior mean estimator for each, the variance of
+# these simulated posterior means should be about (X' V^{-1} X )^{-1}.
+
+##testing with GLS estimator:
+#simulating multiple datasets and getting the posterior mean estimator for each 
+#should I have multiple beta_post? if i simulate multiple X, what is the inputs to the 
+#(X' V^{-1} X )^{-1}. whats the difference of using this to check versus using (X' V^{-1} X )^{-1}X'V^{-1}y on the beta post 
+beta_post
+
+
 
 # > sigma
 # [1] 0.5
@@ -93,10 +109,10 @@ for (i in 1:m){
 # svd_Y = svd(Y)
 # U = svd_Y$u
 # V = svd_Y$v
-# initialize U and V w/ latent factors, r = 5 how r is selected
-r = 5
-U = matrix(rnorm(m * r, mean=mu, sd=psi), m, r)
-V = matrix(rnorm(n * r, mean=mu, sd=psi), n, r)
+# initialize U and V w/ latent factors, p = 5 how p is selected
+p = 5
+U = matrix(rnorm(m * p, mean=mu, sd=psi), m, p)
+V = matrix(rnorm(n * p, mean=mu, sd=psi), n, p)
 
 #initialize sigmas  taus as the overall sd 
 SIGMA = sqrt(rep(sd(Y, na.rm = TRUE), m))
@@ -150,14 +166,27 @@ for (s in 1:S){
 }
 
 #How to select the number of latent factors?
+# This is a model selection choice - it might be good to try a few values
+# and see how the results change. Alternatively, one could do cross
+# validation, but this might be to computationally expensive.
+
+
 #How to evaluate the quality of the output
+#Simulate some data from the model, where the true mean
+#matrix Theta is truly low rank, that is, Theta=UV' for
+#some tall skinny matrices U and V
+
+U = matrix(rnorm(m * p, mean=mu, sd=psi), m, p) 
+V = matrix(rnorm(n * p, mean=0, sd=psi), n, p)
+THETA = U %*% t(V)
+
+# (a) Try to recover UV' from a full data set using your
+# Gibbs sampler. This is the idealized case.
+# 
+# (b) Now pretend you don't have data for some cells.
+# Use your Gibbs sampler to obtain an estimate of
+# UV' in this case. How much worse do you do than
+# in (a)? Do you do better for the cells for which
+# you have data, than for the cells where you don't have data?
 
 
-
-# 1. Initialize $\sigma_i$ and $\tau_j$ as the overall standard deviation of the $Y^{(k)}$ matrix. 
-# 2. Simulate $u_i$ and $\sigma_i$ using the generalized Gibbs Sampler. Set random values 
-#     for the starting value of $X$, the algorithm will naturally converge to the true values of $v_j$.
-# 3. Simulate $v_j$ and $\tau_j$ using the generalized Gibbs Sampler. 
-#     Set random values for the starting value of $X$, the algorithm will naturally converge to the true values of $u_i$.
-# 4. Fill in the missing values $y_{ij}$ in $Y^{(k)}$ by sampling from the normal 
-#     distribution $$y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{\sqrt{(n_ij)}})$$

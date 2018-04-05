@@ -1,15 +1,13 @@
 # A Bayesian Approach to Two Dimensional Matrix Completion
 
-The previous section's results reflected the need for an imputation strategy that accounted for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell (source port $i$, destination port $j$), so the algorithm treated each $y_{ij}$ as a single value with no consideration of differing sample sizes and variances between cells. The following section constructs a statistical model that takes the sample size of observations and their variances for each cell into account and repeatedly simulates values for the missing cells using a Gibbs Sampling procedure. The sampling procedure relies upon first building a general model for simulating the row and column facors with their respective standard deviations. After calculating the full conditionals for the parameters of this general model, the overall procedure repeatedly simulates values from these full conditional distributions, alternating between simulating the matrix of row factors and the matrix of column factors along with their respective standard deviations. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}$ (referred to as $Y$ in general), and the model can be applied to each matrix $Y^{(k)}$ separately.
+The previous section's results reflected the need for a completion strategy that accounts for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell's observations, so the algorithm treated each $y_{ij}$ as a single value rather than the mean and variance of a vector of observations. The following section constructs a statistical model that takes the sample size of observations and their variances for each cell into account and repeatedly simulates values for the missing cells using a Gibbs Sampling procedure. The sampling procedure relies upon first building a general model for simulating the row and column facors with their respective standard deviations. After calculating the full conditionals for the parameters of this general model, the overall procedure repeatedly simulates values from these full conditional distributions, alternating between simulating the matrix of row factors and the matrix of column factors along with their respective standard deviations. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}$ (referred to as $Y$ in general), and the model can be applied to each matrix $Y^{(k)}$ separately.
 
 
 ## Statistical Model for Port Relationships
 
 <!-- Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination.  -->
 
-The following statistical model is defined for the cells in $Y$: $$y_{ij} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}$$ where $u_i$ represents the row factors, $v_j$ represents the column factors, 
-<!-- $\sigma_i$ represents the standard deviation of each row in the matrix, $\tau_j$ represents the standard deviations of each column in the matrix,  -->
-$s_{ij}$ represents the sample size of observations observed for source port $i$ and destination port $j$, and $\epsilon_{ij} \sim N(0,1)$. Fixing the $j$ values in the analysis (i.e. $v_j$ and $\tau_j$ are known) enables the model to be rewritten in the form of a weighted least squares model for imputing $u_i$ and $\sigma_i$. Similarly, when $i$ is fixed, the model can be rewritten to simulate $v_j$ and $\tau_j$. To demonstrate this property, the procedure for simulating $u_i$ and $\tau_j$ given known values for $v_j$ and $\tau_j$ is described below. The same procedure is possible for $v_j$ and $\tau_j$ when $u_i$ and $\sigma_i$ are known.
+The following statistical model is defined for the cells in $Y$: $$y_{ij} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}$$ where $u_i$ represents the row factors, $v_j$ represents the column factors, $\sigma_i$ represents the standard deviation of each row in the matrix, $\tau_j$ represents the standard deviations of each column in the matrix, $s_{ij}$ represents the sample size of observations observed for source port $i$ and destination port $j$, and $\epsilon_{ij} \sim N(0,1)$. Fixing the $j$ values in the analysis (i.e. $v_j$ and $\tau_j$ are known) enables the model to be rewritten in the form of a weighted least squares model for imputing $u_i$ and $\sigma_i$. Similarly, when $i$ is fixed, the model can be rewritten to simulate $v_j$ and $\tau_j$. To demonstrate this property, the procedure for simulating $u_i$ and $\tau_j$ given known values for $v_j$ and $\tau_j$ is described below. The same procedure is possible for $v_j$ and $\tau_j$ when $u_i$ and $\sigma_i$ are known.
 
 ## General Model for Simulating Row and Column Factors
 
@@ -26,7 +24,7 @@ $$\vec{y_i} = Vu_i + \sigma_i W^{1/2}\vec{\epsilon}$$
 <!-- $$\vec{y_i} = \beta^Tx_i + \sigma w_i^{1/2}\epsilon_{ij}$$  -->
 <!-- where $w_i = (\frac{\tau_j}{\sqrt(n_{ij}})^2$, and $\beta^T = u_i$. -->
 <!-- Vectorizing the above model yields $$\vec{y} = X\beta + \sigma W^{1/2} \epsilon$$  -->
-where $V \in \mathbb{R}^{n \times r}$ is the matrix of column factors ($r$ is the dimension of the latent factors), and $W \in \mathbb{R}^{n \times n}$ is the diagonal matrix of weights, such that
+where $V \in \mathbb{R}^{n \times r}$ is the matrix of column factors ($p$ is the dimension of the latent factors), and $W \in \mathbb{R}^{n \times n}$ is the diagonal matrix of weights, such that
 $$V =
   \begin{bmatrix}
     v_1^T- \\
@@ -46,35 +44,36 @@ $$V =
     & & \frac{\tau_n^2}{s_{nn}}
   \end{bmatrix}$$
 
+Note $\tau^2$ refers to the variance, variance being the square of the standard deviation.
+
 This model can be rewritten in a general form: 
 
 $$\vec{y} = X\beta + \sigma W^{1/2}\epsilon$$ where $X$ represents $V$, $\beta$ represents $u_i$ and $sigma$ represents $\sigma_i$.
 
-This is a specific form of the Generalized Least Squares Model (GLS), which gives a weighted least squares estimate of $\beta$, and it is appropriate when the error terms are not independent and identically distributed. Bayesian analysis of this problem provides similar parameter estimates to GLS, and both ordinary least squares and GLS provide unbiased parameter estimates of $\beta$ with the latter giving estimates with a lower variance because the non-Bayes estimator serves as a limit of the Bayes estimator. 
+This is a modified form of the Generalized Least Squares Model (GLS), which gives a weighted least squares estimate of $\beta$, and it is appropriate when the error terms are not independent and identically distributed. Bayesian analysis of this problem provides similar parameter estimates to GLS, and both ordinary least squares and GLS provide unbiased parameter estimates of $\beta$ with the latter giving estimates with a lower variance because the non-Bayes estimator serves as a limit of the Bayes estimator. 
 
-The full conditional distributions of the random variables $\beta$ and $\sigma^2$ (note the $\sigma$ is squared in the model) for this case of GLS are described below: 
+The full conditional distributions of the random variables $\beta$ and $\sigma^2$ (note $\sigma$ is squared in the model) for this case are described below: 
 $$\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)$$
 $$\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})$$
 where MVN represents the Multivariate Normal Distribution, and IG represents the Inverse Gamma distribution.
 $$ \begin{cases}
-      \Sigma_n = (X^TW^{-1}X/\sigma^2+W_0^{-1})^{-1}\\
-      \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + W_0^{-1} \beta_0)
+      \Sigma_n = (X^TW^{-1}X/\sigma^2+\Sigma_0^{-1})^{-1}\\
+      \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + \Sigma_0^{-1} \beta_0)
     \end{cases}$$
 $$SSR_W = (y - X\beta)^TW^{-1}(y-X\beta)$$
 
-The remaining variables in the closed form full conditionals come from the random variables prior distributions, which are defined as follows: 
-$$\beta \sim MVN (\beta_0, W_0)$$
+The remaining variables in the closed form full conditionals come from the parameter's prior distributions, which are defined as follows: 
+
+$$\beta \sim MVN (\beta_0, \Sigma_0)$$
 $$\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)$$
 
-The initial values for the prior distributions are set as: $\beta_0 = 0$, $W_0 = \gamma^2I$ where $\gamma^2$ is a large number and $I$ is the $m \times n$ identity matrix, $\nu_0 = 2$, $\sigma_0^2 = 1$. This results in a diffuse prior for $\beta$ that spreads out the density, and a noninformative prior for $\sigma^2_0$. 
+The initial values for the prior distributions are set as: $\beta_0 = 0$, $\Sigma_0 = \gamma^2I$ where $\gamma^2$ is a large number and $I$ is the $m \times n$ identity matrix, $\nu_0 = 2$, $\sigma_0^2 = 1$. This results in a diffuse prior for $\beta$ that spreads out the density, and a noninformative prior for $\sigma^2_0$. 
 
 <!-- SHOW THAT GENERALIZED LINEAR MODEL IS (X^T W^-1 X )^-1 X^TW^-1y -->
 
-<!-- The derivation of the general case can be found in APPENDIX???? -->
+### Generalized Gibbs Sampler Function
 
-### Generalized Gibbs Sampler
-
-Following the formulation of the model and the definition of the priors, a Gibbs Sampler is created to simulate  samples from the full conditional of each parameter in the statistical model, which iteratively creates an approximate value for each cell.
+Following the formulation of the model and the definition of the priors, a general Gibbs Sampler function is created to simulate samples from the full conditional of each parameter in the statistical model, which iteratively creates an approximate value for each cell.
 
 The Gibbs Sampler algorithm progresses as follows:
 
@@ -88,11 +87,11 @@ Sample $\sigma^2 \sim P(\sigma^2 \mid X, \vec{y}, \beta^{(s+1)})$
 
 Set $\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}$
 
-This Gibbs Sampler serves as a general technique that can be used to simulate both the values of $u_i$ and $\sigma_i$ or $v_j$ and $\tau_j$ depending on the inputs it is given because the formulation of both models are identical; they only differ by the calculations of the inputs, $X$ and $W$. In the context of the problem, it can first be called repeatedly to simulate all of the rows of the matrix $Y^{(k)}$, then called repeatedly with updated inputs to simulate all of the columns of the matrix. 
+This Gibbs Sampler serves as a general technique that can be used to simulate both the values of $u_i$ and $\sigma_i$ or $v_j$ and $\tau_j$ depending on the inputs it is given because the formulation of both models are identical; they only differ by the the inputs, $X$ and $W$, which are calculated, and $y$ which is sliced directly from $Y$. In the context of the problem, this function can first be called repeatedly to simulate all of the rows in the matrix $Y$, then called repeatedly with updated inputs to simulate all of the columns of the matrix. 
 
-### Validating the General Gibbs Sampler
+### Validation Simulated Data
 
-Before using the general Gibbs sampler function in the overall procedure for imputing missing values in $Y$, it is necessary to validate the procedure's validity on simulated data. As the algorithm runs, it stores a matrix $\beta$ vectors and a vector of $\sigma^2$ scalars. Thus, if $S = 50$, i.e. the algorithm samples 50 $\beta$ and 50 $\sigma$, the final returned output will be 
+Before using the general Gibbs sampler function in the overall procedure for simulating missing values in $Y$, it is necessary to validate the procedure's effectiveness on simulated data where the ground truth is known. As the algorithm runs, it stores a matrix of $\beta$ vectors and a vector of $\sigma^2$ scalars. Thus, if $S = 50$, i.e. the algorithm samples 50 $\beta$ and 50 $\sigma$, the final returned output will be 
 $$\beta =
   \begin{bmatrix}
     \beta_1^T- \\
@@ -108,8 +107,8 @@ $$\beta =
     \sigma_{50}^2\\
   \end{bmatrix}$$
 
-
-Using random sampled values from the normal distribution for $X$ and $y$, and random sampled values from the exponential distribution for $W$ (exponential distribution is used to ensure $\Sigma_n$ is positive definite), its possible to generate a distribution of $\beta$ and $\sigma^2$. The posterior means of these distributions are then compared to the actual values in the distributions. 
+Using random sampled values from the normal distribution for $X$ and random sampled values from the exponential distribution for $W$ (exponential distribution is used to ensure $\Sigma_n$ is positive definite), it is possible to calculate values of $\vec{y}$ using a predefined $\beta*$ and $\sigma *$, which are known as the ground truth values for comparison: $$\vec{y} = X\beta * + \sigma * W^{1/2}\epsilon$$ 
+This $\vec{y}$, $W$, and $X$ are used as inputs to the general Gibbs Sampler Function to generate a distribution of $\beta$'s and a distribution $\sigma^2$'s. The posterior means of these distributions are then computed and compared to recover the original values, $\beta *$ and $\sigma *$. 
 
 ```{r, eval = FALSE}
 p<-5
@@ -122,23 +121,32 @@ plot(beta, lm(y~ -1+ X)$coef)
 abline(0,1)
 ```
 
+In particular, the posterior mean of $\sigma^2$ is calculated by taking the mean of the function's output of $\sigma^2$. This posterior mean is compared to the original $\sigma *$ used to generate $\vec{y}$. Repeatedly performing this procedure reveals the posterior mean matches the ground the original quite often.
+
+The recovering the original $\beta *$ is more complex. The Bayes estimator (the posterior mean of generated $\beta$s) should be close to the GLS estimator. There are theoretical results that say how close the GLS estimator should be to the true value INSERT THEORETICAL RESULTS HERE. In particular, the variance matrix of the GLS estimator around the true value is $$(X^T \Omega^{-1} X )^{-1}$$ and the posterior mean estimate  $$\hat{\beta} = (X^T \Omega^{-1} X )^{-1}X^T\Omega^{-1}y$$. Thus, after simulating many data sets and solving for the posterior mean estimator for each, the variance of these simulated posterior means should be close to  $$(X^T \Omega^{-1} X )^{-1}$$. WHAT IS OMEGA IN THIS CASE?
+
 <!-- run the algorithm more than 10 times, check that the beta posterior mean (column means of the beta matrix object) -->
 <!-- get a distribution of betas, calculate the posterior mean of those, get a distribution of sigma2 (make sure it is, dont use variance of 1) -->
 
 ## Gibbs Sampling Procedure for Imputing Missing Values
 
-The complete Gibbs Sampler for imputing missing values uses the generalized Gibbs Sampler defined above to iteratively simulate missing values for the entire matrix $Y^{(k)}$. The procedure is described below:
+The complete Gibbs Sampler for imputing missing values uses the generalized Gibbs Sampler defined above to iteratively simulate missing values for the entire matrix $Y$. The procedure is described below:
 
-Initialize $\sigma_i$ for $i = 1 ... m$ and $\tau_j$ for $j = 1 ... n$ as the overall standard deviation of the $Y^{(k)}$ matrix. Initialize missing values of $Y$ using the ANOVA imputation described in the previous section.
+Initialize $\sigma_i$ for $i = 1 ... m$ and $\tau_j$ for $j = 1 ... n$ as the overall standard deviation of the $Y^{(k)}$ matrix. Initialize missing values of $Y$ using the ANOVA imputation described in the previous section. Initialize the matrix of row factors $U \in \mathbb{R}^{m \times p}$ and the matrix of column factors $V \in \mathbb{R}^{n \times p}$.  
 
 Repeat the following:
 
-1. For $i = 1 ... m$: Simulate $u_i$ and $\sigma_i$ using the generalized Gibbs Sampler. For the first iteration of the sampler, set $X$ to the $V$ matrix in the singular value decomposition of $Y$. For all future iterations, the use the stored $V$ from the pervious iteration as $X$. For the first iteration, use the initialized $\tau_j$ for $j = 1 ... n$ to calculate the diagonals for the $W$ matrix. For all future iterations use the stored $\tau_j$ values from the previous iteration to calculate $W$. Take the corresponding $y_i$ directly from the $Y$ matrix. Store the resulting sampled $u_i$'s in a matrix $U$, and the $\sigma_i$ in a vector, to use for simulating $v_j$ and $\tau_j$. 
+1. For $i = 1 ... m$: Simulate $u_i$ and $\sigma_i$ using the generalized Gibbs Sampler. For the first iteration of the sampler, set $X$ to the $V$ matrix in the singular value decomposition of $Y$. For all future iterations, the use the stored $V$ from the pervious iteration as $X$. For the first iteration, use the initialized $\tau_j$ for $j = 1 ... n$ to calculate the diagonals for the $W$ matrix. For all future iterations use the stored $\tau_j$ values from the previous iteratioWn to calculate $W$. Take the corresponding $y_i$ directly from the $Y$ matrix. Store the resulting sampled $u_i$'s in a matrix $U$, and the $\sigma_i$ in a vector, to use for simulating $v_j$ and $\tau_j$. 
+
 2. For $j = 1 ... n$: Simulate $v_j$ and $\tau_j$ using the generalized Gibbs Sampler. Use the stored $U$ from the previous step as the $X$ input and use the stored $\tau_j$ to calculate the $W$ input. Take the corresponding $y_j$ directly from the $Y$ matrix. Store the resulting sampled $v_j$'s in a matrix $V$, and the $\tau_j$ in a vector, to use for simulating $u_i$ and $\sigma_j$. 
-4. Impute values for $y_{ij}$ in $Y^{(k)}$ that were missing in the original dataset by sampling from the normal distribution $$y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{s_{ij}})$$
 
+3. Impute values for $y_{ij}$ in $Y^$ that were missing in the original dataset by sampling from the normal distribution $$y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{s_{ij}})$$
 
+### Selecting the Dimension of Latent Factors
 
+The dimension of the latent factors, $p$, is used to define the dimension of $\beta \in \mathbb{R}^{p \times 1}$ and consequently defines the dimensions of the row and column factor matrices $U$ and $V$. Selecting $p$ is a model selection choice similar to determining the optimal low rank approximation $r$ in the previous section. Once again, Leave One Out Cross Validation may be used to detemine the optimal $p$ given the observed data. In this technique, it is more computationally expensive than the previous technique to perform Leave One Out Cross Validation on the entire dataset, so randomly selecting a set number of observed cells to set to missing for determining $p$ is also valid.
 
+### Validation on Simulated Data
 
+Again it is necessary to validate the effectiveness of the overall sampling procedure with simulated data where the ground truth is known. Simulate matrices $U$ and $V$ such that $\Theta = UV^T$ is truly low rank. The same procedure for generating low rank matrices used in the previous chapter can be applied here. Using $\Theta$ there are two possible tests for determining the validity of the sampling procedure. First, the simulated data is used to recover the true values for $UV^T$ from the model. This is considered an idealized case for testing the procedure. Second, some cells are set to missing and again the procedure is used to obtain an estimate for $UV^T$ from the model. This output is compared to the previous case's output to evaluate the performance depending on whether the cells have data or do not. 
 

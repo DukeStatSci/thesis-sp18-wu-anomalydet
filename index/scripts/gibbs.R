@@ -66,7 +66,7 @@ abline(0,2, col = "red")
 # these simulated posterior means should be about (X' V^{-1} X )^{-1}.
 
 ##testing with GLS estimator:
-#simulating multiple datasets and getting the posterior mean estimator for each 
+#simulating multiple datasets and getting the posterior mean estimator for each , WHAT IS V in this case
 #should I have multiple beta_post? if i simulate multiple X, what is the inputs to the 
 #(X' V^{-1} X )^{-1}. whats the difference of using this to check versus using (X' V^{-1} X )^{-1}X'V^{-1}y on the beta post 
 beta_post

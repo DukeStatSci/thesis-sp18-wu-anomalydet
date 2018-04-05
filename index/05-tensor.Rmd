@@ -1,41 +1,61 @@
-# Tensor Completion
+#Future Work: Tensor Completion
 
-## Imputation Strategy
+Recall the analysis of correlations between the continuous features in $T$ in chapter 2. 
 
-The imputation strategy focuses on finding a low rank approximation for $Y$ when decomposing the tensor.
+```{r, echo = FALSE, fig.height = 5, fig.width = 5}
+### CORRELATIONS
+kendall_cors = matrix(c(1.0000000, 0.7227563, 0.5729918, 0.6367907,
+                0.7227563, 1.0000000, 0.7425211, 0.8108184,
+                0.5729918, 0.7425211, 1.0000000, 0.8827988,
+                0.6367907, 0.8108184, 0.8827988, 1.0000000),
+                nrow = 4, ncol = 4)
+rownames(kendall_cors) = c("SrcBytes", "SrcPkts", "DstBytes", "DstPkts")
+colnames(kendall_cors) = c("SrcBytes", "SrcPkts", "DstBytes", "DstPkts")
+levelplot(kendall_cors, main = "Kendall Correlations Between Continuous 
+          Features", xlab = "", ylab = "")
+#continuous_data = subset(argus, select = c("SrcBytes", "SrcPkts", "DstBytes", "DstPkts"))
+#sub_data = continuous_data[1:50000,]
+#cor(continuous_data, method = "kendall")
 
-### CP Decomposition
+#           SrcBytes   SrcPkts  DstBytes   DstPkts
+# SrcBytes 1.0000000 0.7227563 0.5729918 0.6367907
+# SrcPkts  0.7227563 1.0000000 0.7425211 0.8108184
+# DstBytes 0.5729918 0.7425211 1.0000000 0.8827988
+# DstPkts  0.6367907 0.8108184 0.8827988 1.0000000
 
-The CP decomposition expresses the tensor as: $$Y = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r$$ where $r$ represents the rank approximation, $\cdotp$ denotes the outer product of tensors, and $u \in \mathbb{R_{m \times r}}$, $v \in \mathbb{R_{n \times r}}$, and $w \in \mathbb{R_{4 \times r}}$. Each individual cell is expressed: $$y_{ijk} = \sum_{r=1}^Ru_{ri} \cdotp v_{ri} \cdotp w_{ri}$$ Applying this decomposition yields the objective $$min_{Y'}\|Y-Y'\|, Y' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)$$, where $lambda_r$ is the regularization penalty.
+```
 
-### Variable Sample Sizes
+The strong correlations between the individual continuous features suggests imputing the tensor $T$ all at once may yield closer estimates than the previous two techniques, which sliced the matrices. By imputing the tensor as a whole, techniques that include effects that capture the relationships between features can take advantage of possible collinearity between the features. 
 
-A traditional approach to tensor completion involves using alternating least squares regression to impute the missing values after populating them with some initial values. The previous section applies this approach to a 2-dimensional $m \times n$ tensor that represents a cross-section slice of $Y$ that only includes one of the four continuous features. 
-*include als section here, related work: https://arxiv.org/abs/1410.2596 (hastie fast als), application netflix challenge*
+The following section describes the way techniques in the previous sections may be extended to full 3-dimensional tensor completion. 
 
-While this approach yields a completed tensor, it does not account for the fact that the means in each cell are calculated from a variable number of observations. Furthermore it is not necessarily true that $n_{ijk} = n_{i'j'k'}$ or $\sigma^2_{ijk} = \sigma^2_{i'j'k'}$ for $i \neq i', j \neq j', k \neq k'$. 
+##PARAFAC Decomposition
 
-We propose the following model: 
-$$y_{ijk} \sim N(\mu_{ijk}, \frac{\sigma^2_{ijk}}{n_{ijk}})$$ 
-where $\mu_{ijk}$ is the sample mean, $n_{ijk}$ is the sample size, and $\sigma^2_{ijk}$ is the sample variance of observations for source port $i$, destination port $j$, and continuous feature $k$.
+The PARAFAC decomposition expresses the tensor as: $$T = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r$$ where $r$ represents the rank approximation, $\cdotp$ denotes the outer product of tensors, and $u \in \mathbb{R}^{m \times r}$, $v \in \mathbb{R}^{n \times r}$, and $w \in \mathbb{R}^{4 \times r}$. Each individual cell is expressed: $$t_{ijk} = \sum_{r=1}^Ru_{ri} \cdotp v_{ri} \cdotp w_{ri}$$ Applying this decomposition yields the objective $$\underset{T'} {\text{min}}\|T-T'\|$$ where $$T' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)$$ and $\lambda_r$ is the regularization penalty.
 
-Substituting these values into the Gaussian probability density function yields the likelihood: $$\frac{n_{ijk}}{\sigma^2_{ijk}}\sum(\bar y_{ijk} - \mu_{ijk})^2$$
+## Statistical Model
 
-Applying the CP/PARAFAC decomposition $u_{ijk}$ is re-expressed: $$u_{ijk} = \sum_{r=1}^Ra_{ir}b_{jr}c_{kr}$$
+The following model is proposed: 
+$$t_{ijk} \sim N(\mu_{ijk}, \frac{\sigma^2_{ijk}}{s_{ijk}})$$ 
+where $\mu_{ijk}$ is the sample mean, $s_{ijk}$ is the sample size of observations, and $\sigma^2_{ijk}$ is the sample variance of observations for source port $i$, destination port $j$, and continuous feature $k$.
 
-Vectorizing the inputs in the likelihood yields: $$\sum_j\sum_k[\bar y_{ijk} - a_i^T(b_i \cdotp c_k)]\frac{n_{ijk}}{\sigma^2_{ijk}} (1)$$ where $a_i \in \mathbb{R_{m \times r}}$, $b_j \in \mathbb{R_{n \times r}}$, and $c_k \in \mathbb{R_{4 \times r}}$. Summing across $j$ and $k$ in this case solves for the $ith$ row slice of the tensor. How to notate vectorization of $y$?
+Substituting these values into the Gaussian probability density function yields the likelihood: $$\frac{s_{ijk}}{\sigma^2_{ijk}}\sum(\bar t_{ijk} - \mu_{ijk})^2$$
 
-Recall the Residual Sum of Squares (RSS) of the likelihood for an Ordinary Least Squares (OLS) regression is expressed: $$\sum_l(y_l-B^Tx_l)^2$$ 
+Applying the PARAFAC decomposition, $\mu_{ijk}$ is re-expressed: $$\mu_{ijk} = \sum_{r=1}^Ra_{ir}b_{jr}c_{kr}$$
 
-Adding a weight, $w_l$ to the summation yields a Weighted Least Squares problem (WLS) $$\sum_l^nw_l(y_l-\beta^Tx_l)^2 (2)$$ that is analagous to the vectorized likelihood equation (1) with $w_l = \frac{n_{ijk}}{\sigma^2_{ijk}}$, $\beta = a_i$, $x = (b_j \cdotp c_k)$.
+Vectorizing the inputs in the likelihood yields: $$\sum_j\sum_k[\bar t_{ijk} - a_i^T(b_i \cdotp c_k)]\frac{n_{ijk}}{\sigma^2_{ijk}}$$ where $a_i \in \mathbb{R_{m \times r}}$, $b_j \in \mathbb{R_{n \times r}}$, and $c_k \in \mathbb{R_{4 \times r}}$. Summing across $j$ and $k$ in this case solves for the $ith$ row slice of the tensor.
 
-With this formulation its now possible to solve for the optimal values for each slice $a_i$ of the tensor.
+<!-- Recall the Residual Sum of Squares (RSS) of the likelihood for an Ordinary Least Squares (OLS) regression is expressed: $$\sum_l(y_l-B^Tx_l)^2$$  -->
 
-Recall that in a traditional vectorized OLS, $y = X\beta + \sigma\epsilon$, where $y \in \mathbb{R_{n \times 1}}$, $X \in \mathbb{R_{n \times p}}$, $\beta \in \mathbb{R_{p \times 1}}$, and $\\sigma\epsilon \in \mathbb{R_{n \times 1}}$. Solving the maximum likelihood estimator of $\beta$, gives $\hat \beta = (X^TX)^{-1}X^Ty$. 
+<!-- Adding a weight, $w_l$ to the summation yields a Weighted Least Squares problem (WLS) $$\sum_l^nw_l(y_l-\beta^Tx_l)^2 (2)$$ that is analagous to the vectorized likelihood equation (1) with $w_l = \frac{n_{ijk}}{\sigma^2_{ijk}}$, $\beta = a_i$, $x = (b_j \cdotp c_k)$. -->
 
-Applying this formulation to the weighted least squares gives $y = X\beta + W^{-\frac{1}{2}}\epsilon$. Solving for the weighted least squares estimator gives $\hat \beta = (X^TWX)^{-1}X^TWy$. 
+<!-- With this formulation its now possible to solve for the optimal values for each slice $a_i$ of the tensor. -->
 
-Repeating this estimation technique across each slice of the tensor $a_i$, $b_j$, $c_k$ results in a completed model for $y_{ijk}$.
+<!-- Recall that in a traditional vectorized OLS, $y = X\beta + \sigma\epsilon$, where $y \in \mathbb{R_{n \times 1}}$, $X \in \mathbb{R_{n \times p}}$, $\beta \in \mathbb{R_{p \times 1}}$, and $\\sigma\epsilon \in \mathbb{R_{n \times 1}}$. Solving the maximum likelihood estimator of $\beta$, gives $\hat \beta = (X^TX)^{-1}X^Ty$.  -->
+
+<!-- Applying this formulation to the weighted least squares gives $y = X\beta + W^{-\frac{1}{2}}\epsilon$. Solving for the weighted least squares estimator gives $\hat \beta = (X^TWX)^{-1}X^TWy$.  -->
+
+<!-- Repeating this estimation technique across each slice of the tensor $a_i$, $b_j$, $c_k$ results in a completed model for $y_{ijk}$. -->
 
 <!-- ## Motivation -->
 
@@ -46,9 +66,6 @@ Repeating this estimation technique across each slice of the tensor $a_i$, $b_j$
 <!-- Additive Main Effects and Multiplicative Interaction Models (AMMI models) provide a defined statistical model for each cell in the ports matrix. In particular, the model combines the additive effects of the initial ANOVA imputation with the multiplicative effects yielded from singular value decomposition described in the previous section. More importantly, the model also includes a variance term for each cell that takes into account the differing frequency of observations in each port combination. Applying the same mathematical notation as the previous section, the model is formally expressed: $$y_{i,j} = u + a_i + b_j + \mathbf{u_i}D\mathbf{v_j^T} + \sigma_{i,j}\epsilon_{i,j}$$ -->
 <!-- where $sigma_{i,j}$ is the variance for the $ith$ row $jth$ column in the ports combination matrix, and $\epsilon \sim N(0,1)$. -->
 
-## Gibbs Sampling
-
-Following the formulation of the model, a Gibbs Sampling algorithm is used to repeatedly generate samples from the full conditional of each parameter in the model statistical model, which iteratively creates an approximate value for each cell. 
 
 
 

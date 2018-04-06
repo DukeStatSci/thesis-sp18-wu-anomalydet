@@ -15,17 +15,15 @@ $F \in \mathbb{R}^{m \times n}$ is a sparse matrix that represents the frequenci
 
 The objective is $$\underset{r}{\text{min}} \sum_{i,j:F_{i,j} > 0} (y_{i,j} - u_iDv^T_j)^2$$ where $UDV^{(k)T}$ represents the singular value decomposition of $Y$ and $r$ is the low rank approximation for $Y$. There are multiple steps to the matrix completion process:
 
-1. ANOVA Initial Imputation
-
+### ANOVA Initial Imputation
 An analysis of variance (ANOVA) imputation is used to fill in the initial values for $y_{ij}$. This yields an additive model dependent upon the means of the present observations: $$y_{ij} =  a_i + b_j - \mu$$ where$\mu$ is the overall mean of $Y$, $a_i$ is the row mean, and $b_j$ is column mean of $y_{ij}$.
 
-2. Repeated Simulation
-
+### Repeated Simulation
 The repeated imputation procedure solves $Y^{(s)}[M] = R_r(Y^{(s-1)})[M]$ where $R_r( ... )$ is the best rank $r$ approximation for the $s$-th step. For each step $(s)$ the singular value decomposition decomposes $$Y^{(s)} =  U^{(s)}D^{(s)}V^{T(s)}$$ where $D$ is a diagonal matrix of the singular values, $U$ is the left singular vectors of $Y$ and $V$ is the right singular vectors of $Y$. 
 
 The Eckart-Young-Mirsky Theorem provides the best rank $r$ approximation for the missing values in $Y^{(s+1)}$. Recall $Y[M]$ represents all of the missing values of $Y$. Applying the EYM theorem:  $$Y^{(s+1)}[M] = (U[,1:r]^{(s)}D[,1:r]^{(s)}V[,1:r]^{T(s)})[M]$$ Where $U[,1:r]$ represents the first $r$ columns of $U$ and the same for $D$ and $V$. 
 
-3. Convergence Criterion
+### Convergence Criterion
 
 The Eckart-Young-Mirsky rank approximation step is repeated until the relative difference between $Y^{(s+1)}$ and $Y^{(s)}$ falls below a set threshold, $H$. The relative difference threshold is expressed: $$\frac{\|Y^{(s+1)}-Y^{(s)}\|_2}{\|Y^{(s)}\|_2} < H$$ where $\|Y\|_2$ is the Frobenius norm for matrices. The denominator of the expression ensures the convergence criterion is invariate to a scale change in the matrix itself. 
 
@@ -177,10 +175,6 @@ approximate_rank = function(Y, M, S = 50, simulated = TRUE){
   return (ranks)
 }
 ```
-
-WHAT PLOTS OR VISUALIZATIONS DO I USE FOR RESULTS? HISTOGRAM OF PERCENTAGES FOR RANK APPROXIMATIONS? 1-4 100%, higher ranks arent that relevant; effects of noise
-
-USE THIS TECHNIQUE TO SHOW DIFFERENT EFFECTS OF NOISE? 
 
 The above plots represent the accuracy of the matrix completion technique for matrices with true rank $r = 1,2,...8$. The accuracy is measured by simulating 10 random matrices with low rank of $r$ for each value of $r$ (80 simulated matrices total), and then running the leave one out cross validation procedure described above on the matrix $C$ to generate a root mean square error for each possible rank. The accuracy is the calculated using the number of times the rank with the lowest error matches the true simulated rank divided by 10 (the number of trials with rank $r$). Note as the true rank becomes larger, the technique performs far worse at determining the optimal low rank, THIS IS BECAUSE_______
 

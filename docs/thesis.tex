@@ -129,14 +129,29 @@ their continued unwavering support in all my endeavors.
 }
 
 \Abstract{
-The goal of this project is to identify novel methods for detecting
-anomalies in network IP data. The space is represented as a
-3-dimensional tensor of the continuous features (source bytes,
-destination bytes, source packets, destination packets) divided by their
-respective source port and destination port combinations. This project
-implements and assesses the validity of principal component analysis and
-matrix completion via singular value decomposition (more methods
-pending) in determining anomalous entries in the tensor.
+The goal of this paper is to identify novel methods for detecting
+anomalies in network IP data. The data is comprised of four continuous
+features (source bytes, destination bytes, source packets, destination
+packets) divided by their respective source port and destination port
+combinations. Thus, the data is represented as a 3-dimensional tensor
+\(T \in \mathbb{R}^{m \times n \times 4}\), where \(m\) is the number of
+source ports, \(n\) is the number of destination ports, and \(4\) is the
+number of continuous features. Each cell in \(T\), \(t_{ijk}\) stores
+the mean of the observations of continuous feature \(k\) between source
+port at index \(i\) and destination port at index \(j\). This paper
+proposes three techniques for generating means to fill in the missing
+cells in \(T\), thereby completing the tensor, so as to provide
+reasonable estimates for new observations between every possible port
+combination. In the context of anomaly detection, new observations
+between ports that do not align closely with their corresponding
+estimate in \(T\) are considered anomalies. The first technique uses a
+low-rank singular value decomposition algorithm for completing
+individual matrix slices of the tensor. The second defines a statistical
+model for the values in \(T\) and uses a Bayesian Gibbs Sampling
+Procedure to simulate missing values in individual matrix slices of
+\(T\). Finally, the third approach extends the first and second
+approaches to completing the tensor all at once, rather than with
+completing individual matrices.
 }
 
 % End of CII addition
@@ -181,27 +196,57 @@ pending) in determining anomalous entries in the tensor.
 
 
   \begin{abstract}
-    The goal of this project is to identify novel methods for detecting
-    anomalies in network IP data. The space is represented as a
-    3-dimensional tensor of the continuous features (source bytes,
-    destination bytes, source packets, destination packets) divided by their
-    respective source port and destination port combinations. This project
-    implements and assesses the validity of principal component analysis and
-    matrix completion via singular value decomposition (more methods
-    pending) in determining anomalous entries in the tensor.
+    The goal of this paper is to identify novel methods for detecting
+    anomalies in network IP data. The data is comprised of four continuous
+    features (source bytes, destination bytes, source packets, destination
+    packets) divided by their respective source port and destination port
+    combinations. Thus, the data is represented as a 3-dimensional tensor
+    \(T \in \mathbb{R}^{m \times n \times 4}\), where \(m\) is the number of
+    source ports, \(n\) is the number of destination ports, and \(4\) is the
+    number of continuous features. Each cell in \(T\), \(t_{ijk}\) stores
+    the mean of the observations of continuous feature \(k\) between source
+    port at index \(i\) and destination port at index \(j\). This paper
+    proposes three techniques for generating means to fill in the missing
+    cells in \(T\), thereby completing the tensor, so as to provide
+    reasonable estimates for new observations between every possible port
+    combination. In the context of anomaly detection, new observations
+    between ports that do not align closely with their corresponding
+    estimate in \(T\) are considered anomalies. The first technique uses a
+    low-rank singular value decomposition algorithm for completing
+    individual matrix slices of the tensor. The second defines a statistical
+    model for the values in \(T\) and uses a Bayesian Gibbs Sampling
+    Procedure to simulate missing values in individual matrix slices of
+    \(T\). Finally, the third approach extends the first and second
+    approaches to completing the tensor all at once, rather than with
+    completing individual matrices.
   \end{abstract}
 
 \mainmatter % here the regular arabic numbering starts
 \pagestyle{fancyplain} % turns page numbering back on
 
-The goal of this project is to identify novel methods for detecting
-anomalies in network IP data. The space is represented as a
-3-dimensional tensor of the continuous features (source bytes,
-destination bytes, source packets, destination packets) divided by their
-respective source port and destination port combinations. This project
-implements and assesses the validity of principal component analysis and
-matrix completion via singular value decomposition (more methods
-pending) in determining anomalous entries in the tensor.
+The goal of this paper is to identify novel methods for detecting
+anomalies in network IP data. The data is comprised of four continuous
+features (source bytes, destination bytes, source packets, destination
+packets) divided by their respective source port and destination port
+combinations. Thus, the data is represented as a 3-dimensional tensor
+\(T \in \mathbb{R}^{m \times n \times 4}\), where \(m\) is the number of
+source ports, \(n\) is the number of destination ports, and \(4\) is the
+number of continuous features. Each cell in \(T\), \(t_{ijk}\) stores
+the mean of the observations of continuous feature \(k\) between source
+port at index \(i\) and destination port at index \(j\). This paper
+proposes three techniques for generating means to fill in the missing
+cells in \(T\), thereby completing the tensor, so as to provide
+reasonable estimates for new observations between every possible port
+combination. In the context of anomaly detection, new observations
+between ports that do not align closely with their corresponding
+estimate in \(T\) are considered anomalies. The first technique uses a
+low-rank singular value decomposition algorithm for completing
+individual matrix slices of the tensor. The second defines a statistical
+model for the values in \(T\) and uses a Bayesian Gibbs Sampling
+Procedure to simulate missing values in individual matrix slices of
+\(T\). Finally, the third approach extends the first and second
+approaches to completing the tensor all at once, rather than with
+completing individual matrices.
 
 \chapter{Introduction}\label{introduction}
 
@@ -262,32 +307,11 @@ it is unclear which observations are actually scanners and which are
 just standard user behavior, unsupervised approaches are necessary for
 tackling the problem.
 
+\section{Network Dataset}\label{network-dataset}
+
 This particular dataset is from Duke University's Office of Information
 Technology (OIT), and it covers all observations in their network
 traffic during a five minute period in February 2017.
-
-\subsection{Status Quo Solution}\label{status-quo-solution}
-
-OIT's current solution for detecting scanners relies on specific domain
-knowledge gathered from diagnostics programs and data analysis completed
-on previous data. They prevent scanners by blocking IP addresses that
-fit certain rules they have constructed to run on every network
-transaction as it occurs. The specific checks in these rules are private
-for security reasons, but they belong to the nature of evaluating the
-size of transactions, repeated connections between particular ports,
-many pings from the same address, and combinations of these particular
-behaviors.
-
-While this solution presents a methodical way for banning IP addresses
-and its method of rule checking is essentially removing what OIT
-considers outliers for network transactions-any observation that does
-not fit within the constraints specified by the rules is classified as
-an outleir and its source IP is blocked-it is inflexible, prone to
-detecting false negatives, and fails to detect observations that may be
-within the parameter constraints of the rules but are anomalous with
-respect to other parameters or parameter constraints.
-
-\section{Network Dataset}\label{network-dataset}
 
 \subsection{Features}\label{features}
 
@@ -368,9 +392,28 @@ considered an anomaly. Furthermore, the State feature may not be
 reliable because Argus occasionally resets the state data statistics
 during monitoring.
 
-\chapter{Modeling Port Relationships}\label{modeling-port-relationships}
+\subsection{Status Quo Solution}\label{status-quo-solution}
 
-\section{Motivation}\label{motivation}
+OIT's current solution for detecting scanners relies on specific domain
+knowledge gathered from diagnostics programs and data analysis completed
+on previous data. They prevent scanners by blocking IP addresses that
+fit certain rules they have constructed to run on every network
+transaction as it occurs. The specific checks in these rules are private
+for security reasons, but they belong to the nature of evaluating the
+size of transactions, repeated connections between particular ports,
+many pings from the same address, and combinations of these particular
+behaviors.
+
+While this solution presents a methodical way for banning IP addresses
+and its method of rule checking is essentially removing what OIT
+considers outliers for network transactions-any observation that does
+not fit within the constraints specified by the rules is classified as
+an outlier and its source IP is blocked-it is inflexible, prone to
+detecting false negatives, and fails to detect observations that may be
+within the parameter constraints of the rules but are anomalous with
+respect to other parameters or parameter constraints.
+
+\section{Problem Formulation}\label{problem-formulation}
 
 Preliminary data analysis signaled that there may exist trends between
 different port combinations. For instance, a particular source and
@@ -383,194 +426,246 @@ This approach to the anomaly detection problem reduces the dataset to
 the values of the four continuous features, SrcBytes, SrcPkts, DstBytes,
 DstPkts, observed across different source port and destination port
 combinations. The data can be represented as a 3-dimensional tensor
-\(Y \in \mathbb{R}_{m \times n \times 4}\) where \(m\) represents the
+\(T \in \mathbb{R}^{m \times n \times 4}\) where \(m\) represents the
 number of source ports, \(n\) represents the number of destination
 ports, and \(4\) accounts for the four continuous features in the
-dataset. Each cell, \(y_{ijk}\), contains the mean of all the
-observations observed for source port, \(i\), and destination port
-\(j\). In the cases where the combination of \(i\) and \(j\) is not
-observed in the dataset, \(y_{ijk}\) is missing.
+dataset. Each cell, \(t_{ijk}\), contains the mean of all the
+observations observed between the source port at index \(i\) and
+destination port at index \(j\). In the cases where the combination of
+\(i\) and \(j\) is not observed in the dataset, \(t_{ijk}\) is
+considered missing (NA). Note, the data is collected in a way where
+either all four continuous features are observed, or none are observed,
+i.e.~a missing cell, \(t_{ij1}\) indicates
+\(t_{ij2}, t_{ij3} and t_{ij4}\) are also missing.
 
-The goal of this paper is to devise an optimal strategy for imputing the
-missing cells in \(Y\) to create the completed tensor
-\(Y' \in \mathbb{R}_{m \times n \times 4}\). As new observations are
-observed for combinations of ports \(i\) and \(j\), the \(y'_{ijk}\)
+The goal of this paper is to devise and assess strategies for
+calculating a reasonable estimate for the missing cells in \(T\) to
+create the completed tensor \(T' \in \mathbb{R}^{m \times n \times 4}\).
+As new observations are observed for combinations of source ports at
+index \(i\) and destination ports at index \(j\), the \(t'_{ijk}\)
 values can be interpreted as an approximation for the expected behavior
 for that particular port combination. Observations with continuous
-features that are a certain threshold away from \(y'_{ijk}\) may be
+features that are a certain threshold away from \(t'_{ijk}\) may be
 marked as anomalies and investigated further.
 
-Imputing values for each of the four continuous features in the dataset
-for all possible source and destination port combinations yields a
-reasonable expected value in each cell of the ports matrix that can then
-be compared to actual connection values when they are observed. New
-observations that differ greatly from the imputed values are flagged as
-anomalies and require further investigation.
+\section{Introduction of Methods}\label{introduction-of-methods}
 
-\section{Tensor Properties}\label{tensor-properties}
+Chapters 3,4, and 5 discuss three methods for completing the tensor
+\(T\). The first two techniques slice \(T\) into four matrices divided
+by the four continuous features:
+\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}\).
+Because both techniques apply to each matrix separately, the techniques
+will refer to a general matrix \(Y\), which represents any of
+\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)}\). Each \(Y^{(k)}\) has missingness
+because not every source port interacts with every destination port.
+Chapter three considers an iterative approach using an alternating least
+squares technique and the best low-rank approximation of \(Y\) to
+repeatedly calculate estimates for the missing values of the singular
+value decomposition of \(Y\). While the approach does not consider the
+variable sample sizes and variances for each port combination,
+essentially treating each cell as a scalar value rather than a mean of
+observations, it is the fastest technique of the three and provides
+reasonable performance metrics. Chapter four shores up the weaknesses of
+chapter three by defining an additive statistical model that accounts
+for the variable sample sizes and variances of the observations in each
+port combination. This model is generalized to a weighted least squares
+problem, and a Bayesian approach is used to create a Gibbs Sampler to
+iteratively simulate the row factors and column factors with their
+respective variances of the model. Each approach is validated on
+simulated data where the ground truth is known to verify correctness
+before being applied to the actual networks dataset. Finally, chapter
+five proposes a tensor completion technique that simulates cells in
+\(T\) without slicing the tensor. This approach allows considers
+correlation and collinearity between the different continuous features
+and relies on the PARAFAC tensor decomposition (as opposed to the
+two-dimensional matrix singular value decomposition).
 
-The following properties of \(Y\) inform the imputation strategies in
-following sections.
+\chapter{Modeling Port Relationships}\label{modeling-port-relationships}
 
-\subsection{Correlations}\label{correlations}
+The following properties of \(T\) inform the matrix and tensor
+completion strategies in chapters 3, 4, and 5.
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-2-1.pdf} The
-matrix above describes the Kendall rank correlations (commonly referred
-to as Kendall's tau coefficent) between the four continuous features in
-the dataset. Intuitively, the Kendall correlation between two features
-will be high when observations have a similar rank (i.e.~relative
-position label of observations within the variable: 1st, 2nd, 3rd, etc.)
-between the two variables, and low when observations have a dissimilar
-rank between the two variables. The range of correlations is {[}-1,
-1{]}. Kendall correlation was selected as a measure because it evaluates
-ranks between observations, as opposed to Pearson, which is more
-susceptible to outliers in the dataset (large byte and packet
-observations in the continuous feautres skewed the Pearson measures).
+\section{Missingness}\label{missingness}
 
-\subsection{Missingness}\label{missingness}
-
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-2-1.pdf}
 
 The above matrix represents the missingness in the port combinations for
 pairings of the top 20 most used source ports and destination ports. The
 black cells represent missingness; of the 400 cells in the matrix, 295
-(73.75\%) of cells are missing observations.
+(73.75\%) of cells are missing observations. This single matrix slice
+can be extrapolated to missingness in ports throughout the entire tensor
+because the dataset is collected in a way such that either all four
+continuous features are observed, or none are observed. It is important
+to note that missingness is not uniform across source and destination
+port combinations. In the event that an entire row or column of port
+combinations is missing, the port at that respective index will need to
+be discarded from the simulation procedure because all three techniques
+depend on the row and column effects when simulating a value for a
+missing cell.
 
-\subsection{Row and Column Properties}\label{row-and-column-properties}
+\section{Row and Column Properties}\label{row-and-column-properties}
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
 
 The bar plots above represent the row and column means of the continuous
 features for each slice of the tensor. These row means and column means
-inform imputation techniques for the missing cells within those
+inform simulation techniques for the missing cells within those
 respective rows and columns. There exist clear outliers in the means for
-certain ports. These outliers may cause problems with imputing missing
-values in that row or column combination because the outliers will tend
-to have a larger effect on the imputed value than other means that are
-more close to the median in the imputed values row or column. This
-further suggests imputation techniques that take into account variances
-among the row and column means and the number of samples observed for
-each port combination will result in more accurate imputations.
+certain rows and columns. This outlier behavior is undoubtedly caused by
+outliers existing within the cells in that particular row or column.
+These outliers exist because each cell represents the mean of all
+observations that occured within a particular port combination,
+regardless of sample size (i.e.~some cells may have a few large
+observations, resulting in a large mean that skews the cell's row and
+column mean). Thus, cells that only have a few observed observations
+have a disproportionately large effect on their respective row and
+column mean.
 
-\subsection{Port Connections}\label{port-connections}
+These outliers may cause problems with simulating missing values in that
+row or column because the outliers will have a disproportionately large
+effect on the simulated value than the other observations, which are
+more close to the median in the missing value's row or column. This
+behavior suggests that the completion techniques that take into account
+variances among the row and column means and the number of samples
+observed for each port combination will result in more accurate
+estimations for the missing port combinations.
+
+\section{Port Connections}\label{port-connections}
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+The above ports network graph displays the pairings between the top
+twenty source ports (red circles) and the top destination ports (blue
+squares). When a square and circle are connected it represents that
+there exist observations for this particular port combination in the
+dataset. The size of each node reflects the number of paired
+observations that were observed using that particular port. Clearly, not
+every source port is paired with a destination port and vice versa (not
+every node is connected to every other node). These missing combinations
+reflect missing cells in the \(T\) tensor, and consequently they
+correspond to the combinations that require values to be simulated.
+
+\section{Varied Sample Sizes}\label{varied-sample-sizes}
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
 
-The above ports network graph displays the pairings between the top
-source ports (red cirlces) and the the top destination ports (blue
-squares). The size of each node reflects the number of paired
-observations that were observed using that particular port. It is
-important to note that not every source port is paired with a
-destination port and vice versa (not every node is connected to every
-other node). These missing combinations reflect missing values in the
-\(Y\) tensor, and consequently they correspond to the combinations that
-require values to be imputed.
+Finally, to better visualize the sample sizes first displayed in the
+network graph, the above heat plot represents the sample sizes for each
+source-destination port combination on a log scale for clarity. It is
+again clear there are certain combinations that have many observations
+(range of 35000 on the original scale), while most of the observations
+are 0, indicating no observations were observed and the corresponding
+cell in \(T\) is missing, or near 0, indicating few observations were
+observed. The large variation in sample sizes again suggests a
+simulation technique that accounts for sample size of a missing cell's
+related row and column cells is necessary.
 
-\subsection{Matrix Slice Properties}\label{matrix-slice-properties}
+\section{Correlations}\label{correlations}
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-6-1.pdf}
 
-Finally, to better visualize the sample sizes first displayed in the
-network graph (section 2.2.4), the above heat plot represents the sample
-sizes for each source-destination port combination. It is again clear
-there are certain combinations that have many observations (range of
-35000), while most of the observations are 0, indicating no observations
-were observed and the corresponding cell in \(Y\) is missing, or near 0,
-indicating few observations were observed. The large variation in sample
-sizes suggests an imputation technique that accounts for sample size of
-a missing cell's related row and column cells is necessary.
+The matrix above describes the Kendall rank correlations (commonly
+referred to as Kendall's tau coefficent) between the four continuous
+features in the dataset. Intuitively, the Kendall correlation between
+two features will be high when observations have a similar rank
+(i.e.~relative position label of observations within the variable: 1st,
+2nd, 3rd, etc.) between the two variables, and low when observations
+have a dissimilar rank between the two variables. The range of
+correlations is {[}-1, 1{]}. Kendall correlation was selected as a
+measure because it evaluates ranks between observations, as opposed to
+Pearson, which is more susceptible to outliers in the dataset (large
+byte and packet observations in the continuous features skewed the
+Pearson measures).
+
+It is clear there exist strong correlations between the four continuous
+features, DstBytes and DstPkts in particular. This behavior suggests a
+technique that simulates estimates for the missing cells with all four
+features considered at once (i.e.~a technique that simulates the entire
+tensor as a whole rather than in slices) will also be valuable.
 
 \chapter{Alternating Least Squares Applied to Two Dimensional
 Matrices}\label{alternating-least-squares-applied-to-two-dimensional-matrices}
 
-\section{Motivation}\label{motivation-1}
+This approach determines the best low-rank approximation for \(Y\) using
+the Eckart-Young-Mirsky Theorem to repeatedly generate the orthonormal
+matrices \(U\) and \(V\) of the singular value decomposition of \(Y\)
+(\(Y = UDV^T\)) in an alternating pattern. The technique is proven to
+correctly determine a low rank approximation on simulated matrices where
+the true rank is known. Once the optimal low rank is determined from the
+actual dataset the optimal low rank is used in the technique to simulate
+the estimates for the missing cells of \(Y\). The technique's fit is
+assessed by comparing the fitted versus the observed values
 
-The preliminary tensor imputation technique slices the tensor into four
-separate matrices,
-\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}\). Each
-matrix has dimensions defined by the number of source ports by the
-number of destination ports. Each cell, \(Y^{(k)}_{ij}\) contains the
-mean of the observations observed for continuous feature \(k\) and
-source port \(i\) destination port \(j\). Each matrix will have its
-missing cells imputed with information from the rest of that matrix, and
-separately from information about the other matrices. The four completed
-matrices will then be recombined to create the tensor \(Y\). Similar
-techniques for matrix completion were employed in the Netflix Challenge
-where top competitor predicted ratings for movies by users that had not
-watched the movie based on the other ratings in the matrix of users and
-movies.
+\section{Related Work}\label{related-work}
+
+\url{https://arxiv.org/abs/1410.2596}
+\url{https://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf}
+
+Similar techniques for matrix completion were employed in the Netflix
+Challenge where top competitor predicted ratings for movies by users
+that had not watched the movie based on the other ratings in the matrix
+of users and movies.
 
 \section{Matrix Completion Algorithm}\label{matrix-completion-algorithm}
 
-Each \(Y^{(k)}\) has missingness because not every source port interacts
-with every destination port. \(F \in \mathbb{R}^{m \times n}\) is a
-sparse matrix that represents the frequencies of combinations, i.e
-\(F[32242,12312]\) represents the number of observations for the 32242
-12312 port interaction. \(M \in \mathbb{R}^{m \times n}\) represents a
-boolean matrix of whether the corresponding \(Y\) values are missing.
-\(Y^{(k)}[M]\) represents all of the missing values of \(Y^{(k)}\).
-Moreover because each non-missing observation contains all four
-continuous features, \(Y[M]\) represents all the missing values of
-\(Y\).
+\(F \in \mathbb{R}^{m \times n}\) is a sparse matrix that represents the
+frequencies of combinations, i.e \(F[32242,12312]\) represents the
+number of observations for the 32242 12312 port combination
+\(M \in \mathbb{R}^{m \times n}\) represents a boolean matrix of whether
+the corresponding \(Y\) values are missing. \(Y[M]\) represents all of
+the missing values in \(Y\).
 
 The objective is
-\[min \sum_{i,j:F_{i,j} > 0} (Y^{(k)}_{i,j} - u^{(k)}_iD^{(k)}v^{(k)T}_j)^2\]
-where \(U^{(k)}D^{(k)}V^{(k)T}\) represents the singular value
-decomposition of \(Y^{(k)}\). There are multiple steps to the matrix
-completion process:
+\[\underset{r}{\text{min}} \sum_{i,j:F_{i,j} > 0} (y_{i,j} - u_iDv^T_j)^2\]
+where \(UDV^{(k)T}\) represents the singular value decomposition of
+\(Y\) and \(r\) is the low rank approximation for \(Y\). There are
+multiple steps to the matrix completion process:
 
 \subsection{ANOVA Initial Imputation}\label{anova-initial-imputation}
 
-Impute the initial values for the missing \(y^{(k)}_{i,j}\) observations
-\(1 \leq i \leq m, 1 \leq j \leq n\): In general an additive model is
-applicable:
-\[y^{(k)}_{i,j} = \mu^{(k)} + a^{(k)}_i + b^{(k)}_j + \epsilon^{(k)}_{i,j}\]
-where \(\epsilon^{(k)} \in N(0,\sigma^2)\), \(\mu^{(k)}\) is the overall
-mean of \(Y^{(k)}\), \(a^{(k)}_i\) is the row mean, and \(b^{(k)}_j\) is
-column mean. An analysis of variance (ANOVA) imputation is used to fill
-in the initial values, \(y^{(k)}_{i,j}\). Ignoring the missing values
-for now, let \(y_{..}\) denote the empirical overall mean, \(y_{i.}\)
-denote the empirical row mean, and \(y_{.j}\) denote the column mean.
-\[y_{i,j} = y_{..} + (y_{i.}-y{..}) + (y_{.j}-y_{..}) = y_{i.} + y_{.j} - y{..}\]
+An analysis of variance (ANOVA) imputation is used to fill in the
+initial values for \(y_{ij}\). This yields an additive model dependent
+upon the means of the present observations:
+\[y_{ij} =  a_i + b_j - \mu\] where\(\mu\) is the overall mean of \(Y\),
+\(a_i\) is the row mean, and \(b_j\) is column mean of \(y_{ij}\).
 
-\subsection{Repeated Imputation}\label{repeated-imputation}
+\subsection{Repeated Simulation}\label{repeated-simulation}
 
 The repeated imputation procedure solves
-\(Y^{(s)}[M] = R_k(Y^{(s-1)})[M]\) where \(R_k\) is the best rank-k
-approximation for the \(s\)-th step. For each step \((s)\) use singular
-value decomposition to decompose \[Y^{(s)} =  U^{(s)}DV^{T(s)}\] where
-\(D\) is a diagonal matrix of the singular values, \(U\) is the left
-singular vectors of \(Y\) and \(V\) is the right singular vectors of
-\(Y\).
+\(Y^{(s)}[M] = R_r(Y^{(s-1)})[M]\) where \(R_r( ... )\) is the best rank
+\(r\) approximation for the \(s\)-th step. For each step \((s)\) the
+singular value decomposition decomposes
+\[Y^{(s)} =  U^{(s)}D^{(s)}V^{T(s)}\] where \(D\) is a diagonal matrix
+of the singular values, \(U\) is the left singular vectors of \(Y\) and
+\(V\) is the right singular vectors of \(Y\).
 
-The Eckart-Young-Mirsky (EYM) Theorem provides the best rank-k
+The Eckart-Young-Mirsky Theorem provides the best rank \(r\)
 approximation for the missing values in \(Y^{(s+1)}\). Recall \(Y[M]\)
 represents all of the missing values of \(Y\). Applying the EYM theorem:
-\[Y^{(s+1)}[M] = (U[,1:k]^{(s)}D[,1:k]V[,1:k]^{T(s)})[M]\] Where
-\(U[,1:k]\) represents the first \(k\) columns of \(U\) and the same for
+\[Y^{(s+1)}[M] = (U[,1:r]^{(s)}D[,1:r]^{(s)}V[,1:r]^{T(s)})[M]\] Where
+\(U[,1:r]\) represents the first \(r\) columns of \(U\) and the same for
 \(D\) and \(V\).
 
 \subsection{Convergence Criterion}\label{convergence-criterion}
 
-The EYM rank approximation imputation steps are repeated until the
+The Eckart-Young-Mirsky rank approximation step is repeated until the
 relative difference between \(Y^{(s+1)}\) and \(Y^{(s)}\) falls below a
-set threshold, \(T\). The relative difference threshold is expressed:
-\[\frac{\|Y^{(s+1)}-Y^{(s)}\|_2}{\|Y^{(s)}\|_2} < T\] where \(\|Y\|_2\)
-is the Frobenius norm. The denominator of the expression ensures the
-convergence criterion is invariate to a scale change in the matrix
-itself.
+set threshold, \(H\). The relative difference threshold is expressed:
+\[\frac{\|Y^{(s+1)}-Y^{(s)}\|_2}{\|Y^{(s)}\|_2} < H\] where \(\|Y\|_2\)
+is the Frobenius norm for matrices. The denominator of the expression
+ensures the convergence criterion is invariate to a scale change in the
+matrix itself.
 
-\subsection{Leave One Out Cross
-Validation}\label{leave-one-out-cross-validation}
+\section{Best Low Rank Approximation}\label{best-low-rank-approximation}
 
-To assess the quality of the imputation, Leave-One-Out Cross Validation
-(LOOCV) is used to generate a prediction error. LOOCV cycles through the
-observed values, setting each to NA (missing), and then performing the
-described imputation process. The prediction error is then calculated as
-some function of the difference between the imputed value and the true
-value. In this case, the algorithm records absolute error
-\(\sum \mid \hat y_{i,j} - y_{i,j}\mid\) and root mean square error
-\(\sqrt{\frac{\sum (\hat y_{i,j} - y_{i,j})^2}{n}}\) where \(n\) is the
+To determine the best low rank for approximating \(Y\), Leave-One-Out
+Cross Validation (LOOCV) is used to generate prediction errors for each
+possible rank. LOOCV cycles through the observed values, setting each to
+NA (missing), and then performing the described matrix completion
+process. The prediction error is then calculated as some function of the
+difference between the imputed value and the true value. In this case,
+the algorithm records root mean square error
+\[\sqrt{\frac{\sum (\hat y_{ij} - y_{ij})^2}{z}}\] where \(z\) is the
 number of observations not missing.
 
 \section{Validation Against Simulated
@@ -578,7 +673,7 @@ Data}\label{validation-against-simulated-data}
 
 Before applying the algorithm on the real data it is useful to validate
 the algorithmic approach against simulated data where the true rank is
-known.
+already known.
 
 \subsection{Simulating a Low Rank
 Matrix}\label{simulating-a-low-rank-matrix}
@@ -586,54 +681,52 @@ Matrix}\label{simulating-a-low-rank-matrix}
 Taking the Kronecker product of two lower dimension matrices yields a
 higher dimension matrix with low rank. Explicitly, given matrix
 \(A \in \mathbb{R}^{m \times r}\) and \(B \in \mathbb{R}^{r \times n}\),
-\(A \otimes B = C\) where \(C \in \mathbb{R}^{m \times n}\) with rank
+\(A \otimes B = C\) where \(C \in \mathbb{R}^{m \times n}\) has rank
 \(r\). Thus, when \(r < m, r < n\) the matrix \(C\) has an optimal low
 rank that minimizes the root mean square error from the leave one out
 cross validation procedure. To add noise to the simulated matrix, \(C\),
-simply add an error matrix, \(E \in \mathbb{R}\) where
-\(e_{i,j} \sim N(0,1)\).
+simply add an error matrix, \(E \in \mathbb{R}^{m \times n}\) sampled
+from a normal distribution.
 
-Moreover, this procedure provides a computationally efficient way to
-simulate many random low rank matrices to use as inputs for the
-validation procedure. In the case of simulated matrices, there are no
-missing entries, so the leave one out cross validation procedure
-sequentially removes each cell in the matrix, imputes its value using
-the rank being investigated, and considers the individual cell error as
-the difference between the true value and the imputed value. The overall
-root mean square error for the technique is then calculated with the
-aggregate each of these individual cell errors.
+This procedure provides a computationally efficient way to simulate many
+random low rank matrices to use as inputs for the validation procedure.
+In the case of simulated matrices, there are no missing entries, so the
+leave one out cross validation procedure sequentially removes each cell
+in the matrix, imputes its value using the rank being investigated, and
+considers the individual cell error as the difference between the true
+value and the imputed value. The overall root mean square error for the
+technique is then calculated with the aggregate each of these individual
+cell errors.
 
 \subsection{Approximating Optimal
 Rank}\label{approximating-optimal-rank}
 
-WHAT PLOTS OR VISUALIZATIONS DO I USE FOR RESULTS? HISTOGRAM OF
-PERCENTAGES FOR RANK APPROXIMATIONS? 1-4 100\%, higher ranks arent that
-relevant; effects of noise
-
-USE THIS TECHNIQUE TO SHOW DIFFERENT EFFECTS OF NOISE?
-
 The above plots represent the accuracy of the matrix completion
-technique for matrices with true rank \(k = 1,2,...8\). The accuracy is
-measured by simulating 10 random matrices with low rank of \(k\) for
-each value of \(k\) (80 simulated matrices total), and then running the
+technique for matrices with true rank \(r = 1,2,...8\). The accuracy is
+measured by simulating 10 random matrices with low rank of \(r\) for
+each value of \(r\) (80 simulated matrices total), and then running the
 leave one out cross validation procedure described above on the matrix
 \(C\) to generate a root mean square error for each possible rank. The
 accuracy is the calculated using the number of times the rank with the
-lowest error matches the true simulated rank divided by 10. Note as the
-true rank becomes larger, the technique performs far worse at
-determining the optimal low rank, THIS IS BECAUSE\_\_\_\_\_\_\_
+lowest error matches the true simulated rank divided by 10 (the number
+of trials with rank \(r\)). Note as the true rank becomes larger, the
+technique performs far worse at determining the optimal low rank, THIS
+IS BECAUSE\_\_\_\_\_\_\_
 
-When a noise matrix \(E\) is added to each simulated matrix \(C\)
+Furthermore, when noise is applied to each simulated matrix, \(C\)
+(through the addition of a noise matrix \(E\)), the algorithm tends to
+perform worse at
 
 \section{Results on Real Data}\label{results-on-real-data}
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-11-1.pdf}
 
-The above plot displays the root mean square errors from leave one out
-cross validation across different rank inputs into the algorithm. It's
-clear that rank 2 provides the best low-rank solution for the
-alternating least squares imputation algorithm. Thus rank 2 is used in
-the algorithm to impute the missing values in \(Y\).
+The above plot displays the root mean square errors from the leave one
+out cross validation process across different rank inputs into the
+algorithm. It's clear that rank 2 provides the best low-rank
+approximation for simulating missing values in \(Y\) using the
+alternating least squares algorithm. Thus, the dataset is fitted with
+the algorithm using rank 2 to simulate the missing values in \(Y\).
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-12-1.pdf}
 
@@ -642,14 +735,11 @@ The two plots above display the true values of the \(Y\) matrix
 using the alternating least squares algorithm with an input of rank 2.
 The first plot displays all values and shows a somewhat positive linear
 trend (an ideal fit of the true values would be a scatter of points
-following the 45 degree angled line represented in red). However,
-several outliers with large true values skew this dataset and cause the
-plot to appear linear. Closer examination of the true and fitted values
-smaller than 1000 (the plot on the right) reveals the relationship is
-far from the linear pattern.
-
-DISCUSS THE NEED TO HAVE DATA WHERE THE ENTIRE ROW OR COLUMN CANT BE
-MISSING
+following a linear relationship, represented in red). However, several
+outliers with large true values skew this dataset and cause the plot to
+appear linear. Closer examination of the true and fitted values smaller
+than 1000 (the plot on the right) reveals the relationship is far from
+the linear pattern.
 
 \subsection{Scale Transformations}\label{scale-transformations}
 
@@ -659,48 +749,62 @@ matrix as well as the row and column means when imputing each missing
 cell value. This reliance upon sample means leads to susceptiblity to
 outliers. Moreover exploratory data analysis reveals the dataset
 contains outliers, particularly in the SrcBytes and DstBytes
-measurements. Thus, a transformation of features in the model may be
+measurements. Because outliers drive the sum of squares for the
+alternating least squares procedure, the poor fit on the data is
+unsurprising. Thus, a transformation of features in the dataset may be
 appropriate for improving the fit of the algorithm.
 
-OUTLIERS DRIVE SUM OF SQUARES
-
-When a natural log transformation is applied to the raw dataset before
-any imputation steps are taken, the alternating least squares imputation
-algorithm yields the following root mean square errors varied by rank.
+When a natural logarithm transformation is applied to the raw dataset
+before any simulation steps are taken, the alternating least squares
+imputation algorithm yields the following root mean square errors varied
+by rank.
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-13-1.pdf}
 
+Now the optimal rank from the LOOCV procedure is 1. The algorithm is run
+on the log transformed dataset with a low rank approximation of 1 and
+the fitted vereus observed values are again compared.
+
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-14-1.pdf}
 
-\[min \sum_{i,j:F_{i,j} > 0} (y_{i,j} - u_iDv^T_j)^2\]
-\[y_{ij} =  a_i + b_j - \mu + \epsilon_{ij}\]
+The values above have been retransformed (exponentiated) to the
+dataset's original scale after the simulation procedure was completed.
+The fit still appears to be quite poor and there is not much difference
+between the log transformed output versus the original non-transformed
+output.
 
-\[UDV^T\]
-
-\[Y^{(s+1)} = (U^{(s)}[,1 : r]D^{(s)}[,1 : r]V^{(s)}[,1 : r]^T)\]
+This poor performance may largely be due to the fact the algorithm does
+not account for the variability in the sample size and variance in the
+observed interactions for each cell. Unlike the Netflix Competition, in
+which each cell of the matrix being completed contained only a single
+user rating of a movie, the matrix in this problem contains the mean of
+a variable number of observations corresponding to particular port
+combinations.
 
 \chapter{A Bayesian Approach to Two Dimensional Matrix
 Completion}\label{a-bayesian-approach-to-two-dimensional-matrix-completion}
 
-\section{Motivation}\label{motivation-2}
-
-The previous section's results reflected the need for an imputation
-strategy that accounted for the variability in the number of
-observations observed for each port combination when imputing that
-particular combination's cell. The previous technique fails to take into
-account the differing sample size and variance in each cell (source port
-\(i\), destination port \(j\)), so the algorithm treated each
-\(y_{ij}^{k}\), which represents the mean of all observations in cell
-\((i,j)\) for continuous feature \(k\), as a single value with no
-consideration of differing sample sizes and variances between cells. The
-following section constructs a statistical model that takes frequency of
-observations and variances for each cell into account and repeatedly
-samples using a nested Gibbs Sampling procedure built upon the full
-conditionals of the parameters of the statistical model to impute
-missing values in the matrix. Note, this technique again slices the
-tensor into the four separate matrices,
-\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}\), and
-the model can be applied to each matrix \(Y^{(k)}\) separately.
+The previous section's results reflected the need for a completion
+strategy that accounts for the variability in the number of observations
+observed for each port combination when imputing that particular
+combination's cell. The previous technique fails to take into account
+the differing sample size and variance in each cell's observations, so
+the algorithm treated each \(y_{ij}\) as a single value rather than the
+mean and variance of a vector of observations. The following section
+constructs a statistical model that takes the sample size of
+observations and their variances for each cell into account and
+repeatedly simulates values for the missing cells using a Gibbs Sampling
+procedure. The sampling procedure relies upon first building a general
+model for simulating the row and column facors with their respective
+standard deviations. After calculating the full conditionals for the
+parameters of this general model, the overall procedure repeatedly
+simulates values from these full conditional distributions, alternating
+between simulating the matrix of row factors and the matrix of column
+factors along with their respective standard deviations. Note, this
+technique again slices the tensor into the four separate matrices,
+\(Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}\)
+(referred to as \(Y\) in general), and the model can be applied to each
+matrix \(Y^{(k)}\) separately.
 
 \section{Statistical Model for Port
 Relationships}\label{statistical-model-for-port-relationships}
@@ -708,8 +812,10 @@ Relationships}\label{statistical-model-for-port-relationships}
 The following statistical model is defined for the cells in \(Y\):
 \[y_{ij} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}\]
 where \(u_i\) represents the row factors, \(v_j\) represents the column
-factors, \(s_{ij}\) represents the sample size of observations observed
-for source port \(i\) and destination port \(j\), and
+factors, \(\sigma_i\) represents the standard deviation of each row in
+the matrix, \(\tau_j\) represents the standard deviations of each column
+in the matrix, \(s_{ij}\) represents the sample size of observations
+observed for source port \(i\) and destination port \(j\), and
 \(\epsilon_{ij} \sim N(0,1)\). Fixing the \(j\) values in the analysis
 (i.e. \(v_j\) and \(\tau_j\) are known) enables the model to be
 rewritten in the form of a weighted least squares model for imputing
@@ -735,7 +841,7 @@ Vectorizing all of these equations varied across \(j = 1...n\) yields:
 \[\vec{y_i} = Vu_i + \sigma_i W^{1/2}\vec{\epsilon}\]
 
 where \(V \in \mathbb{R}^{n \times r}\) is the matrix of column factors
-(\(r\) is the dimension of the latent factors), and
+(\(p\) is the dimension of the latent factors), and
 \(W \in \mathbb{R}^{n \times n}\) is the diagonal matrix of weights,
 such that \[V =
   \begin{bmatrix}
@@ -755,13 +861,16 @@ such that \[V =
     & \ddots & \\
     & & \frac{\tau_n^2}{s_{nn}}
   \end{bmatrix}\]
+Note \(\tau^2\) refers to the variance, variance being the square of the
+standard deviation.
+
 This model can be rewritten in a general form:
 
 \[\vec{y} = X\beta + \sigma W^{1/2}\epsilon\] where \(X\) represents
 \(V\), \(\beta\) represents \(u_i\) and \(sigma\) represents
 \(\sigma_i\).
 
-This is a specific form of the Generalized Least Squares Model (GLS),
+This is a modified form of the Generalized Least Squares Model (GLS),
 which gives a weighted least squares estimate of \(\beta\), and it is
 appropriate when the error terms are not independent and identically
 distributed. Bayesian analysis of this problem provides similar
@@ -771,32 +880,34 @@ estimates with a lower variance because the non-Bayes estimator serves
 as a limit of the Bayes estimator.
 
 The full conditional distributions of the random variables \(\beta\) and
-\(\sigma^2\) (note the \(\sigma\) is squared in the model) for this case
-of GLS are described below:
+\(\sigma^2\) (note \(\sigma\) is squared in the model) for this case are
+described below:
 \[\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)\]
 \[\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})\]
 where MVN represents the Multivariate Normal Distribution, and IG
 represents the Inverse Gamma distribution. \[ \begin{cases}
-      \Sigma_n = (X^TW^{-1}X/\sigma^2+W_0^{-1})^{-1}\\
-      \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + W_0^{-1} \beta_0)
+      \Sigma_n = (X^TW^{-1}X/\sigma^2+\Sigma_0^{-1})^{-1}\\
+      \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + \Sigma_0^{-1} \beta_0)
     \end{cases}\] \[SSR_W = (y - X\beta)^TW^{-1}(y-X\beta)\]
 The remaining variables in the closed form full conditionals come from
-the random variables prior distributions, which are defined as follows:
-\[\beta \sim MVN (\beta_0, W_0)\]
+the parameter's prior distributions, which are defined as follows:
+
+\[\beta \sim MVN (\beta_0, \Sigma_0)\]
 \[\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)\]
 
 The initial values for the prior distributions are set as:
-\(\beta_0 = 0\), \(W_0 = \gamma^2I\) where \(\gamma^2\) is a large
+\(\beta_0 = 0\), \(\Sigma_0 = \gamma^2I\) where \(\gamma^2\) is a large
 number and \(I\) is the \(m \times n\) identity matrix, \(\nu_0 = 2\),
 \(\sigma_0^2 = 1\). This results in a diffuse prior for \(\beta\) that
 spreads out the density, and a noninformative prior for \(\sigma^2_0\).
 
-\subsection{Generalized Gibbs Sampler}\label{generalized-gibbs-sampler}
+\subsection{Generalized Gibbs Sampler
+Function}\label{generalized-gibbs-sampler-function}
 
 Following the formulation of the model and the definition of the priors,
-a Gibbs Sampler is created to simulate samples from the full conditional
-of each parameter in the statistical model, which iteratively creates an
-approximate value for each cell.
+a general Gibbs Sampler function is created to simulate samples from the
+full conditional of each parameter in the statistical model, which
+iteratively creates an approximate value for each cell.
 
 The Gibbs Sampler algorithm progresses as follows:
 
@@ -813,21 +924,22 @@ Set \(\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}\)
 This Gibbs Sampler serves as a general technique that can be used to
 simulate both the values of \(u_i\) and \(\sigma_i\) or \(v_j\) and
 \(\tau_j\) depending on the inputs it is given because the formulation
-of both models are identical; they only differ by the calculations of
-the inputs, \(X\) and \(W\). In the context of the problem, it can first
-be called repeatedly to simulate all of the rows of the matrix
-\(Y^{(k)}\), then called repeatedly with updated inputs to simulate all
-of the columns of the matrix.
+of both models are identical; they only differ by the the inputs, \(X\)
+and \(W\), which are calculated, and \(y\) which is sliced directly from
+\(Y\). In the context of the problem, this function can first be called
+repeatedly to simulate all of the rows in the matrix \(Y\), then called
+repeatedly with updated inputs to simulate all of the columns of the
+matrix.
 
-\subsection{Validating the General Gibbs
-Sampler}\label{validating-the-general-gibbs-sampler}
+\subsection{Validation Simulated Data}\label{validation-simulated-data}
 
 Before using the general Gibbs sampler function in the overall procedure
-for imputing missing values in \(Y\), it is necessary to validate the
-procedure's validity on simulated data. As the algorithm runs, it stores
-a matrix \(\beta\) vectors and a vector of \(\sigma^2\) scalars. Thus,
-if \(S = 50\), i.e.~the algorithm samples 50 \(\beta\) and 50
-\(\sigma\), the final returned output will be \[\beta =
+for simulating missing values in \(Y\), it is necessary to validate the
+procedure's effectiveness on simulated data where the ground truth is
+known. As the algorithm runs, it stores a matrix of \(\beta\) vectors
+and a vector of \(\sigma^2\) scalars. Thus, if \(S = 50\), i.e.~the
+algorithm samples 50 \(\beta\) and 50 \(\sigma\), the final returned
+output will be \[\beta =
   \begin{bmatrix}
     \beta_1^T- \\
     \beta_2^T- \\
@@ -842,40 +954,52 @@ if \(S = 50\), i.e.~the algorithm samples 50 \(\beta\) and 50
     \sigma_{50}^2\\
   \end{bmatrix}\]
 Using random sampled values from the normal distribution for \(X\) and
-\(y\), and random sampled values from the exponential distribution for
-\(W\) (exponential distribution is used to ensure \(\Sigma_n\) is
-positive definite), its possible to generate a distribution of \(\beta\)
-and \(\sigma^2\). The posterior means of these distributions are then
-compared to the actual values in the distributions.
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{p<-}\DecValTok{5}
-\NormalTok{beta<-}\KeywordTok{rnorm}\NormalTok{(p)}
-\NormalTok{X =}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rnorm}\NormalTok{(m *}\StringTok{ }\NormalTok{p, }\DataTypeTok{mean=}\DecValTok{0}\NormalTok{, }\DataTypeTok{sd=}\DecValTok{1}\NormalTok{), m, p)}
-\NormalTok{W =}\StringTok{ }\KeywordTok{diag}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{rexp}\NormalTok{(m), }\DataTypeTok{nrow =} \NormalTok{m, }\DataTypeTok{ncol =} \NormalTok{m)}
-\NormalTok{y =}\StringTok{ }\NormalTok{X%*%beta  +}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rnorm}\NormalTok{(m *}\StringTok{ }\DecValTok{1}\NormalTok{, }\DataTypeTok{mean=}\DecValTok{0}\NormalTok{, }\DataTypeTok{sd=}\DecValTok{1}\NormalTok{), m, }\DecValTok{1}\NormalTok{)}
+random sampled values from the exponential distribution for \(W\)
+(exponential distribution is used to ensure \(\Sigma_n\) is positive
+definite), it is possible to calculate values of \(\vec{y}\) using a
+predefined \(\beta*\) and \(\sigma *\), which are known as the ground
+truth values for comparison:
+\[\vec{y} = X\beta * + \sigma * W^{1/2}\epsilon\] This \(\vec{y}\),
+\(W\), and \(X\) are used as inputs to the general Gibbs Sampler
+Function to generate a distribution of \(\beta\)'s and a distribution
+\(\sigma^2\)'s. The posterior means of these distributions are then
+computed and compared to recover the original values, \(\beta *\) and
+\(\sigma *\).
 
-\KeywordTok{plot}\NormalTok{(beta, }\KeywordTok{lm}\NormalTok{(y~}\StringTok{ }\NormalTok{-}\DecValTok{1}\NormalTok{+}\StringTok{ }\NormalTok{X)$coef)}
-\KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-\section{Gibbs Sampling Procedure for Imputing Missing
-Values}\label{gibbs-sampling-procedure-for-imputing-missing-values}
+In particular, the posterior mean of \(\sigma^2\) is calculated by
+taking the mean of the function's output of \(\sigma^2\). This posterior
+mean is compared to the original \(\sigma *\) used to generate
+\(\vec{y}\). Repeatedly performing this procedure reveals the posterior
+mean matches the ground the original quite often.
+
+The recovering the original \(\beta *\) is more complex. The Bayes
+estimator (the posterior mean of generated \(\beta\)s) should be close
+to the GLS estimator. There are theoretical results that say how close
+the GLS estimator should be to the true value INSERT THEORETICAL RESULTS
+HERE. In particular, the variance matrix of the GLS estimator around the
+true value is \[(X^T \Omega^{-1} X )^{-1}\] and the posterior mean
+estimate \[\hat{\beta} = (X^T \Omega^{-1} X )^{-1}X^T\Omega^{-1}y\].
+Thus, after simulating many data sets and solving for the posterior mean
+estimator for each, the variance of these simulated posterior means
+should be close to \[(X^T \Omega^{-1} X )^{-1}\]. WHAT IS OMEGA IN THIS
+CASE?
+
+\section{Full Sampling Procedure}\label{full-sampling-procedure}
 
 The complete Gibbs Sampler for imputing missing values uses the
 generalized Gibbs Sampler defined above to iteratively simulate missing
-values for the entire matrix \(Y^{(k)}\). The procedure is described
-below:
+values for the entire matrix \(Y\). The procedure is described below:
 
 Initialize \(\sigma_i\) for \(i = 1 ... m\) and \(\tau_j\) for
 \(j = 1 ... n\) as the overall standard deviation of the \(Y^{(k)}\)
 matrix. Initialize missing values of \(Y\) using the ANOVA imputation
-described in the previous section.
+described in the previous section. Initialize the matrix of row factors
+\(U \in \mathbb{R}^{m \times p}\) and the matrix of column factors
+\(V \in \mathbb{R}^{n \times p}\).
 
 Repeat the following:
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\tightlist
 \item
   For \(i = 1 ... m\): Simulate \(u_i\) and \(\sigma_i\) using the
   generalized Gibbs Sampler. For the first iteration of the sampler, set
@@ -884,10 +1008,11 @@ Repeat the following:
   pervious iteration as \(X\). For the first iteration, use the
   initialized \(\tau_j\) for \(j = 1 ... n\) to calculate the diagonals
   for the \(W\) matrix. For all future iterations use the stored
-  \(\tau_j\) values from the previous iteration to calculate \(W\). Take
-  the corresponding \(y_i\) directly from the \(Y\) matrix. Store the
-  resulting sampled \(u_i\)'s in a matrix \(U\), and the \(\sigma_i\) in
-  a vector, to use for simulating \(v_j\) and \(\tau_j\).
+  \(\tau_j\) values from the previous iteratioWn to calculate \(W\).
+  Take the corresponding \(y_i\) directly from the \(Y\) matrix. Store
+  the resulting sampled \(u_i\)'s in a matrix \(U\), and the
+  \(\sigma_i\) in a vector, to use for simulating \(v_j\) and
+  \(\tau_j\).
 \item
   For \(j = 1 ... n\): Simulate \(v_j\) and \(\tau_j\) using the
   generalized Gibbs Sampler. Use the stored \(U\) from the previous step
@@ -897,103 +1022,94 @@ Repeat the following:
   the \(\tau_j\) in a vector, to use for simulating \(u_i\) and
   \(\sigma_j\).
 \item
-  Impute values for \(y_{ij}\) in \(Y^{(k)}\) that were missing in the
+  Simulate values for \(y_{ij}\) in \(Y\) that were missing in the
   original dataset by sampling from the normal distribution
   \[y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{s_{ij}})\]
 \end{enumerate}
-Should \(s_ij\) increment as the number of iterations increase?
+\subsection{Selecting the Dimension of Latent
+Factors}\label{selecting-the-dimension-of-latent-factors}
 
-\chapter{Tensor Completion}\label{tensor-completion}
+The dimension of the latent factors, \(p\), is used to define the
+dimension of \(\beta \in \mathbb{R}^{p \times 1}\) and consequently
+defines the dimensions of the row and column factor matrices \(U\) and
+\(V\). Selecting \(p\) is a model selection choice similar to
+determining the optimal low rank approximation \(r\) in the previous
+section. Once again, Leave One Out Cross Validation may be used to
+detemine the optimal \(p\) given the observed data. In this technique,
+it is more computationally expensive than the previous technique to
+perform Leave One Out Cross Validation on the entire dataset, so
+randomly selecting a set number of observed cells to set to missing for
+determining \(p\) is also valid.
 
-\section{Imputation Strategy}\label{imputation-strategy}
+\subsection{Validation on Simulated
+Data}\label{validation-on-simulated-data}
 
-The imputation strategy focuses on finding a low rank approximation for
-\(Y\) when decomposing the tensor.
+Again it is necessary to validate the effectiveness of the overall
+sampling procedure with simulated data where the ground truth is known.
+Simulate matrices \(U\) and \(V\) such that \(\Theta = UV^T\) is truly
+low rank. The same procedure for generating low rank matrices used in
+the previous chapter can be applied here. Using \(\Theta\) there are two
+possible tests for determining the validity of the sampling procedure.
+First, the simulated data is used to recover the true values for
+\(UV^T\) from the model. This is considered an idealized case for
+testing the procedure. Second, some cells are set to missing and again
+the procedure is used to obtain an estimate for \(UV^T\) from the model.
+This output is compared to the previous case's output to evaluate the
+performance depending on whether the cells have data or do not.
 
-\subsection{CP Decomposition}\label{cp-decomposition}
+\chapter{Future Work: Tensor
+Completion}\label{future-work-tensor-completion}
 
-The CP decomposition expresses the tensor as:
-\[Y = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r\] where \(r\) represents the
+Recall the analysis of correlations between the continuous features in
+\(T\) in chapter 2.
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+The strong correlations between the individual continuous features
+suggests imputing the tensor \(T\) all at once may yield closer
+estimates than the previous two techniques, which sliced the matrices.
+By imputing the tensor as a whole, techniques that include effects that
+capture the relationships between features can take advantage of
+possible collinearity between the features.
+
+The following section describes the way techniques in the previous
+sections may be extended to full 3-dimensional tensor completion.
+
+\section{PARAFAC Decomposition}\label{parafac-decomposition}
+
+The PARAFAC decomposition expresses the tensor as:
+\[T = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r\] where \(r\) represents the
 rank approximation, \(\cdotp\) denotes the outer product of tensors, and
-\(u \in \mathbb{R_{m \times r}}\), \(v \in \mathbb{R_{n \times r}}\),
-and \(w \in \mathbb{R_{4 \times r}}\). Each individual cell is
-expressed: \[y_{ijk} = \sum_{r=1}^Ru_{ri} \cdotp v_{ri} \cdotp w_{ri}\]
+\(u \in \mathbb{R}^{m \times r}\), \(v \in \mathbb{R}^{n \times r}\),
+and \(w \in \mathbb{R}^{4 \times r}\). Each individual cell is
+expressed: \[t_{ijk} = \sum_{r=1}^Ru_{ri} \cdotp v_{ri} \cdotp w_{ri}\]
 Applying this decomposition yields the objective
-\[min_{Y'}\|Y-Y'\|, Y' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)\],
-where \(lambda_r\) is the regularization penalty.
+\[\underset{T'} {\text{min}}\|T-T'\|\] where
+\[T' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)\] and
+\(\lambda_r\) is the regularization penalty.
 
-\subsection{Variable Sample Sizes}\label{variable-sample-sizes}
+\section{Statistical Model}\label{statistical-model}
 
-A traditional approach to tensor completion involves using alternating
-least squares regression to impute the missing values after populating
-them with some initial values. The previous section applies this
-approach to a 2-dimensional \(m \times n\) tensor that represents a
-cross-section slice of \(Y\) that only includes one of the four
-continuous features. \emph{include als section here, related work:
-\url{https://arxiv.org/abs/1410.2596} (hastie fast als), application
-netflix challenge}
-
-While this approach yields a completed tensor, it does not account for
-the fact that the means in each cell are calculated from a variable
-number of observations. Furthermore it is not necessarily true that
-\(n_{ijk} = n_{i'j'k'}\) or \(\sigma^2_{ijk} = \sigma^2_{i'j'k'}\) for
-\(i \neq i', j \neq j', k \neq k'\).
-
-We propose the following model:
-\[y_{ijk} \sim N(\mu_{ijk}, \frac{\sigma^2_{ijk}}{n_{ijk}})\] where
-\(\mu_{ijk}\) is the sample mean, \(n_{ijk}\) is the sample size, and
-\(\sigma^2_{ijk}\) is the sample variance of observations for source
-port \(i\), destination port \(j\), and continuous feature \(k\).
+The following model is proposed:
+\[t_{ijk} \sim N(\mu_{ijk}, \frac{\sigma^2_{ijk}}{s_{ijk}})\] where
+\(\mu_{ijk}\) is the sample mean, \(s_{ijk}\) is the sample size of
+observations, and \(\sigma^2_{ijk}\) is the sample variance of
+observations for source port \(i\), destination port \(j\), and
+continuous feature \(k\).
 
 Substituting these values into the Gaussian probability density function
 yields the likelihood:
-\[\frac{n_{ijk}}{\sigma^2_{ijk}}\sum(\bar y_{ijk} - \mu_{ijk})^2\]
+\[\frac{s_{ijk}}{\sigma^2_{ijk}}\sum(\bar t_{ijk} - \mu_{ijk})^2\]
 
-Applying the CP/PARAFAC decomposition \(u_{ijk}\) is re-expressed:
-\[u_{ijk} = \sum_{r=1}^Ra_{ir}b_{jr}c_{kr}\]
+Applying the PARAFAC decomposition, \(\mu_{ijk}\) is re-expressed:
+\[\mu_{ijk} = \sum_{r=1}^Ra_{ir}b_{jr}c_{kr}\]
 
 Vectorizing the inputs in the likelihood yields:
-\[\sum_j\sum_k[\bar y_{ijk} - a_i^T(b_i \cdotp c_k)]\frac{n_{ijk}}{\sigma^2_{ijk}} (1)\]
+\[\sum_j\sum_k[\bar t_{ijk} - a_i^T(b_i \cdotp c_k)]\frac{n_{ijk}}{\sigma^2_{ijk}}\]
 where \(a_i \in \mathbb{R_{m \times r}}\),
 \(b_j \in \mathbb{R_{n \times r}}\), and
 \(c_k \in \mathbb{R_{4 \times r}}\). Summing across \(j\) and \(k\) in
-this case solves for the \(ith\) row slice of the tensor. How to notate
-vectorization of \(y\)?
-
-Recall the Residual Sum of Squares (RSS) of the likelihood for an
-Ordinary Least Squares (OLS) regression is expressed:
-\[\sum_l(y_l-B^Tx_l)^2\]
-
-Adding a weight, \(w_l\) to the summation yields a Weighted Least
-Squares problem (WLS) \[\sum_l^nw_l(y_l-\beta^Tx_l)^2 (2)\] that is
-analagous to the vectorized likelihood equation (1) with
-\(w_l = \frac{n_{ijk}}{\sigma^2_{ijk}}\), \(\beta = a_i\),
-\(x = (b_j \cdotp c_k)\).
-
-With this formulation its now possible to solve for the optimal values
-for each slice \(a_i\) of the tensor.
-
-Recall that in a traditional vectorized OLS,
-\(y = X\beta + \sigma\epsilon\), where
-\(y \in \mathbb{R_{n \times 1}}\), \(X \in \mathbb{R_{n \times p}}\),
-\(\beta \in \mathbb{R_{p \times 1}}\), and
-\(\\sigma\epsilon \in \mathbb{R_{n \times 1}}\). Solving the maximum
-likelihood estimator of \(\beta\), gives
-\(\hat \beta = (X^TX)^{-1}X^Ty\).
-
-Applying this formulation to the weighted least squares gives
-\(y = X\beta + W^{-\frac{1}{2}}\epsilon\). Solving for the weighted
-least squares estimator gives \(\hat \beta = (X^TWX)^{-1}X^TWy\).
-
-Repeating this estimation technique across each slice of the tensor
-\(a_i\), \(b_j\), \(c_k\) results in a completed model for \(y_{ijk}\).
-
-\section{Gibbs Sampling}\label{gibbs-sampling}
-
-Following the formulation of the model, a Gibbs Sampling algorithm is
-used to repeatedly generate samples from the full conditional of each
-parameter in the model statistical model, which iteratively creates an
-approximate value for each cell.
+this case solves for the \(ith\) row slice of the tensor.
 
 \chapter*{Conclusion}\label{conclusion}
 \addcontentsline{toc}{chapter}{Conclusion}
@@ -1008,6 +1124,317 @@ title or section head \emph{shouldn't be} indented, because indents are
 to tell the reader that you're starting a new paragraph. Since that's
 obvious after a chapter or section title, proper typesetting doesn't add
 an indent there.
+
+\appendix
+
+\chapter{Preliminary Data
+Investigation}\label{preliminary-data-investigation}
+
+\section{Exploratory Data Analysis}\label{exploratory-data-analysis}
+
+\subsection{Cleaning Predictors}\label{cleaning-predictors}
+\begin{verbatim}
+     Flgs   SrcAddr     Sport   DstAddr     Dport   SrcPkts   DstPkts 
+ "factor"  "factor"  "factor"  "factor"  "factor" "integer" "integer" 
+ SrcBytes  DstBytes     State 
+"integer" "integer"  "factor" 
+\end{verbatim}
+This code casts the features to their corresponding class
+classifications (numeric and factor), and removes Proto, StartTime, and
+Diretion from the dataset.
+
+\subsection{Categorical Features: Unique Categories and
+Counts}\label{categorical-features-unique-categories-and-counts}
+\begin{verbatim}
+    Flgs  SrcAddr    Sport  DstAddr    Dport  SrcPkts  DstPkts SrcBytes 
+      70    65113    64486    41903    17537     2790     3633    44075 
+DstBytes    State 
+   64549        6 
+\end{verbatim}
+\begin{verbatim}
+           x     N
+    1: 33461 35683
+    2:  4263  8541
+    3:    80  8346
+    4:  4165  4988
+    5: 48468  3023
+   ---            
+64482: 57904     1
+64483: 58242     1
+64484: 59051     1
+64485: 59315     1
+64486: 60116     1
+\end{verbatim}
+\begin{verbatim}
+           x      N
+    1:    23 235616
+    2:    80 204128
+    3:   443 137360
+    4: 32819 102166
+    5:    25  53167
+   ---             
+17533: 65515      1
+17534: 65528      1
+17535: 65529      1
+17536: 65532      1
+17537: 65533      1
+\end{verbatim}
+\begin{verbatim}
+                  x     N
+    1: 197.0.31.231 35440
+    2:    1.0.11.96  8717
+    3:  100.0.7.149  8526
+    4:    197.0.9.1  5536
+    5:   1.0.85.103  4976
+   ---                   
+65109:   197.0.55.5     1
+65110:   197.0.55.6     1
+65111:   197.0.55.7     1
+65112:   197.0.55.8     1
+65113:   197.0.55.9     1
+\end{verbatim}
+\begin{verbatim}
+                  x     N
+    1:    100.0.1.9 64508
+    2:    100.0.1.2 62681
+    3:   100.0.1.28 25780
+    4:   100.0.1.55 25641
+    5:  100.0.18.93 20766
+   ---                   
+41899:  100.0.6.179     1
+41900:  100.0.7.173     1
+41901: 100.0.77.113     1
+41902: 100.0.77.147     1
+41903: 100.0.88.111     1
+\end{verbatim}
+\begin{verbatim}
+     x      N
+1: REQ 571899
+2: FIN 307337
+3: RST 135280
+4: CON  17146
+5: ACC  16815
+6: CLO     98
+\end{verbatim}
+\subsection{Continuous Features: Distributions and
+Relationships}\label{continuous-features-distributions-and-relationships}
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-20-1.pdf}
+\begin{verbatim}
+ [1] 118257047 116615879 112673526 108933442 105793666  73376579  72839115
+ [8]  70001807  56206409  55359912
+\end{verbatim}
+\begin{verbatim}
+ [1] 1008233 1000971  771590  492361  458603  437296  408530  407973
+ [9]  371976  371251
+\end{verbatim}
+\begin{verbatim}
+ [1] 1850817751 1713055847 1690162763 1524781880 1491609296 1340922625
+ [7] 1304668214 1206594243 1163954979 1145323438
+\end{verbatim}
+\begin{verbatim}
+ [1] 1239611 1223485 1219276 1004471  982931  942827  883354  795120
+ [9]  766776  754831
+\end{verbatim}
+The histograms and the largest 10 values in each of the continuous
+variables show that there are a relatively few amount of large
+observations skewing the distributions. This explains the model summary
+containing means much larger than their medians. It's not possible to
+remove the large values as outliers because they may be scanner
+observations to detect. Also there is a high frequency (up to the first
+quartile) of destination bytes and packets that equal 0.
+
+We will now try to investigate whether the largest continuous predictor
+values correspond to any particular addresses or ports.
+\begin{verbatim}
+             Flgs   SrcAddr Sport    DstAddr Dport SrcPkts DstPkts
+282859  * s        1.0.12.1 18086  100.0.1.8 31743  208339  104886
+282841  * s        1.0.12.1 18086  100.0.1.8 31743  204912   99688
+282832  * s        1.0.12.1 18086  100.0.1.8 31743  198007   94621
+282853  * s        1.0.12.1 18086  100.0.1.8 31743  191443   95892
+282823  * s        1.0.12.1 18086  100.0.1.8 31743  186228   84342
+724162  * *       100.0.4.9 37901 100.0.2.67    22 1008233 1239611
+        SrcBytes   DstBytes State
+282859 118257047    7514403   CON
+282841 116615879    7146182   CON
+282832 112673526    6801146   CON
+282853 108933442    6857053   CON
+282823 105793666    6048529   CON
+724162  73376579 1713055847   CON
+\end{verbatim}
+\begin{verbatim}
+             Flgs   SrcAddr Sport    DstAddr Dport SrcPkts DstPkts
+2162    * d       197.0.1.1 62030  100.0.1.1    80  371251 1219276
+724162  * *       100.0.4.9 37901 100.0.2.67    22 1008233 1239611
+724106  * *       100.0.4.9 37901 100.0.2.67    22 1000971 1223485
+2212    * d       197.0.1.1 62034  100.0.1.1    80  280593 1004471
+78245   * d         1.0.2.1 11210  100.0.1.2    80  158194  982931
+2185    * d       197.0.1.1 62033  100.0.1.1    80  268402  883354
+       SrcBytes   DstBytes State
+2162   26430322 1850817751   CON
+724162 73376579 1713055847   CON
+724106 72839115 1690162763   CON
+2212   20037592 1524781880   FIN
+78245  11294111 1491609296   CON
+2185   19137354 1340922625   FIN
+\end{verbatim}
+Source Addresses tend to be repetitive for the largest max
+bytes/packets, while ports vary. The top 10 largest DstBytes all
+correspond to SrcAddr 197.0.1.1 and DstAddr 100.0.1.1. Also both max Src
+and Dst rows correspond to the ``* s''" flag. The largest sizes of
+DstBytes tend to go to Dport 80, which is the port that expects to
+receive from a web client (http), while the largest SrcBytes go to
+31743. The next section implements a systematic way for investigating
+the relationship between addresses and ports because simply looking at
+the max rows is difficult.
+
+\section{Transformations on the Data}\label{transformations-on-the-data}
+
+\subsection{Removing Quantiles}\label{removing-quantiles}
+
+To get a better sense of the unskewed distribution, the below plots
+visualize the continuous features with the largest and smallest 10\% of
+observations removed. The removed values will be readded to the dataset
+when investigating for anomalies.
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-22-1.pdf}
+
+The continuous features are still unevenly distributed even with the
+20\% most extreme values removed.
+
+\subsection{Log Transformation}\label{log-transformation}
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-23-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-23-2.pdf}
+
+A log transformation for each of the continuous features outputs
+right-skewed histograms. Skewed features may affect the results of a
+kernel pca, so we consider other approaches for transformations.
+
+\subsection{Normal Scores
+Transformation}\label{normal-scores-transformation}
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+Finally, a normal scores transformation is applied to the dataset. The
+normal scores transformation reassigns each feature value so that it
+appears the overall data for that feature had arisen or been observed
+from a standard normal distribution. This transformation solves the
+issue of skewness-each value's histogram will now follow a standard
+gaussian density plot-, but it may cause issues with other analysis
+methods, particularly methods that are susceptible to ties in data.
+
+\section{Principal Component
+Analysis}\label{principal-component-analysis}
+
+Principal component analysis represents data in terms of its principal
+components rather than relying on traditional Cartesian axes. Principal
+components contain the underlying structure in data by representing the
+directions that contain the most variance. Each successive principal
+component is orthoganol to the previous, so the resulting vectors yields
+an uncorrelated orthogonal basis set. Because PCA is sensitive to
+relative scaling of variables, a normal scores transformation is applied
+before the algorithm is run.
+
+\subsection{Application}\label{application}
+
+In this problem, Principal Component Anaylsis is applied to each
+source-destination port grouping of observed data to understand the
+underlying structure of the data partition's continuous features: source
+bytes and packets and destination bytes and packets. In particular the
+amount of variance explained by the generated principal components and
+their relative directions will signal whether specific trends in
+connection behavior occur at certain ports, and whether the size of each
+of the continuous features affects port behavior as well as the other
+features.
+
+\section{Implementation}\label{implementation}
+
+\subsection{Investigating Port
+Combinations}\label{investigating-port-combinations}
+\begin{verbatim}
+Sport: 32416    Dport: 9163 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.4113308 -0.7246604 -0.5528760  0.001575730
+SrcPkts  0.5054262 -0.3234250  0.7999554  0.003459252
+DstBytes 0.5357591  0.4327433 -0.1665939  0.705649994
+DstPkts  0.5369483  0.4277813 -0.1632360 -0.708550377
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.7118 0.8991 0.51065 0.02309
+Proportion of Variance 0.7326 0.2021 0.06519 0.00013
+Cumulative Proportion  0.7326 0.9347 0.99987 1.00000
+\end{verbatim}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-1.pdf}
+\begin{verbatim}
+Sport: 4145     Dport: 9119 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.4333309  0.8902089 -0.1405308  0.001886624
+SrcPkts  0.5213529 -0.1206221  0.8439979  0.036180840
+DstBytes 0.5190742 -0.3165495 -0.3953966  0.688490995
+DstPkts  0.5205549 -0.3045896 -0.3340362 -0.724339380
+Importance of components:
+                         PC1    PC2     PC3     PC4
+Standard deviation     1.875 0.6538 0.23124 0.05551
+Proportion of Variance 0.879 0.1069 0.01337 0.00077
+Cumulative Proportion  0.879 0.9859 0.99923 1.00000
+\end{verbatim}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-2.pdf}
+\begin{verbatim}
+Sport: 19239    Dport: 9153 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.4400190  0.8125062 -0.3823817 -0.001104223
+SrcPkts  0.5189497  0.1174251  0.8466938 -0.003489750
+DstBytes 0.5179403 -0.4057384 -0.2640886 -0.705245607
+DstPkts  0.5184712 -0.4017728 -0.2591352  0.708953621
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.8418 0.7037 0.33316 0.03695
+Proportion of Variance 0.8481 0.1238 0.02775 0.00034
+Cumulative Proportion  0.8481 0.9719 0.99966 1.00000
+\end{verbatim}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-3.pdf}
+\begin{verbatim}
+Sport: 4243     Dport: 27 
+               PC1        PC2        PC3          PC4
+SrcBytes 0.3986539  0.8262979 -0.3978739  0.001762539
+SrcPkts  0.5268775  0.1487193  0.8367993  0.007045781
+DstBytes 0.5300998 -0.3876467 -0.2708012  0.703840168
+DstPkts  0.5314785 -0.3805842 -0.2610173 -0.710321243
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.7727 0.8343 0.40033 0.03406
+Proportion of Variance 0.7856 0.1740 0.04007 0.00029
+Cumulative Proportion  0.7856 0.9596 0.99971 1.00000
+\end{verbatim}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-4.pdf}
+\begin{verbatim}
+Sport: 4243     Dport: 10290 
+                PC1         PC2        PC3          PC4
+SrcBytes -0.4146349  0.86007431 -0.2972268 -0.002501828
+SrcPkts  -0.5225073  0.04229265  0.8514240 -0.016572825
+DstBytes -0.5257892 -0.36545098 -0.3181251 -0.699133556
+DstPkts  -0.5278350 -0.35345310 -0.2924547  0.714794623
+Importance of components:
+                          PC1    PC2     PC3     PC4
+Standard deviation     1.8125 0.7560 0.37528 0.05022
+Proportion of Variance 0.8213 0.1429 0.03521 0.00063
+Cumulative Proportion  0.8213 0.9642 0.99937 1.00000
+\end{verbatim}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-5.pdf}
+
+\subsection{Interpretation}\label{interpretation}
+
+In general the first two principal components explained most of the
+variance (\textasciitilde{}90\%) for each of the port combinations. The
+scatterplots of the principal components show clear horizontal patterns
+in the 2nd principal component. This similar behavior, mirrored
+throughout the top 10 most frequent ports, may be caused by the high
+frequency of zeroes in the dataset. Recall, the first quartile of
+observations for destination bytes and packets were all 0. This high
+frequency of the same value (0) yields ties when performing the normal
+scores transformation applied to the data, which may also cause the
+horizontal behavior exhibited in every principal component analysis.
 
 \backmatter
 

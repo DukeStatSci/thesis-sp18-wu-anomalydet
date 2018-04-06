@@ -8,7 +8,7 @@ If you feel it necessary to include an appendix, it goes here.
 # Preliminary Data Investigation
 ## Exploratory Data Analysis
 ### Cleaning Predictors
-```{r,include=FALSE}
+```{r,include=FALSE,echo=FALSE}
 setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index/")
 library(plyr)
 library(data.table)
@@ -36,7 +36,7 @@ continuous = c("SrcPkts", "DstPkts", "SrcBytes", "DstBytes")
 This code casts the features to their corresponding class classifications (numeric and factor), and removes Proto, StartTime, and Diretion from the dataset.
 
 ### Categorical Features: Unique Categories and Counts
-```{r}
+```{r,echo=FALSE}
 sapply(argus, function(x) length(unique(x)))
 #function that returns elements of the feature and their counts in descending order
 element_counts = function(x) {
@@ -78,32 +78,12 @@ head(max.DstBytes)
 
 Source Addresses tend to be repetitive for the largest max bytes/packets, while ports vary. The top 10 largest DstBytes all correspond to SrcAddr 197.0.1.1 and DstAddr 100.0.1.1. Also both max Src and Dst rows correspond to the "* s"" flag. The largest sizes of DstBytes tend to go to Dport 80, which is the port that expects to receive from a web client (http), while the largest SrcBytes go to 31743. The next section implements a systematic way for investigating the relationship between addresses and ports because simply looking at the max rows is difficult.
 
-
-### Correlation Between Features
-```{r}
-cor(SrcBytes, SrcPkts)
-cor(DstBytes, DstPkts)
-cor(SrcBytes, DstBytes)
-cor(SrcPkts, DstPkts)
-```
-
-The plots of the predictors suggest strong linear trends between the predictors, which makes intuitive sense given the domain matter. Further investigations show that DstPkts has a correlation of ~1 with DstBytes and ~0.85 with SrcPkts.
-
-```{r,eval=FALSE}
-cor(DstBytes, DstPkts, method = "kendall")
-cor(SrcPkts, DstPkts, method = "kendall")
-cor(DstBytes, DstPkts, method = "spearman")
-cor(SrcPkts, DstPkts, method = "spearman")
-```
-
-Because the original correlation tests relied on the Pearson method, which is susceptible to bias from large values, further tests investigate the relationship between DstPkts and the other features. While the correlation is still high for Kendall-Tau and Spearman's correlation coefficients, it is less cause for concern when compared to the skewed response from the Pearson method.
-
 ## Transformations on the Data
 ### Removing Quantiles 
 
 To get a better sense of the unskewed distribution, the below plots visualize the continuous features with the largest and smallest 10% of observations removed. The removed values will be readded to the dataset when investigating for anomalies.
 
-```{r}
+```{r,echo=FALSE}
 remove_quantiles = function(v, lowerbound, upperbound){
   return (v[quantile(v,lowerbound) >= v & v <= quantile(v,upperbound)])
 }
@@ -130,7 +110,7 @@ A log transformation for each of the continuous features outputs right-skewed hi
 
 ### Normal Scores Transformation
 
-```{r}
+```{r,echo=FALSE}
 nscore = function(x) {
    # Takes a vector of values x and calculates their normal scores. Returns 
    # a list with the scores and an ordered table of original values and
@@ -227,13 +207,11 @@ In this problem, Principal Component Anaylsis is applied to each source-destinat
 
 ## Implementation
 
-### Ports Combination Matrix/Tensor
-
-```{r}
+```{r,echo=FALSE}
 #set counts
 s_num = 25
 d_num = 25
-combo_num = 20
+combo_num = 10
 
 #get top sport and dport values
 Sport_table = table(Sport)
@@ -281,12 +259,8 @@ generate_combinations_matrix = function(top_combinations){
 combinations = generate_combinations_matrix(top_combinations)
 ```
 
-```{r,include=FALSE}
-# combinations = readRDS("data/combinations.rds")
-```
-
-### Investigating Combinations
-```{r}
+### Investigating Port Combinations
+```{r,echo=FALSE}
 #principal component analysis and visualizing results
 pca_analysis = function(SrcBytes, SrcPkts, DstBytes, DstPkts){
   pca_cont_vars = cbind(SrcBytes, SrcPkts, DstBytes, DstPkts)
@@ -304,7 +278,7 @@ pca_analysis = function(SrcBytes, SrcPkts, DstBytes, DstPkts){
   return(pca$rotation)
 }
 #apply pca to the data partitions on the top 10 port combinations 
-combo_num = 10
+combo_num = 5
 for (i in 1:combo_num){
   combo_table = combinations[i]
   combo_table = transform(combo_table,

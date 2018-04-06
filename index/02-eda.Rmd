@@ -29,7 +29,7 @@ top_Dport = (head(Dport_table$Var1, n_Dport))
 
 The following properties of $T$ inform the matrix and tensor completion strategies in chapters 3, 4, and 5.
 
-### Missingness
+## Missingness
 ```{r, echo = FALSE, fig.height = 5, fig.width = 5}
 ### MISSINGNESS VISUALIZATIONS
 
@@ -53,7 +53,7 @@ levelplot(missing,xlab = "Source Ports", ylab = "Destination Ports", scales=list
 
 The above matrix represents the missingness in the port combinations for pairings of the top 20 most used source ports and destination ports. The black cells represent missingness; of the 400 cells in the matrix, 295 (73.75%) of cells are missing observations. This single matrix slice can be extrapolated to missingness in ports throughout the entire tensor because the dataset is collected in a way such that either all four continuous features are observed, or none are observed. It is important to note that missingness is not uniform across source and destination port combinations. In the event that an entire row or column of port combinations is missing, the port at that respective index will need to be discarded from the simulation procedure because all three techniques depend on the row and column effects when simulating a value for a missing cell. 
 
-### Row and Column Properties
+## Row and Column Properties
 
 ```{r, echo = FALSE, fig.height=9, fig.width=6.5}
 sbyte_means = readRDS("data/means_SB.rds")[1:20, 1:20]
@@ -100,7 +100,7 @@ The bar plots above represent the row and column means of the continuous feature
 
 These outliers may cause problems with simulating missing values in that row or column because the outliers will have a disproportionately large effect on the simulated value than the other observations, which are more close to the median in the missing value's row or column.  This behavior suggests that the completion techniques that take into account variances among the row and column means and the number of samples observed for each port combination will result in more accurate estimations for the missing port combinations.
 
-### Port Connections
+## Port Connections
 
 ```{r, echo=FALSE, fig.height = 7, fig.width = 7}
 ### PORTS NETWORK GRAPH
@@ -147,7 +147,7 @@ plot(g,
 
 The above ports network graph displays the pairings between the top twenty source ports (red circles) and the top destination ports (blue squares). When a square and circle are connected it represents that there exist observations for this particular port combination in the dataset. The size of each node reflects the number of paired observations that were observed using that particular port. Clearly, not every source port is paired with a destination port and vice versa (not every node is connected to every other node). These missing combinations reflect missing cells in the $T$ tensor, and consequently they correspond to the combinations that require values to be simulated. 
 
-### Varied Sample Sizes
+## Varied Sample Sizes
 
 ```{r, echo = FALSE}
 ### MATRIX VISUALIZATIONS
@@ -163,7 +163,7 @@ levelplot(log(freqs20), xlab = "Source Ports", ylab = "Destination Ports",
 
 Finally, to better visualize the sample sizes first displayed in the network graph, the above heat plot represents the sample sizes for each source-destination port combination on a log scale for clarity. It is again clear there are certain combinations that have many observations (range of 35000 on the original scale), while most of the observations are 0, indicating no observations were observed and the corresponding cell in $T$ is missing, or near 0, indicating few observations were observed. The large variation in sample sizes again suggests a simulation technique that accounts for sample size of a missing cell's related row and column cells is necessary.
 
-### Correlations
+## Correlations
 ```{r, echo = FALSE, fig.height = 5, fig.width = 5}
 ### CORRELATIONS
 kendall_cors = matrix(c(1.0000000, 0.7227563, 0.5729918, 0.6367907,

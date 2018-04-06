@@ -110,7 +110,7 @@ $$\beta =
 Using random sampled values from the normal distribution for $X$ and random sampled values from the exponential distribution for $W$ (exponential distribution is used to ensure $\Sigma_n$ is positive definite), it is possible to calculate values of $\vec{y}$ using a predefined $\beta*$ and $\sigma *$, which are known as the ground truth values for comparison: $$\vec{y} = X\beta * + \sigma * W^{1/2}\epsilon$$ 
 This $\vec{y}$, $W$, and $X$ are used as inputs to the general Gibbs Sampler Function to generate a distribution of $\beta$'s and a distribution $\sigma^2$'s. The posterior means of these distributions are then computed and compared to recover the original values, $\beta *$ and $\sigma *$. 
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, include=FALSE}
 p<-5
 beta<-rnorm(p)
 X = matrix(rnorm(m * p, mean=0, sd=1), m, p)
@@ -128,7 +128,7 @@ The recovering the original $\beta *$ is more complex. The Bayes estimator (the 
 <!-- run the algorithm more than 10 times, check that the beta posterior mean (column means of the beta matrix object) -->
 <!-- get a distribution of betas, calculate the posterior mean of those, get a distribution of sigma2 (make sure it is, dont use variance of 1) -->
 
-## Gibbs Sampling Procedure for Imputing Missing Values
+## Full Sampling Procedure
 
 The complete Gibbs Sampler for imputing missing values uses the generalized Gibbs Sampler defined above to iteratively simulate missing values for the entire matrix $Y$. The procedure is described below:
 
@@ -140,7 +140,7 @@ Repeat the following:
 
 2. For $j = 1 ... n$: Simulate $v_j$ and $\tau_j$ using the generalized Gibbs Sampler. Use the stored $U$ from the previous step as the $X$ input and use the stored $\tau_j$ to calculate the $W$ input. Take the corresponding $y_j$ directly from the $Y$ matrix. Store the resulting sampled $v_j$'s in a matrix $V$, and the $\tau_j$ in a vector, to use for simulating $u_i$ and $\sigma_j$. 
 
-3. Impute values for $y_{ij}$ in $Y^$ that were missing in the original dataset by sampling from the normal distribution $$y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{s_{ij}})$$
+3. Simulate values for $y_{ij}$ in $Y$ that were missing in the original dataset by sampling from the normal distribution $$y_{ij} \sim N(u_i^Tv_j, \frac{\sigma_i^2\tau_j^2}{s_{ij}})$$
 
 ### Selecting the Dimension of Latent Factors
 

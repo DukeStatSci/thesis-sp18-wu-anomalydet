@@ -4,6 +4,8 @@ This approach determines the best low-rank approximation for $Y$ using the Eckar
 
 ## Related Work
 
+NEED TO MENTION THAT THERE IS A SIMPLIFIYING ASSUMPTION WHEN CONDUCTING MATRIX COMPLETION THAT THE MATRIX IS LOW RANK, ONE OF MANY APPROACHES TO MATRIX COMPLETION
+
 https://arxiv.org/abs/1410.2596
 https://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf
 
@@ -176,10 +178,21 @@ approximate_rank = function(Y, M, S = 50, simulated = TRUE){
 }
 ```
 
-The above plots represent the accuracy of the matrix completion technique for matrices with true rank $r = 1,2,...8$. The accuracy is measured by simulating 10 random matrices with low rank of $r$ for each value of $r$ (80 simulated matrices total), and then running the leave one out cross validation procedure described above on the matrix $C$ to generate a root mean square error for each possible rank. The accuracy is the calculated using the number of times the rank with the lowest error matches the true simulated rank divided by 10 (the number of trials with rank $r$). Note as the true rank becomes larger, the technique performs far worse at determining the optimal low rank, THIS IS BECAUSE_______
+```{r, echo=FALSE}
+Ranks = c(1,2,3,4,5,6,7,8)
+Accuracy = c(1,1,1,1,0.8,0.8,0.6,0.5)
+Ranks = c(1,2,3,4,5,6,7,8)
+Accuracy_Noise = c(0.9,1,0.9,1,0.9,0.7,0.5,0.4)
+par(mfrow=c(1,2))
+plot(Ranks, Accuracy, main = "No Noise", 
+     xlab = "Rank (r)", ylab = "Accuracy")
+plot(Ranks, Accuracy_Noise, main = "Additional Noise", 
+     xlab = "Rank (r)", ylab = "Accuracy")
+```
 
-Furthermore, when noise is applied to each simulated matrix, $C$ (through the addition of a noise matrix $E$), the algorithm tends to perform worse at 
+The above plots represent the accuracy of the matrix completion technique for matrices with true rank $r = 1,2,...8$. The accuracy is measured by simulating 10 random matrices (dimensions ranging from 74 to 100 values) with low rank of $r$ for each value of $r$ (80 simulated matrices total), and then running the leave one out cross validation procedure described above on the matrix $C$ to generate a root mean square error for each possible rank. The accuracy is the calculated using the number of times the rank with the lowest error matches the true simulated rank divided by 100 (the number of trials with rank $r$). Note as the true rank becomes larger, the technique performs far worse at determining the true rank. This behavior is due to the fact that LOOCV attempts to find the rank that minimizes the root mean square error, not necessarily the true low rank approximation for a matrix. Higher true ranks tend to give higher out-of-sample validation error, so LOOCV will still select a low rank approximation for simulated matrices that have relatively high true ranks. For instance, a simulated data matrix may have a true rank of 8, but it may also be very close to rank 2, which results in LOOCV selecting rank 2 as the optimal low rank approximation for minimizing error.
 
+Furthermore, when noise is applied to each simulated matrix, $C$, (through the addition of a noise matrix $E$), the algorithm tends to perform worse at a majority of the attempted ranks. This is expected because the addition of noise to every cell in the matrix may obscure the true rank from the LOOCV procedure.
 
 ## Results on Real Data
 

@@ -43,7 +43,7 @@ Substituting these values into the Gaussian probability density function yields 
 
 Applying the PARAFAC decomposition, $\mu_{ijk}$ is re-expressed: $$\mu_{ijk} = \sum_{r=1}^Ra_{ir}b_{jr}c_{kr}$$
 
-Vectorizing the inputs in the likelihood yields: $$\sum_j\sum_k[\bar t_{ijk} - a_i^T(b_i \cdotp c_k)]\frac{n_{ijk}}{\sigma^2_{ijk}}$$ where $a_i \in \mathbb{R_{m \times r}}$, $b_j \in \mathbb{R_{n \times r}}$, and $c_k \in \mathbb{R_{4 \times r}}$. Summing across $j$ and $k$ in this case solves for the $ith$ row slice of the tensor.
+Vectorizing the inputs in the likelihood yields: $$\sum_j\sum_k[\bar t_{ijk} - a_i^T(b_i \cdotp c_k)]\frac{n_{ijk}}{\sigma^2_{ijk}}$$ where $a_i \in \mathbb{R}^{m \times r}$, $b_j \in \mathbb{R}^{n \times r}$, and $c_k \in \mathbb{R}{4 \times r}$. Summing across $j$ and $k$ in this case solves for the $ith$ row slice of the tensor.
 
 <!-- Recall the Residual Sum of Squares (RSS) of the likelihood for an Ordinary Least Squares (OLS) regression is expressed: $$\sum_l(y_l-B^Tx_l)^2$$  -->
 

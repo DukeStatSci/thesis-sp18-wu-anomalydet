@@ -36,7 +36,7 @@ continuous = c("SrcPkts", "DstPkts", "SrcBytes", "DstBytes")
 This code casts the features to their corresponding class classifications (numeric and factor), and removes Proto, StartTime, and Diretion from the dataset.
 
 ### Categorical Features: Unique Categories and Counts
-```{r,echo=FALSE}
+```{r,echo=FALSE,eval=FALSE}
 sapply(argus, function(x) length(unique(x)))
 #function that returns elements of the feature and their counts in descending order
 element_counts = function(x) {

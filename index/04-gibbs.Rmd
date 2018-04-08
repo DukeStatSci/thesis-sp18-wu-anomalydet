@@ -52,6 +52,8 @@ $$\vec{y} = X\beta + \sigma W^{1/2}\epsilon$$ where $X$ represents $V$, $\beta$ 
 
 This is a modified form of the Generalized Least Squares Model (GLS), which gives a weighted least squares estimate of $\beta$, and it is appropriate when the error terms are not independent and identically distributed. Bayesian analysis of this problem provides similar parameter estimates to GLS, and both ordinary least squares and GLS provide unbiased parameter estimates of $\beta$ with the latter giving estimates with a lower variance because the non-Bayes estimator serves as a limit of the Bayes estimator. 
 
+CITE HOFF
+
 The full conditional distributions of the random variables $\beta$ and $\sigma^2$ (note $\sigma$ is squared in the model) for this case are described below: 
 $$\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)$$
 $$\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})$$
@@ -69,7 +71,8 @@ $$\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)$$
 
 The initial values for the prior distributions are set as: $\beta_0 = 0$, $\Sigma_0 = \gamma^2I$ where $\gamma^2$ is a large number and $I$ is the $m \times n$ identity matrix, $\nu_0 = 2$, $\sigma_0^2 = 1$. This results in a diffuse prior for $\beta$ that spreads out the density, and a noninformative prior for $\sigma^2_0$. 
 
-<!-- SHOW THAT GENERALIZED LINEAR MODEL IS (X^T W^-1 X )^-1 X^TW^-1y -->
+https://arxiv.org/abs/1406.1440 BAYESIAN PRIORS
+
 
 ### Generalized Gibbs Sampler Function
 
@@ -124,13 +127,14 @@ abline(0,1)
 In particular, the posterior mean of $\sigma^2$ is calculated by taking the mean of the function's output of $\sigma^2$. This posterior mean is compared to the original $\sigma *$ used to generate $\vec{y}$. Repeatedly performing this procedure reveals the posterior mean only differs from the ground truth value by 1-2% in almost every single trial.
 
 Recovering the original $\beta *$ provides a much more defined procedure for evaluating the performance of the Gibbs Sampler. First, the Bayes estimator (the posterior mean of generated $\beta$s) should be close to the GLS estimator and theoretical results state the GLS estimator serves as a good approximation for the true value. Furthermore, the variance matrix of the GLS estimator around the true value is $$Var(\hat{\beta}_{GLS}) = \mathbb{E}[(\hat{\beta}_{GLS}-\beta * )(\hat{\beta}_{GLS}-\beta *)^T]=(X^T W^{-1}X/\sigma^2 )^{-1}$$.  Thus, after simulating many data sets and solving for the posterior mean estimator, $\hat{\beta}$, the variance of these simulated posterior means, $Var(\hat{\beta})$ should be close to $(X^T W^{-1}X/\sigma^2 )^{-1}$. Moreover, the standard errors are calculated $$SE(\hat{\beta}_{GLS}) = \sqrt{diag((X^T W^{-1}X/\sigma^2 )^{-1})}$$. This provides a nominal 95% confidence interval for which to assess the performance of the model for recovering the original $\beta *$. 
+<!-- The simulation procedure was able to recover a large percentage of the $\beta *$ values that resulted -->
 
 <!-- run the algorithm more than 10 times, check that the beta posterior mean (column means of the beta matrix object) -->
 <!-- get a distribution of betas, calculate the posterior mean of those, get a distribution of sigma2 (make sure it is, dont use variance of 1) -->
 
 ## Full Sampling Procedure
 
-The complete Gibbs Sampler for imputing missing values uses the generalized Gibbs Sampler defined above to iteratively simulate missing values for the entire matrix $Y$. The procedure is described below:
+The complete sampling procedure for imputing missing values uses the generalized Gibbs Sampler defined above to iteratively simulate missing values for the entire matrix $Y$. The procedure is described below:
 
 Initialize $\sigma_i$ for $i = 1 ... m$ and $\tau_j$ for $j = 1 ... n$ as the overall standard deviation of the $Y^{(k)}$ matrix. Initialize missing values of $Y$ using the ANOVA imputation described in the previous section. Initialize the matrix of row factors $U \in \mathbb{R}^{m \times p}$ and the matrix of column factors $V \in \mathbb{R}^{n \times p}$.  
 
@@ -144,9 +148,13 @@ Repeat the following:
 
 ### Selecting the Dimension of Latent Factors
 
-The dimension of the latent factors, $p$, is used to define the dimension of $\beta \in \mathbb{R}^{p \times 1}$ and consequently defines the dimensions of the row and column factor matrices $U$ and $V$. Selecting $p$ is a model selection choice similar to determining the optimal low rank approximation $r$ in the previous section. Once again, Leave One Out Cross Validation may be used to detemine the optimal $p$ given the observed data. In this technique, it is more computationally expensive than the previous technique to perform Leave One Out Cross Validation on the entire dataset, so randomly selecting a set number of observed cells to set to missing for determining $p$ is also valid.
+The dimension of the latent factors, $p$, is used to define the dimension of $\beta \in \mathbb{R}^{p \times 1}$ and consequently defines the dimensions of the row and column factor matrices $U$ and $V$. Selecting $p$ is a model selection choice similar to determining the optimal low rank approximation $r$ in the previous section. Once again, Leave One Out Cross Validation may be used to detemine the optimal $p$ given the observed data. In this technique, it is more computationally expensive than the previous technique to perform Leave One Out Cross Validation on the entire dataset, so K-Fold cross validation or randomly selecting a set number of observed cells to set to missing for determining $p$ is also valid.
 
 ### Validation on Simulated Data
 
 Again it is necessary to validate the effectiveness of the overall sampling procedure with simulated data where the ground truth is known. Simulate matrices $U$ and $V$ such that $\Theta = UV^T$ is truly low rank. The same procedure for generating low rank matrices used in the previous chapter can be applied here. Using $\Theta$ there are two possible tests for determining the validity of the sampling procedure. First, the simulated data is used to recover the true values for $UV^T$ from the model. This is considered an idealized case for testing the procedure. Second, some cells are set to missing and again the procedure is used to obtain an estimate for $UV^T$ from the model. This output is compared to the previous case's output to evaluate the performance depending on whether the cells have data or do not. 
+
+## Results on the Real Data
+
+
 

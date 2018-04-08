@@ -154,13 +154,18 @@ for (s in 1:S){
   #impute y
   for (i in 1:m){
     for (j in 1:n){
-      if (M[i,j] == 0){
-        u_i = U[i,]
-        v_j = V[j,]
-        sigma_i = SIGMA[i]
-        tau_j = TAU[j]
-        Y[i,j] = rnorm(1, t(u_i) * v_j, sigma_i * tau_j) ##how does u_i and v_j become scalar????
-      }
+      # if (M[i,j] == 0){
+      #   u_i = U[i,]
+      #   v_j = V[j,]
+      #   sigma_i = SIGMA[i]
+      #   tau_j = TAU[j]
+      #   Y[i,j] = rnorm(1, t(u_i) * v_j, sigma_i * tau_j) ##how does u_i and v_j become scalar????
+      # }
+      u_i = U[i,]
+      v_j = V[j,]
+      sigma_i = SIGMA[i]
+      tau_j = TAU[j]
+      Y[i,j] = rnorm(1, t(u_i) * v_j, sigma_i * tau_j) ##how does u_i and v_j become scalar????
     }
   }
 }

@@ -598,6 +598,10 @@ assessed by comparing the fitted versus the observed values
 
 \section{Related Work}\label{related-work}
 
+NEED TO MENTION THAT THERE IS A SIMPLIFIYING ASSUMPTION WHEN CONDUCTING
+MATRIX COMPLETION THAT THE MATRIX IS LOW RANK, ONE OF MANY APPROACHES TO
+MATRIX COMPLETION
+
 \url{https://arxiv.org/abs/1410.2596}
 \url{https://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf}
 
@@ -701,25 +705,37 @@ cell errors.
 \subsection{Approximating Optimal
 Rank}\label{approximating-optimal-rank}
 
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-11-1.pdf}
+
 The above plots represent the accuracy of the matrix completion
 technique for matrices with true rank \(r = 1,2,...8\). The accuracy is
-measured by simulating 10 random matrices with low rank of \(r\) for
-each value of \(r\) (80 simulated matrices total), and then running the
-leave one out cross validation procedure described above on the matrix
-\(C\) to generate a root mean square error for each possible rank. The
-accuracy is the calculated using the number of times the rank with the
-lowest error matches the true simulated rank divided by 10 (the number
-of trials with rank \(r\)). Note as the true rank becomes larger, the
-technique performs far worse at determining the optimal low rank, THIS
-IS BECAUSE\_\_\_\_\_\_\_
+measured by simulating 10 random matrices (dimensions ranging from 74 to
+100 values) with low rank of \(r\) for each value of \(r\) (80 simulated
+matrices total), and then running the leave one out cross validation
+procedure described above on the matrix \(C\) to generate a root mean
+square error for each possible rank. The accuracy is the calculated
+using the number of times the rank with the lowest error matches the
+true simulated rank divided by 100 (the number of trials with rank
+\(r\)). Note as the true rank becomes larger, the technique performs far
+worse at determining the true rank. This behavior is due to the fact
+that LOOCV attempts to find the rank that minimizes the root mean square
+error, not necessarily the true low rank approximation for a matrix.
+Higher true ranks tend to give higher out-of-sample validation error, so
+LOOCV will still select a low rank approximation for simulated matrices
+that have relatively high true ranks. For instance, a simulated data
+matrix may have a true rank of 8, but it may also be very close to rank
+2, which results in LOOCV selecting rank 2 as the optimal low rank
+approximation for minimizing error.
 
-Furthermore, when noise is applied to each simulated matrix, \(C\)
+Furthermore, when noise is applied to each simulated matrix, \(C\),
 (through the addition of a noise matrix \(E\)), the algorithm tends to
-perform worse at
+perform worse at a majority of the attempted ranks. This is expected
+because the addition of noise to every cell in the matrix may obscure
+the true rank from the LOOCV procedure.
 
 \section{Results on Real Data}\label{results-on-real-data}
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-11-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-12-1.pdf}
 
 The above plot displays the root mean square errors from the leave one
 out cross validation process across different rank inputs into the
@@ -728,7 +744,7 @@ approximation for simulating missing values in \(Y\) using the
 alternating least squares algorithm. Thus, the dataset is fitted with
 the algorithm using rank 2 to simulate the missing values in \(Y\).
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-12-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-13-1.pdf}
 
 The two plots above display the true values of the \(Y\) matrix
 (i.e.~the non-missing values) versus their corresponding fitted values
@@ -759,13 +775,13 @@ before any simulation steps are taken, the alternating least squares
 imputation algorithm yields the following root mean square errors varied
 by rank.
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-13-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-14-1.pdf}
 
 Now the optimal rank from the LOOCV procedure is 1. The algorithm is run
 on the log transformed dataset with a low rank approximation of 1 and
 the fitted vereus observed values are again compared.
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-14-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-15-1.pdf}
 
 The values above have been retransformed (exponentiated) to the
 dataset's original scale after the simulation procedure was completed.
@@ -970,19 +986,25 @@ In particular, the posterior mean of \(\sigma^2\) is calculated by
 taking the mean of the function's output of \(\sigma^2\). This posterior
 mean is compared to the original \(\sigma *\) used to generate
 \(\vec{y}\). Repeatedly performing this procedure reveals the posterior
-mean matches the ground the original quite often.
+mean only differs from the ground truth value by 1-2\% in almost every
+single trial.
 
-The recovering the original \(\beta *\) is more complex. The Bayes
-estimator (the posterior mean of generated \(\beta\)s) should be close
-to the GLS estimator. There are theoretical results that say how close
-the GLS estimator should be to the true value INSERT THEORETICAL RESULTS
-HERE. In particular, the variance matrix of the GLS estimator around the
-true value is \[(X^T \Omega^{-1} X )^{-1}\] and the posterior mean
-estimate \[\hat{\beta} = (X^T \Omega^{-1} X )^{-1}X^T\Omega^{-1}y\].
+Recovering the original \(\beta *\) provides a much more defined
+procedure for evaluating the performance of the Gibbs Sampler. First,
+the Bayes estimator (the posterior mean of generated \(\beta\)s) should
+be close to the GLS estimator and theoretical results state the GLS
+estimator serves as a good approximation for the true value.
+Furthermore, the variance matrix of the GLS estimator around the true
+value is
+\[Var(\hat{\beta}_{GLS}) = \mathbb{E}[(\hat{\beta}_{GLS}-\beta * )(\hat{\beta}_{GLS}-\beta *)^T]=(X^T W^{-1}X/\sigma^2 )^{-1}\].
 Thus, after simulating many data sets and solving for the posterior mean
-estimator for each, the variance of these simulated posterior means
-should be close to \[(X^T \Omega^{-1} X )^{-1}\]. WHAT IS OMEGA IN THIS
-CASE?
+estimator, \(\hat{\beta}\), the variance of these simulated posterior
+means, \(Var(\hat{\beta})\) should be close to
+\((X^T W^{-1}X/\sigma^2 )^{-1}\). Moreover, the standard errors are
+calculated
+\[SE(\hat{\beta}_{GLS}) = \sqrt{diag((X^T W^{-1}X/\sigma^2 )^{-1})}\].
+This provides a nominal 95\% confidence interval for which to assess the
+performance of the model for recovering the original \(\beta *\).
 
 \section{Full Sampling Procedure}\label{full-sampling-procedure}
 
@@ -1063,7 +1085,7 @@ Completion}\label{future-work-tensor-completion}
 Recall the analysis of correlations between the continuous features in
 \(T\) in chapter 2.
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-16-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-17-1.pdf}
 
 The strong correlations between the individual continuous features
 suggests imputing the tensor \(T\) all at once may yield closer
@@ -1106,9 +1128,9 @@ Applying the PARAFAC decomposition, \(\mu_{ijk}\) is re-expressed:
 
 Vectorizing the inputs in the likelihood yields:
 \[\sum_j\sum_k[\bar t_{ijk} - a_i^T(b_i \cdotp c_k)]\frac{n_{ijk}}{\sigma^2_{ijk}}\]
-where \(a_i \in \mathbb{R_{m \times r}}\),
-\(b_j \in \mathbb{R_{n \times r}}\), and
-\(c_k \in \mathbb{R_{4 \times r}}\). Summing across \(j\) and \(k\) in
+where \(a_i \in \mathbb{R}^{m \times r}\),
+\(b_j \in \mathbb{R}^{n \times r}\), and
+\(c_k \in \mathbb{R}{4 \times r}\). Summing across \(j\) and \(k\) in
 this case solves for the \(ith\) row slice of the tensor.
 
 \chapter*{Conclusion}\label{conclusion}
@@ -1145,81 +1167,11 @@ Diretion from the dataset.
 
 \subsection{Categorical Features: Unique Categories and
 Counts}\label{categorical-features-unique-categories-and-counts}
-\begin{verbatim}
-    Flgs  SrcAddr    Sport  DstAddr    Dport  SrcPkts  DstPkts SrcBytes 
-      70    65113    64486    41903    17537     2790     3633    44075 
-DstBytes    State 
-   64549        6 
-\end{verbatim}
-\begin{verbatim}
-           x     N
-    1: 33461 35683
-    2:  4263  8541
-    3:    80  8346
-    4:  4165  4988
-    5: 48468  3023
-   ---            
-64482: 57904     1
-64483: 58242     1
-64484: 59051     1
-64485: 59315     1
-64486: 60116     1
-\end{verbatim}
-\begin{verbatim}
-           x      N
-    1:    23 235616
-    2:    80 204128
-    3:   443 137360
-    4: 32819 102166
-    5:    25  53167
-   ---             
-17533: 65515      1
-17534: 65528      1
-17535: 65529      1
-17536: 65532      1
-17537: 65533      1
-\end{verbatim}
-\begin{verbatim}
-                  x     N
-    1: 197.0.31.231 35440
-    2:    1.0.11.96  8717
-    3:  100.0.7.149  8526
-    4:    197.0.9.1  5536
-    5:   1.0.85.103  4976
-   ---                   
-65109:   197.0.55.5     1
-65110:   197.0.55.6     1
-65111:   197.0.55.7     1
-65112:   197.0.55.8     1
-65113:   197.0.55.9     1
-\end{verbatim}
-\begin{verbatim}
-                  x     N
-    1:    100.0.1.9 64508
-    2:    100.0.1.2 62681
-    3:   100.0.1.28 25780
-    4:   100.0.1.55 25641
-    5:  100.0.18.93 20766
-   ---                   
-41899:  100.0.6.179     1
-41900:  100.0.7.173     1
-41901: 100.0.77.113     1
-41902: 100.0.77.147     1
-41903: 100.0.88.111     1
-\end{verbatim}
-\begin{verbatim}
-     x      N
-1: REQ 571899
-2: FIN 307337
-3: RST 135280
-4: CON  17146
-5: ACC  16815
-6: CLO     98
-\end{verbatim}
+
 \subsection{Continuous Features: Distributions and
 Relationships}\label{continuous-features-distributions-and-relationships}
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-20-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-21-1.pdf}
 \begin{verbatim}
  [1] 118257047 116615879 112673526 108933442 105793666  73376579  72839115
  [8]  70001807  56206409  55359912
@@ -1297,15 +1249,15 @@ visualize the continuous features with the largest and smallest 10\% of
 observations removed. The removed values will be readded to the dataset
 when investigating for anomalies.
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-22-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-23-1.pdf}
 
 The continuous features are still unevenly distributed even with the
 20\% most extreme values removed.
 
 \subsection{Log Transformation}\label{log-transformation}
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-23-1.pdf}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-23-2.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-24-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-24-2.pdf}
 
 A log transformation for each of the continuous features outputs
 right-skewed histograms. Skewed features may affect the results of a
@@ -1314,7 +1266,7 @@ kernel pca, so we consider other approaches for transformations.
 \subsection{Normal Scores
 Transformation}\label{normal-scores-transformation}
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-24-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-25-1.pdf}
 
 Finally, a normal scores transformation is applied to the dataset. The
 normal scores transformation reassigns each feature value so that it
@@ -1365,7 +1317,7 @@ Standard deviation     1.7118 0.8991 0.51065 0.02309
 Proportion of Variance 0.7326 0.2021 0.06519 0.00013
 Cumulative Proportion  0.7326 0.9347 0.99987 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-1.pdf}
 \begin{verbatim}
 Sport: 4145     Dport: 9119 
                PC1        PC2        PC3          PC4
@@ -1379,7 +1331,7 @@ Standard deviation     1.875 0.6538 0.23124 0.05551
 Proportion of Variance 0.879 0.1069 0.01337 0.00077
 Cumulative Proportion  0.879 0.9859 0.99923 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-2.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-2.pdf}
 \begin{verbatim}
 Sport: 19239    Dport: 9153 
                PC1        PC2        PC3          PC4
@@ -1393,7 +1345,7 @@ Standard deviation     1.8418 0.7037 0.33316 0.03695
 Proportion of Variance 0.8481 0.1238 0.02775 0.00034
 Cumulative Proportion  0.8481 0.9719 0.99966 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-3.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-3.pdf}
 \begin{verbatim}
 Sport: 4243     Dport: 27 
                PC1        PC2        PC3          PC4
@@ -1407,7 +1359,7 @@ Standard deviation     1.7727 0.8343 0.40033 0.03406
 Proportion of Variance 0.7856 0.1740 0.04007 0.00029
 Cumulative Proportion  0.7856 0.9596 0.99971 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-4.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-4.pdf}
 \begin{verbatim}
 Sport: 4243     Dport: 10290 
                 PC1         PC2        PC3          PC4
@@ -1421,7 +1373,7 @@ Standard deviation     1.8125 0.7560 0.37528 0.05022
 Proportion of Variance 0.8213 0.1429 0.03521 0.00063
 Cumulative Proportion  0.8213 0.9642 0.99937 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-5.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-5.pdf}
 
 \subsection{Interpretation}\label{interpretation}
 

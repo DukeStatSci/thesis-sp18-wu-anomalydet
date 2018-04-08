@@ -602,6 +602,8 @@ NEED TO MENTION THAT THERE IS A SIMPLIFIYING ASSUMPTION WHEN CONDUCTING
 MATRIX COMPLETION THAT THE MATRIX IS LOW RANK, ONE OF MANY APPROACHES TO
 MATRIX COMPLETION
 
+\url{http://www.stat.rice.edu/~gallen/allen_gpca_jasa_2014.pdf}
+
 \url{https://arxiv.org/abs/1410.2596}
 \url{https://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf}
 
@@ -895,6 +897,8 @@ provide unbiased parameter estimates of \(\beta\) with the latter giving
 estimates with a lower variance because the non-Bayes estimator serves
 as a limit of the Bayes estimator.
 
+CITE HOFF
+
 The full conditional distributions of the random variables \(\beta\) and
 \(\sigma^2\) (note \(\sigma\) is squared in the model) for this case are
 described below:
@@ -916,6 +920,8 @@ The initial values for the prior distributions are set as:
 number and \(I\) is the \(m \times n\) identity matrix, \(\nu_0 = 2\),
 \(\sigma_0^2 = 1\). This results in a diffuse prior for \(\beta\) that
 spreads out the density, and a noninformative prior for \(\sigma^2_0\).
+
+\url{https://arxiv.org/abs/1406.1440} BAYESIAN PRIORS
 
 \subsection{Generalized Gibbs Sampler
 Function}\label{generalized-gibbs-sampler-function}
@@ -1008,7 +1014,7 @@ performance of the model for recovering the original \(\beta *\).
 
 \section{Full Sampling Procedure}\label{full-sampling-procedure}
 
-The complete Gibbs Sampler for imputing missing values uses the
+The complete sampling procedure for imputing missing values uses the
 generalized Gibbs Sampler defined above to iteratively simulate missing
 values for the entire matrix \(Y\). The procedure is described below:
 
@@ -1059,9 +1065,9 @@ determining the optimal low rank approximation \(r\) in the previous
 section. Once again, Leave One Out Cross Validation may be used to
 detemine the optimal \(p\) given the observed data. In this technique,
 it is more computationally expensive than the previous technique to
-perform Leave One Out Cross Validation on the entire dataset, so
-randomly selecting a set number of observed cells to set to missing for
-determining \(p\) is also valid.
+perform Leave One Out Cross Validation on the entire dataset, so K-Fold
+cross validation or randomly selecting a set number of observed cells to
+set to missing for determining \(p\) is also valid.
 
 \subsection{Validation on Simulated
 Data}\label{validation-on-simulated-data}
@@ -1079,8 +1085,9 @@ the procedure is used to obtain an estimate for \(UV^T\) from the model.
 This output is compared to the previous case's output to evaluate the
 performance depending on whether the cells have data or do not.
 
-\chapter{Future Work: Tensor
-Completion}\label{future-work-tensor-completion}
+\section{Results on the Real Data}\label{results-on-the-real-data}
+
+\chapter{Tensor Completion}\label{tensor-completion}
 
 Recall the analysis of correlations between the continuous features in
 \(T\) in chapter 2.
@@ -1130,22 +1137,36 @@ Vectorizing the inputs in the likelihood yields:
 \[\sum_j\sum_k[\bar t_{ijk} - a_i^T(b_i \cdotp c_k)]\frac{n_{ijk}}{\sigma^2_{ijk}}\]
 where \(a_i \in \mathbb{R}^{m \times r}\),
 \(b_j \in \mathbb{R}^{n \times r}\), and
-\(c_k \in \mathbb{R}{4 \times r}\). Summing across \(j\) and \(k\) in
+\(c_k \in \mathbb{R}^{4 \times r}\). Summing across \(j\) and \(k\) in
 this case solves for the \(ith\) row slice of the tensor.
 
-\chapter*{Conclusion}\label{conclusion}
-\addcontentsline{toc}{chapter}{Conclusion}
+\section{Future Work}\label{future-work}
 
-If we don't want Conclusion to have a chapter number next to it, we can
-add the \texttt{\{-\}} attribute.
+Future work will use the PARAFAC decomposition and the Gaussian
+statistical model described above to extend the techniques described in
+chapters 3 and 4 to completing the tensor as a whole. The PARAFAC
+decomposition allows for low rank tensor completion on data with high
+degrees of missingness. Recent work by Yokota, Zhao, and Cichocki (2016)
+propose a ``Smooth PARAFAC Decomposition for Tensor Completion'' that
+``consider `smoothness' constraints as well as low-rank approximations,
+and propose an efficient algorithm for performing tensor completion that
+is particularly powerful regarding visual data. The proposed method
+admits significant advantages, owing to the integration of smooth
+PARAFAC decomposition for incomplete tensors and the efficient selection
+of models in order to minimize the tensor rank.'' The statistical model
+for tensor completion mimics Chapter four's technique more closely. The
+full conditionals for the parameters being estimated in the model are
+constructed, and a Gibbs Sampler is created using these full
+conditionals to iteratively sample the three factor variables and their
+respective standard deviations described in the model. Like the previous
+techniques, each of these technique's validity will first be tested on
+simulated data where the ground truth is known before being applied to
+the real dataset.
 
-\textbf{More info}
+\url{https://arxiv.org/abs/1505.06611} SMOOTH PARAFAC
 
-And here's some other random info: the first paragraph after a chapter
-title or section head \emph{shouldn't be} indented, because indents are
-to tell the reader that you're starting a new paragraph. Since that's
-obvious after a chapter or section title, proper typesetting doesn't add
-an indent there.
+\chapter*{Summary}\label{summary}
+\addcontentsline{toc}{chapter}{Summary}
 
 \appendix
 
@@ -1401,17 +1422,41 @@ horizontal behavior exhibited in every principal component analysis.
 \setlength{\parskip}{8pt}
 
 \hypertarget{refs}{}
-\hypertarget{ref-angel2000}{}
-Angel, E. (2000). \emph{Interactive computer graphics : A top-down
-approach with opengl}. Boston, MA: Addison Wesley Longman.
+\hypertarget{ref-GLSmatrix2013}{}
+Allen, G. I., Grosenick, L., \& Taylor, J. (2014). A generalized
+least-square matrix decomposition. \emph{Journal of the American
+Statistical Association}, \emph{109}(505), 145--159.
 
-\hypertarget{ref-angel2001}{}
-Angel, E. (2001a). \emph{Batch-file computer graphics : A bottom-up
-approach with quicktime}. Boston, MA: Wesley Addison Longman.
+\hypertarget{ref-prior2014}{}
+Alquier, V. C., Pierre; Cottet. (2014). Bayesian matrix completion:
+Prior specification.
 
-\hypertarget{ref-angel2002a}{}
-Angel, E. (2001b). \emph{Test second book by angel}. Boston, MA: Wesley
-Addison Longman.
+\hypertarget{ref-pca2012}{}
+Bailey, S. (2012). Principal component analysis with noisy and/or
+missing data.
+
+\hypertarget{ref-fastALS2014}{}
+Hastie, R. L., Trevor; Mazumder. (2014). Matrix completion and low-rank
+svd via fast alternating least square.
+
+\hypertarget{ref-hoff2009}{}
+Hoff, P. D. (2009). \emph{A first course in bayesian statistical
+methods}. Springer-Verlag New York.
+
+\hypertarget{ref-netflix2009}{}
+T?scher, A., Jahrer, M., \& Bell, R. M. (2009). The bigchaos solution to
+the netflix grand prize.
+
+\hypertarget{ref-smoothParafac2016}{}
+Tatsuya Yokota, A. C., Qibin Zhao. (2016). Smooth parafac decomposition
+for tensor completion. \emph{IEEE Transactions on Signal Processing
+Issue 20}, \emph{64}(20), 5423--5436.
+
+\hypertarget{ref-sparse2014}{}
+Yang, D., Ma, Z., \& Buja, A. (2014). A sparse singular value
+decomposition method for high-dimensional data. \emph{Journal of
+Computational and Graphical Statistics}, \emph{23}(4), 923--942.
+\url{http://doi.org/10.1080/10618600.2013.858632}
 
 
 % Index?

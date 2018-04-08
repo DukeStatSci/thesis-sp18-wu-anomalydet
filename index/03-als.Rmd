@@ -4,14 +4,11 @@ This approach determines the best low-rank approximation for $Y$ using the Eckar
 
 ## Related Work
 
-NEED TO MENTION THAT THERE IS A SIMPLIFIYING ASSUMPTION WHEN CONDUCTING MATRIX COMPLETION THAT THE MATRIX IS LOW RANK, ONE OF MANY APPROACHES TO MATRIX COMPLETION
+A common approach to matrix completion revolves around the underlying assumption that there exists a low rank approximation for the data matrix, particularly in the case of high dimensional data. Hastie, Mazumder, Lee, and Zadeh (2014) devised a similar approach to the one presented in this chapter that fuses nuclear-norm-regularized matrix approximation (Candes and Tao, 2009, Mazumder, Hastie and Tibshirani, 2010) and maximum-margin matrix factorization (Srebro, Rennie and Jaakkola, 2005), resulting in a fast alternating least squares that relies on a low rank singular value decomposition to drive an efficient algorithm for large matrix factorization. 
+ 
+Similar techniques for matrix completion were employed heavily in the Netflix Challenge where competitors predicted ratings for movies by users that had not watched the movie based on the other ratings in the matrix of users and movies. The winning team, BellKor’s Pragmatic Chaos, employed a low rank decomposition technique to reduce the incredibly large dataset, so that other algorithms could be applied without too much computational overhead (Andreas Toscher,  Michael Jahrer, Robert M. Bell 2009). 
 
-http://www.stat.rice.edu/~gallen/allen_gpca_jasa_2014.pdf
-
-https://arxiv.org/abs/1410.2596
-https://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf
-
-Similar techniques for matrix completion were employed in the Netflix Challenge where top competitor predicted ratings for movies by users that had not watched the movie based on the other ratings in the matrix of users and movies.
+Network datasets can range up to billions of observations (recall this particular dataset with 1 million observations was collected in just five minutes). Furthermore, there are up to 65000 possible network source and destination ports, so the resulting network tensor has large dimensions. Given the nature of the dataset and prior work in matrix completion, the technique in this chapter assumes a low rank decomposition to implement an alternating least squares completion technique.
 
 ## Matrix Completion Algorithm
 

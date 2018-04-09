@@ -7,48 +7,48 @@ If you feel it necessary to include an appendix, it goes here.
 -->
 # Preliminary Data Investigation
 ## Exploratory Data Analysis
-### Cleaning Predictors
-```{r,include=FALSE,echo=FALSE}
-setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index/")
-library(plyr)
-library(data.table)
-library(factoextra)
-library(ggbiplot)
-library(gridExtra)
+<!-- ### Cleaning Predictors -->
+<!-- ```{r,include=FALSE,echo=FALSE} -->
+<!-- setwd("~/Desktop/Stats Thesis/thesis-sp18-wu-anomalydet/index/") -->
+<!-- library(plyr) -->
+<!-- library(data.table) -->
+<!-- library(factoextra) -->
+<!-- library(ggbiplot) -->
+<!-- library(gridExtra) -->
 
-#argus = read.csv("data/argus-anon-20170201.csv")
-argus = readRDS("data/argus_complete.rds")
-# combinations = readRDS("/data/combinations.rds")
-```
+<!-- #argus = read.csv("data/argus-anon-20170201.csv") -->
+<!-- argus = readRDS("data/argus_complete.rds") -->
+<!-- # combinations = readRDS("/data/combinations.rds") -->
+<!-- ``` -->
 
-```{r,echo=FALSE}
-sapply(argus, class)
-argus = transform(argus,
-                  Sport = as.factor(argus$Sport),
-                  Dport = as.factor(argus$Dport))
-argus = subset(argus, select = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport",
-                                "SrcPkts", "DstPkts", "SrcBytes", "DstBytes", "State"))
-attach(argus)
-categorical = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport", "State")
-continuous = c("SrcPkts", "DstPkts", "SrcBytes", "DstBytes")
-```
+<!-- ```{r,echo=FALSE} -->
+<!-- sapply(argus, class) -->
+<!-- argus = transform(argus, -->
+<!--                   Sport = as.factor(argus$Sport), -->
+<!--                   Dport = as.factor(argus$Dport)) -->
+<!-- argus = subset(argus, select = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport", -->
+<!--                                 "SrcPkts", "DstPkts", "SrcBytes", "DstBytes", "State")) -->
+<!-- attach(argus) -->
+<!-- categorical = c("Flgs", "SrcAddr", "Sport", "DstAddr", "Dport", "State") -->
+<!-- continuous = c("SrcPkts", "DstPkts", "SrcBytes", "DstBytes") -->
+<!-- ``` -->
 
-This code casts the features to their corresponding class classifications (numeric and factor), and removes Proto, StartTime, and Diretion from the dataset.
+<!-- This code casts the features to their corresponding class classifications (numeric and factor), and removes Proto, StartTime, and Diretion from the dataset. -->
 
-### Categorical Features: Unique Categories and Counts
-```{r,echo=FALSE,eval=FALSE}
-sapply(argus, function(x) length(unique(x)))
-#function that returns elements of the feature and their counts in descending order
-element_counts = function(x) {
-  dt = data.table(x)[, .N, keyby = x]
-  dt[order(dt$N, decreasing = TRUE),]
-}
-element_counts(Sport)
-element_counts(Dport)
-element_counts(SrcAddr)
-element_counts(DstAddr)
-element_counts(State)
-```
+<!-- ### Categorical Features: Unique Categories and Counts -->
+<!-- ```{r,echo=FALSE,eval=FALSE} -->
+<!-- sapply(argus, function(x) length(unique(x))) -->
+<!-- #function that returns elements of the feature and their counts in descending order -->
+<!-- element_counts = function(x) { -->
+<!--   dt = data.table(x)[, .N, keyby = x] -->
+<!--   dt[order(dt$N, decreasing = TRUE),] -->
+<!-- } -->
+<!-- element_counts(Sport) -->
+<!-- element_counts(Dport) -->
+<!-- element_counts(SrcAddr) -->
+<!-- element_counts(DstAddr) -->
+<!-- element_counts(State) -->
+<!-- ``` -->
 
 ### Continuous Features: Distributions and Relationships
 ```{r,echo=FALSE}

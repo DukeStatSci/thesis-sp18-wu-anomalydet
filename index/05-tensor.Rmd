@@ -31,7 +31,7 @@ The following section describes the way techniques in the previous sections may 
 
 ## PARAFAC Decomposition
 
-The PARAFAC decomposition expresses the tensor as: $$T = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r$$ where $r$ represents the rank approximation, $\cdotp$ denotes the outer product of tensors, and $u \in \mathbb{R}^{m \times r}$, $v \in \mathbb{R}^{n \times r}$, and $w \in \mathbb{R}^{4 \times r}$. Each individual cell is expressed: $$t_{ijk} = \sum_{r=1}^Ru_{ri} \cdotp v_{ri} \cdotp w_{ri}$$ Applying this decomposition yields the objective $$\underset{T'} {\text{min}}\|T-T'\|$$ where $$T' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)$$ and $\lambda_r$ is the regularization penalty.
+The PARAFAC decomposition expresses the tensor as: $$T = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r$$ where $r$ represents the rank approximation, $\cdotp$ denotes the outer product of tensors, and $U \in \mathbb{R}^{m \times r}$, $V \in \mathbb{R}^{n \times r}$, and $W \in \mathbb{R}^{4 \times r}$. Each individual cell is expressed: $$t_{ijk} = \sum_{r=1}^RU_{ri} \cdotp V_{ri} \cdotp W_{ri}$$ Applying this decomposition yields the objective $$\underset{T'} {\text{min}}\|T-T'\|$$ where $$T' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)$$ and $\lambda_r$ is the regularization penalty.
 
 ## Statistical Model
 
@@ -49,7 +49,6 @@ Vectorizing the inputs in the likelihood yields: $$\sum_j\sum_k[\bar t_{ijk} - a
 
 Future work will use the PARAFAC decomposition and the Gaussian statistical model described above to extend the techniques described in chapters 3 and 4 to completing the tensor as a whole. The PARAFAC decomposition allows for low rank tensor completion on data with high degrees of missingness. Recent work by Yokota, Zhao, and Cichocki (2016) propose a "Smooth PARAFAC Decomposition for Tensor Completion" that "consider 'smoothness' constraints as well as low-rank approximations, and propose an efficient algorithm for performing tensor completion that is particularly powerful regarding visual data. The proposed method admits significant advantages, owing to the integration of smooth PARAFAC decomposition for incomplete tensors and the efficient selection of models in order to minimize the tensor rank." The statistical model for tensor completion mimics Chapter four's technique more closely. The full conditionals for the parameters being estimated in the model are constructed, and a Gibbs Sampler is created using these full conditionals to iteratively sample the three factor variables and their respective standard deviations described in the model. Like the previous techniques, each of these technique's validity will first be tested on simulated data where the ground truth is known before being applied to the real dataset.
 
-https://arxiv.org/abs/1505.06611 SMOOTH PARAFAC
 
 <!-- Recall the Residual Sum of Squares (RSS) of the likelihood for an Ordinary Least Squares (OLS) regression is expressed: $$\sum_l(y_l-B^Tx_l)^2$$  -->
 

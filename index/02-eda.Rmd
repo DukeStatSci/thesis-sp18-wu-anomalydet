@@ -153,9 +153,9 @@ barplot(db_col_means, las=2, xlab = "Destination Port", cex.names=0.8,
         main = "Column Means of DstBytes Matrix", col = "orange")
 
 barplot(dp_row_means, las=2, xlab = "Source Port", cex.names=0.8,
-        main = "Row Means of SrcBytes Matrix", col = "green")
+        main = "Row Means of DstPkts Matrix", col = "green")
 barplot(dp_col_means, las=2, xlab = "Destination Port",cex.names=0.8,
-        main = "Column Means of SrcBytes Matrix", col = "orange")
+        main = "Column Means of DstPkts Matrix", col = "orange")
 
 ```
 
@@ -190,6 +190,8 @@ levelplot(kendall_cors, main = "Kendall Correlations Between Continuous
 The matrix above describes the Kendall rank correlations (commonly referred to as Kendall's tau coefficent) between the four continuous features in the dataset. Intuitively, the Kendall correlation between two features will be high when observations have a similar rank (i.e. relative position label of observations within the variable: 1st, 2nd, 3rd, etc.) between the two variables, and low when observations have a dissimilar rank between the two variables. The range of correlations is [-1, 1]. Kendall correlation was selected as a measure because it evaluates ranks between observations, as opposed to Pearson, which is more susceptible to outliers in the dataset (large byte and packet observations in the continuous features skewed the Pearson measures). 
 
 It is clear there exist strong correlations between the four continuous features, DstBytes and DstPkts in particular. This behavior suggests a technique that simulates estimates for the missing cells with all four features considered at once (i.e. a technique that simulates the entire tensor as a whole rather than in slices) will also be valuable.
+
+Additional data analysis, including principal component analysis of the cells and the exploration of the different scale transformations, can be found in the Appendix.
 
 <!-- ### Principal Component Analysis/Dimensionality Reduction -->
 

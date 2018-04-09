@@ -2,6 +2,9 @@
 
 The previous section's results reflected the need for a completion strategy that accounts for the variability in the number of observations observed for each port combination when imputing that particular combination's cell. The previous technique fails to take into account the differing sample size and variance in each cell's observations, so the algorithm treated each $y_{ij}$ as a single value rather than the mean and variance of a vector of observations. The following section constructs a statistical model that takes the sample size of observations and their variances for each cell into account and repeatedly simulates values for the missing cells using a Gibbs Sampling procedure. The sampling procedure relies upon first building a general model for simulating the row and column facors with their respective standard deviations. After calculating the full conditionals for the parameters of this general model, the overall procedure repeatedly simulates values from these full conditional distributions, alternating between simulating the matrix of row factors and the matrix of column factors along with their respective standard deviations. Note, this technique again slices the tensor into the four separate matrices, $Y^{(1)}, Y^{(2)}, Y^{(3)}, Y^{(4)} \in \mathbb{R}^{m \times n}$ (referred to as $Y$ in general), and the model can be applied to each matrix $Y^{(k)}$ separately.
 
+## Related Work
+
+Bayesian methods are becoming increasingly popular as a matrix completion technique for large scale datasets. Work by Zhou, Wang, Chen, Paisley, Dunson and Carin (2010) indicate Gibbs Sampling provides an efficient solution to large scale problems and yields "predictions as well as a measure of confidence in each prediction." Their paper considers algorithm performance in several datasets of varying scale and relationship between variables, and the results indicate strong performance compared to other common approaches. Granted, this approach considers non-parametric Bayesian matrix completion, while the Gibbs Sampler in this chapter  relies upon constructing the full conditional distributions for parameters in a defined statistical model. Nevertheless, the hypothesis remains that Gibbs Sampling provides an efficient and effective solution for matrix completion. Mai and Alquier also support this claim in their paper "A Bayesian Approach for Noisy Matrix Completion: Optimal Rate under General Sampling Distribution" (2014), in which they construct a Bayesian estimator that relies upon the premise that "Bayesian methods for low-rank matrix completion with noise have been shown to be very efficient computationally." They apply this technique to the Netflix competition dataset as a case study.
 
 ## Statistical Model for Port Relationships
 
@@ -15,7 +18,7 @@ Varying $j = 1 ... n$ the model above yields the following cell values:
 $$y_{i1} = u_i^Tv_1 + \frac{\sigma_1 \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}$$ 
 $$ ... $$ 
 
-$$ y_{in} = u_i^Tv_n + \frac{\sigma_1 \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij} $$
+$$ y_{in} = u_i^Tv_n + \frac{\sigma_i \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij} $$
 
 Vectorizing all of these equations varied across $j = 1...n$ yields:
 
@@ -52,8 +55,6 @@ $$\vec{y} = X\beta + \sigma W^{1/2}\epsilon$$ where $X$ represents $V$, $\beta$ 
 
 This is a modified form of the Generalized Least Squares Model (GLS), which gives a weighted least squares estimate of $\beta$, and it is appropriate when the error terms are not independent and identically distributed. Bayesian analysis of this problem provides similar parameter estimates to GLS, and both ordinary least squares and GLS provide unbiased parameter estimates of $\beta$ with the latter giving estimates with a lower variance because the non-Bayes estimator serves as a limit of the Bayes estimator. 
 
-CITE HOFF
-
 The full conditional distributions of the random variables $\beta$ and $\sigma^2$ (note $\sigma$ is squared in the model) for this case are described below: 
 $$\{\beta \mid X, \vec{y}, \sigma^2\} \sim MVN (\beta_n, \Sigma_n)$$
 $$\{\sigma^2 \mid X, \vec{y}, \beta\} \sim IG (\frac{\nu_0 + n}{2}, \frac{v_0\sigma^2_0 + SSR_W}{2})$$
@@ -64,15 +65,16 @@ $$ \begin{cases}
     \end{cases}$$
 $$SSR_W = (y - X\beta)^TW^{-1}(y-X\beta)$$
 
+The formulation for the closed form full conditional distributions for the $\beta$ and $\sigma^2$ parameters are based upon the general full conditionals established for a regression model with correlated errors (Hoff 2009). These particular full conditional formulations are a special case of this model where $W$ is a diagonal matrix and so the covariance matrix is diagonal. This general regression model formulation also conveniently specifies the prior distributions.
+
 The remaining variables in the closed form full conditionals come from the parameter's prior distributions, which are defined as follows: 
 
 $$\beta \sim MVN (\beta_0, \Sigma_0)$$
 $$\sigma^2 \sim IG (\frac{\nu_0}{2}, \frac{v_0}{2}\sigma_0^2)$$
 
-The initial values for the prior distributions are set as: $\beta_0 = 0$, $\Sigma_0 = \gamma^2I$ where $\gamma^2$ is a large number and $I$ is the $m \times n$ identity matrix, $\nu_0 = 2$, $\sigma_0^2 = 1$. This results in a diffuse prior for $\beta$ that spreads out the density, and a noninformative prior for $\sigma^2_0$. 
+The initial values for the prior distributions are set as: $\beta_0 = 0$, $\Sigma_0 = \gamma^2I$ where $\gamma^2$ is a large number and $I$ is the $m \times n$ identity matrix, $\nu_0 = 2$, $\sigma_0^2 = 1$. This results in a diffuse prior for $\beta$ that spreads out the density, and a noninformative prior for $\sigma^2$. 
 
-https://arxiv.org/abs/1406.1440 BAYESIAN PRIORS
-
+Work by Alquier, Cottet, Chopin, Rousseau (2014) reveal that a standard approach to assigning priors in Bayesian Matrix completion "is to assign an inverse gamma prior to the singular values of a certain singular value decomposition of the matrix of interest; this prior is conjugate. However, [they] show that two other types of priors (again for the singular values) may be conjugate for this model: a gamma prior, and a discrete prior. Conjugacy is very convenient, as it makes it possible to implement either Gibbs sampling or Variational Bayes." In the case of this problem, the distributions of the priors are defined to be diffuse ($\beta$) and noninformative ($\sigma^2$), so that the effects of the priors on the posteriors are limited  when compared to the effects of the observed data.
 
 ### Generalized Gibbs Sampler Function
 
@@ -154,7 +156,7 @@ The dimension of the latent factors, $p$, is used to define the dimension of $\b
 
 Again it is necessary to validate the effectiveness of the overall sampling procedure with simulated data where the ground truth is known. Simulate matrices $U$ and $V$ such that $\Theta = UV^T$ is truly low rank. The same procedure for generating low rank matrices used in the previous chapter can be applied here. Using $\Theta$ there are two possible tests for determining the validity of the sampling procedure. First, the simulated data is used to recover the true values for $UV^T$ from the model. This is considered an idealized case for testing the procedure. Second, some cells are set to missing and again the procedure is used to obtain an estimate for $UV^T$ from the model. This output is compared to the previous case's output to evaluate the performance depending on whether the cells have data or do not. 
 
-## Results on the Real Data
+<!-- ## Results on the Real Data -->
 
 
 

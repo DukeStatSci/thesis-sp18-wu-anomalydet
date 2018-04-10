@@ -7,7 +7,7 @@ output:
 
 ## Acknowledgements {-}
 
-I thank my advisor, Professor Peter Hoff, and the Director of Undergraduate Studies, Professor Mine Cetinkaya-Rundel, for their guidance, support, and assistance in this project. I also thank Duke University's Statistics Department and Office of Information Technology for making this project possible. Most of all I thank my parents for their continued unwavering support in all my endeavors. 
+I thank my research advisor, Professor Peter Hoff for going above and beyond with his guidance, assistance, and patience in working together in this project. I also thank Duke University's Statistics Department, in particular the Director of Undergraduate Studies, Professor Mine Cetinkaya-Rundel, for organizing the entire thesis program and my defense committee members, Professor Jerry Reiter and Professor Galen Reeves, and the Duke Office of Information Technology for making this project possible. Finally, I thank my parents for their continued unwavering support in all my endeavors. 
 
 <!-- ## Abstract {-} -->
 

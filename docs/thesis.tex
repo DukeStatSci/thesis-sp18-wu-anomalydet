@@ -503,9 +503,39 @@ be discarded from the simulation procedure because all three techniques
 depend on the row and column effects when simulating a value for a
 missing cell.
 
-\section{Row and Column Properties}\label{row-and-column-properties}
+\section{Port Connections}\label{port-connections}
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+The above ports network graph displays the pairings between the top
+twenty source ports (red circles) and the top destination ports (blue
+squares). When a square and circle are connected it represents that
+there exist observations for this particular port combination in the
+dataset. The size of each node reflects the number of paired
+observations that were observed using that particular port. Clearly, not
+every source port is paired with a destination port and vice versa (not
+every node is connected to every other node). These missing combinations
+reflect missing cells in the \(T\) tensor, and consequently they
+correspond to the combinations that require values to be simulated.
+
+\section{Varied Sample Sizes}\label{varied-sample-sizes}
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+To better visualize the sample sizes first displayed in the network
+graph, the above heat plot represents the sample sizes for each
+source-destination port combination on a log scale for clarity. It is
+again clear there are certain combinations that have many observations
+(range of 35000 on the original scale), while most of the observations
+are 0, indicating no observations were observed and the corresponding
+cell in \(T\) is missing, or near 0, indicating few observations were
+observed. The large variation in sample sizes again suggests a
+simulation technique that accounts for sample size of a missing cell's
+related row and column cells is necessary.
+
+\section{Row and Column Properties}\label{row-and-column-properties}
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
 
 The bar plots above represent the row and column means of the continuous
 features for each slice of the tensor. These row means and column means
@@ -530,36 +560,6 @@ variances among the row and column means and the number of samples
 observed for each port combination will result in more accurate
 estimations for the missing port combinations.
 
-\section{Port Connections}\label{port-connections}
-
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-4-1.pdf}
-
-The above ports network graph displays the pairings between the top
-twenty source ports (red circles) and the top destination ports (blue
-squares). When a square and circle are connected it represents that
-there exist observations for this particular port combination in the
-dataset. The size of each node reflects the number of paired
-observations that were observed using that particular port. Clearly, not
-every source port is paired with a destination port and vice versa (not
-every node is connected to every other node). These missing combinations
-reflect missing cells in the \(T\) tensor, and consequently they
-correspond to the combinations that require values to be simulated.
-
-\section{Varied Sample Sizes}\label{varied-sample-sizes}
-
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-5-1.pdf}
-
-Finally, to better visualize the sample sizes first displayed in the
-network graph, the above heat plot represents the sample sizes for each
-source-destination port combination on a log scale for clarity. It is
-again clear there are certain combinations that have many observations
-(range of 35000 on the original scale), while most of the observations
-are 0, indicating no observations were observed and the corresponding
-cell in \(T\) is missing, or near 0, indicating few observations were
-observed. The large variation in sample sizes again suggests a
-simulation technique that accounts for sample size of a missing cell's
-related row and column cells is necessary.
-
 \section{Correlations}\label{correlations}
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-6-1.pdf}
@@ -583,6 +583,10 @@ technique that simulates estimates for the missing cells with all four
 features considered at once (i.e.~a technique that simulates the entire
 tensor as a whole rather than in slices) will also be valuable.
 
+Additional data analysis, including principal component analysis of the
+cells and the exploration of the different scale transformations, can be
+found in the Appendix.
+
 \chapter{Alternating Least Squares Applied to Two Dimensional
 Matrices}\label{alternating-least-squares-applied-to-two-dimensional-matrices}
 
@@ -598,19 +602,34 @@ assessed by comparing the fitted versus the observed values
 
 \section{Related Work}\label{related-work}
 
-NEED TO MENTION THAT THERE IS A SIMPLIFIYING ASSUMPTION WHEN CONDUCTING
-MATRIX COMPLETION THAT THE MATRIX IS LOW RANK, ONE OF MANY APPROACHES TO
-MATRIX COMPLETION
+A common approach to matrix completion revolves around the underlying
+assumption that there exists a low rank approximation for the data
+matrix, particularly in the case of high dimensional data. Hastie,
+Mazumder, Lee, and Zadeh (2014) devised a similar approach to the one
+presented in this chapter that fuses nuclear-norm-regularized matrix
+approximation (Candes and Tao, 2009, Mazumder, Hastie and Tibshirani,
+2010) and maximum-margin matrix factorization (Srebro, Rennie and
+Jaakkola, 2005), resulting in a fast alternating least squares that
+relies on a low rank singular value decomposition to drive an efficient
+algorithm for large matrix factorization.
 
-\url{http://www.stat.rice.edu/~gallen/allen_gpca_jasa_2014.pdf}
+Similar techniques for matrix completion were employed heavily in the
+Netflix Challenge where competitors predicted ratings for movies by
+users that had not watched the movie based on the other ratings in the
+matrix of users and movies. The winning team, BellKor's Pragmatic Chaos,
+employed a low rank decomposition technique to reduce the incredibly
+large dataset, so that other algorithms could be applied without too
+much computational overhead (Andreas Toscher, Michael Jahrer, Robert M.
+Bell 2009).
 
-\url{https://arxiv.org/abs/1410.2596}
-\url{https://www.netflixprize.com/assets/GrandPrize2009_BPC_BigChaos.pdf}
-
-Similar techniques for matrix completion were employed in the Netflix
-Challenge where top competitor predicted ratings for movies by users
-that had not watched the movie based on the other ratings in the matrix
-of users and movies.
+Network datasets can range up to billions of observations (recall this
+particular dataset with 1 million observations was collected in just
+five minutes). Furthermore, there are up to 65000 possible network
+source and destination ports, so the resulting network tensor has large
+dimensions. Given the nature of the dataset and prior work in matrix
+completion, the technique in this chapter assumes a low rank
+decomposition to implement an alternating least squares completion
+technique.
 
 \section{Matrix Completion Algorithm}\label{matrix-completion-algorithm}
 
@@ -824,6 +843,28 @@ technique again slices the tensor into the four separate matrices,
 (referred to as \(Y\) in general), and the model can be applied to each
 matrix \(Y^{(k)}\) separately.
 
+\section{Related Work}\label{related-work-1}
+
+Bayesian methods are becoming increasingly popular as a matrix
+completion technique for large scale datasets. Work by Zhou, Wang, Chen,
+Paisley, Dunson and Carin (2010) indicate Gibbs Sampling provides an
+efficient solution to large scale problems and yields ``predictions as
+well as a measure of confidence in each prediction.'' Their paper
+considers algorithm performance in several datasets of varying scale and
+relationship between variables, and the results indicate strong
+performance compared to other common approaches. Granted, this approach
+considers non-parametric Bayesian matrix completion, while the Gibbs
+Sampler in this chapter relies upon constructing the full conditional
+distributions for parameters in a defined statistical model.
+Nevertheless, the hypothesis remains that Gibbs Sampling provides an
+efficient and effective solution for matrix completion. Mai and Alquier
+also support this claim in their paper ``A Bayesian Approach for Noisy
+Matrix Completion: Optimal Rate under General Sampling Distribution''
+(2014), in which they construct a Bayesian estimator that relies upon
+the premise that ``Bayesian methods for low-rank matrix completion with
+noise have been shown to be very efficient computationally.'' They apply
+this technique to the Netflix competition dataset as a case study.
+
 \section{Statistical Model for Port
 Relationships}\label{statistical-model-for-port-relationships}
 
@@ -852,7 +893,7 @@ values:
 \[y_{i1} = u_i^Tv_1 + \frac{\sigma_1 \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}\]
 \[ ... \]
 
-\[ y_{in} = u_i^Tv_n + \frac{\sigma_1 \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij} \]
+\[ y_{in} = u_i^Tv_n + \frac{\sigma_i \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij} \]
 
 Vectorizing all of these equations varied across \(j = 1...n\) yields:
 
@@ -897,8 +938,6 @@ provide unbiased parameter estimates of \(\beta\) with the latter giving
 estimates with a lower variance because the non-Bayes estimator serves
 as a limit of the Bayes estimator.
 
-CITE HOFF
-
 The full conditional distributions of the random variables \(\beta\) and
 \(\sigma^2\) (note \(\sigma\) is squared in the model) for this case are
 described below:
@@ -909,6 +948,14 @@ represents the Inverse Gamma distribution. \[ \begin{cases}
       \Sigma_n = (X^TW^{-1}X/\sigma^2+\Sigma_0^{-1})^{-1}\\
       \beta_n = \Sigma_n(X^TW^{-1}y/\sigma^2 + \Sigma_0^{-1} \beta_0)
     \end{cases}\] \[SSR_W = (y - X\beta)^TW^{-1}(y-X\beta)\]
+The formulation for the closed form full conditional distributions for
+the \(\beta\) and \(\sigma^2\) parameters are based upon the general
+full conditionals established for a regression model with correlated
+errors (Hoff 2009). These particular full conditional formulations are a
+special case of this model where \(W\) is a diagonal matrix and so the
+covariance matrix is diagonal. This general regression model formulation
+also conveniently specifies the prior distributions.
+
 The remaining variables in the closed form full conditionals come from
 the parameter's prior distributions, which are defined as follows:
 
@@ -919,9 +966,20 @@ The initial values for the prior distributions are set as:
 \(\beta_0 = 0\), \(\Sigma_0 = \gamma^2I\) where \(\gamma^2\) is a large
 number and \(I\) is the \(m \times n\) identity matrix, \(\nu_0 = 2\),
 \(\sigma_0^2 = 1\). This results in a diffuse prior for \(\beta\) that
-spreads out the density, and a noninformative prior for \(\sigma^2_0\).
+spreads out the density, and a noninformative prior for \(\sigma^2\).
 
-\url{https://arxiv.org/abs/1406.1440} BAYESIAN PRIORS
+Work by Alquier, Cottet, Chopin, Rousseau (2014) reveal that a standard
+approach to assigning priors in Bayesian Matrix completion ``is to
+assign an inverse gamma prior to the singular values of a certain
+singular value decomposition of the matrix of interest; this prior is
+conjugate. However, {[}they{]} show that two other types of priors
+(again for the singular values) may be conjugate for this model: a gamma
+prior, and a discrete prior. Conjugacy is very convenient, as it makes
+it possible to implement either Gibbs sampling or Variational Bayes.''
+In the case of this problem, the distributions of the priors are defined
+to be diffuse (\(\beta\)) and noninformative (\(\sigma^2\)), so that the
+effects of the priors on the posteriors are limited when compared to the
+effects of the observed data.
 
 \subsection{Generalized Gibbs Sampler
 Function}\label{generalized-gibbs-sampler-function}
@@ -1085,8 +1143,6 @@ the procedure is used to obtain an estimate for \(UV^T\) from the model.
 This output is compared to the previous case's output to evaluate the
 performance depending on whether the cells have data or do not.
 
-\section{Results on the Real Data}\label{results-on-the-real-data}
-
 \chapter{Tensor Completion}\label{tensor-completion}
 
 Recall the analysis of correlations between the continuous features in
@@ -1109,9 +1165,9 @@ sections may be extended to full 3-dimensional tensor completion.
 The PARAFAC decomposition expresses the tensor as:
 \[T = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r\] where \(r\) represents the
 rank approximation, \(\cdotp\) denotes the outer product of tensors, and
-\(u \in \mathbb{R}^{m \times r}\), \(v \in \mathbb{R}^{n \times r}\),
-and \(w \in \mathbb{R}^{4 \times r}\). Each individual cell is
-expressed: \[t_{ijk} = \sum_{r=1}^Ru_{ri} \cdotp v_{ri} \cdotp w_{ri}\]
+\(U \in \mathbb{R}^{m \times r}\), \(V \in \mathbb{R}^{n \times r}\),
+and \(W \in \mathbb{R}^{4 \times r}\). Each individual cell is
+expressed: \[t_{ijk} = \sum_{r=1}^RU_{ri} \cdotp V_{ri} \cdotp W_{ri}\]
 Applying this decomposition yields the objective
 \[\underset{T'} {\text{min}}\|T-T'\|\] where
 \[T' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)\] and
@@ -1163,36 +1219,99 @@ techniques, each of these technique's validity will first be tested on
 simulated data where the ground truth is known before being applied to
 the real dataset.
 
-\url{https://arxiv.org/abs/1505.06611} SMOOTH PARAFAC
+\chapter*{Discussion}\label{discussion}
+\addcontentsline{toc}{chapter}{Discussion}
 
-\chapter*{Summary}\label{summary}
-\addcontentsline{toc}{chapter}{Summary}
+This paper has developed two techniques for matrix completion that can
+then be used to complete individual slices of a tensor. The first
+technique, an alternating least squares procedure relies upon the
+Eckart-Young-Mirsky theorem to implement low-rank singular value
+decomposition. Determining the optimal low rank is a model selection
+problem that is solved using leave one out cross validation to assess
+the quality of possible ranks on given datasets. The validity of this
+technique is tested using simulated datasets where a true low rank is
+known before it is applied to the actual dataset. Finally, the procedure
+is applied to the real networks dataset and its performance is evaluated
+by comparing the fitted values versus the true observed values. Upon
+noticed certain trends due to outliers in the comparison, a log
+transformation is conducted on the original dataset and the matrix is
+once again completed. The second technique constructs a statistical
+model and uses Gibbs Sampling to iteratively sample values from the
+parameter's full distributions. It acknowledges the weaknesses of the
+first technique by including both the sample size and the standard
+deviation of the observations in each matrix cell in the model. This
+model ends up being very close to a Generalized Least Squares model and
+so the sampling procedure for the row and the column factors in the
+matrix is validated by examining the proximity of the variance of the
+\(\beta\) posterior means in many simulated datasets compared to the
+variance of the GLS estimator. The paper finally also proposes a
+solution to extend the two techniques to imputing the tensor iteratively
+as a whole, rather than individual slices.
 
+For the empirical results throughout this paper
+\(T' \in \mathbb{R}^{100 \times 74 \times 4}\): the most used 100 source
+ports and their combinations with the most used 74 destination ports are
+considered. This was constructed by first taking the most used 100
+source and destination ports, creating a \(100 \times 100 \times 4\)
+tensor, and then removing the rows and columns where all values were
+completely missing because those rows and columns would not provide row
+means and column means respectively to inform the completion techniques.
+All of the modeling techniques are informed by the exploratory data
+analysis conducted on the original dataset prior to completion steps.
+
+Application of these completion techniques to the networks dataset
+provides a reasonable estimate for the four continuous features at every
+possible port combination in the matrix. This completed tensor provides
+a basis for detecting anomalies in future data. For instance, new
+observations for a certain port combination that fall outside a
+threshold of error for the estimated value in the tensor can be marked
+as as an anomaly and the source and destination IP may be flagged for
+further investigation. There are two major limitations of these
+techniques:
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  The sheer size of existing and future network data makes the
+  computational efficiency of the techniques a large concern. The
+  techniques would need to provide a reasonable estimate for every cell
+  in a tensor that may extend up to \(65535 \times 65535 \times 4\)
+  (65535 is the number of overall ports). Furthermore, billions of
+  observations may eventually become available, so recalculating initial
+  means and standard deviations for the observations of each cell would
+  need to be done carefully and to be completed in a reasonable amount
+  of time. While Gibbs Sampling and alternating least squares have both
+  been shown to be very efficient and are often employed for handling
+  high dimensional and large scale datasets, the potential size of the
+  networks datasets that may be fed into these techniques enforce the
+  absolute need for computational efficiency.
+\item
+  The techniques do not consider the specific domain context with which
+  each port is used. For instance, in TCP protocol, port number 22 is
+  Secure Shell (SSH), which is one of the most popular ports for
+  everyday users. Previous domain knowledge could perhaps inform
+  reasonable estimates for each port combination. Some port combinations
+  may be expected to have large byte and packet transfers, while others
+  may be expected to have few transfers overall. Constructing additional
+  models or features that incorporate domain knowledge regarding the
+  particular port combinations will be useful for improving the model's
+  effectiveness in detecting anomalies.
+\end{enumerate}
 \appendix
 
 \chapter{Preliminary Data
 Investigation}\label{preliminary-data-investigation}
 
 \section{Exploratory Data Analysis}\label{exploratory-data-analysis}
-
-\subsection{Cleaning Predictors}\label{cleaning-predictors}
 \begin{verbatim}
      Flgs   SrcAddr     Sport   DstAddr     Dport   SrcPkts   DstPkts 
  "factor"  "factor"  "factor"  "factor"  "factor" "integer" "integer" 
  SrcBytes  DstBytes     State 
 "integer" "integer"  "factor" 
 \end{verbatim}
-This code casts the features to their corresponding class
-classifications (numeric and factor), and removes Proto, StartTime, and
-Diretion from the dataset.
-
-\subsection{Categorical Features: Unique Categories and
-Counts}\label{categorical-features-unique-categories-and-counts}
-
 \subsection{Continuous Features: Distributions and
 Relationships}\label{continuous-features-distributions-and-relationships}
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-21-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-20-1.pdf}
 \begin{verbatim}
  [1] 118257047 116615879 112673526 108933442 105793666  73376579  72839115
  [8]  70001807  56206409  55359912
@@ -1270,15 +1389,15 @@ visualize the continuous features with the largest and smallest 10\% of
 observations removed. The removed values will be readded to the dataset
 when investigating for anomalies.
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-23-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-22-1.pdf}
 
 The continuous features are still unevenly distributed even with the
 20\% most extreme values removed.
 
 \subsection{Log Transformation}\label{log-transformation}
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-24-1.pdf}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-24-2.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-23-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-23-2.pdf}
 
 A log transformation for each of the continuous features outputs
 right-skewed histograms. Skewed features may affect the results of a
@@ -1287,7 +1406,7 @@ kernel pca, so we consider other approaches for transformations.
 \subsection{Normal Scores
 Transformation}\label{normal-scores-transformation}
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-25-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-24-1.pdf}
 
 Finally, a normal scores transformation is applied to the dataset. The
 normal scores transformation reassigns each feature value so that it
@@ -1338,7 +1457,7 @@ Standard deviation     1.7118 0.8991 0.51065 0.02309
 Proportion of Variance 0.7326 0.2021 0.06519 0.00013
 Cumulative Proportion  0.7326 0.9347 0.99987 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-1.pdf}
 \begin{verbatim}
 Sport: 4145     Dport: 9119 
                PC1        PC2        PC3          PC4
@@ -1352,7 +1471,7 @@ Standard deviation     1.875 0.6538 0.23124 0.05551
 Proportion of Variance 0.879 0.1069 0.01337 0.00077
 Cumulative Proportion  0.879 0.9859 0.99923 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-2.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-2.pdf}
 \begin{verbatim}
 Sport: 19239    Dport: 9153 
                PC1        PC2        PC3          PC4
@@ -1366,7 +1485,7 @@ Standard deviation     1.8418 0.7037 0.33316 0.03695
 Proportion of Variance 0.8481 0.1238 0.02775 0.00034
 Cumulative Proportion  0.8481 0.9719 0.99966 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-3.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-3.pdf}
 \begin{verbatim}
 Sport: 4243     Dport: 27 
                PC1        PC2        PC3          PC4
@@ -1380,7 +1499,7 @@ Standard deviation     1.7727 0.8343 0.40033 0.03406
 Proportion of Variance 0.7856 0.1740 0.04007 0.00029
 Cumulative Proportion  0.7856 0.9596 0.99971 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-4.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-4.pdf}
 \begin{verbatim}
 Sport: 4243     Dport: 10290 
                 PC1         PC2        PC3          PC4
@@ -1394,7 +1513,7 @@ Standard deviation     1.8125 0.7560 0.37528 0.05022
 Proportion of Variance 0.8213 0.1429 0.03521 0.00063
 Cumulative Proportion  0.8213 0.9642 0.99937 1.00000
 \end{verbatim}
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-27-5.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-26-5.pdf}
 
 \subsection{Interpretation}\label{interpretation}
 
@@ -1435,6 +1554,11 @@ Prior specification.
 Bailey, S. (2012). Principal component analysis with noisy and/or
 missing data.
 
+\hypertarget{ref-EYM1987}{}
+G.H. Golub, G. S., Alan Hoffman. (1987). A generalization of the
+eckart-young-mirsky matrix approximation theorem. \emph{Linear Algebra
+and Its Applications}, \emph{88-89}, 317--327.
+
 \hypertarget{ref-fastALS2014}{}
 Hastie, R. L., Trevor; Mazumder. (2014). Matrix completion and low-rank
 svd via fast alternating least square.
@@ -1443,20 +1567,26 @@ svd via fast alternating least square.
 Hoff, P. D. (2009). \emph{A first course in bayesian statistical
 methods}. Springer-Verlag New York.
 
-\hypertarget{ref-netflix2009}{}
-T?scher, A., Jahrer, M., \& Bell, R. M. (2009). The bigchaos solution to
-the netflix grand prize.
-
 \hypertarget{ref-smoothParafac2016}{}
 Tatsuya Yokota, A. C., Qibin Zhao. (2016). Smooth parafac decomposition
 for tensor completion. \emph{IEEE Transactions on Signal Processing
 Issue 20}, \emph{64}(20), 5423--5436.
 
+\hypertarget{ref-netflix2009}{}
+Toscher, A., Jahrer, M., \& Bell, R. M. (2009). The bigchaos solution to
+the netflix grand prize.
+
 \hypertarget{ref-sparse2014}{}
 Yang, D., Ma, Z., \& Buja, A. (2014). A sparse singular value
 decomposition method for high-dimensional data. \emph{Journal of
 Computational and Graphical Statistics}, \emph{23}(4), 923--942.
-\url{http://doi.org/10.1080/10618600.2013.858632}
+Retrieved from \url{https://doi.org/10.1080/10618600.2013.858632}
+
+\hypertarget{ref-gibbs2010}{}
+Zhou, M., Wang, C., Chen, M., Paisley, J., Dunson, D., \& Carin, L.
+(2010). Nonparametric bayesian matrix completion. In \emph{2010 ieee
+sensor array and multichannel signal processing workshop} (pp.
+213--216).
 
 
 % Index?

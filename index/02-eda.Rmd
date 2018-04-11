@@ -48,10 +48,10 @@ for (s in 1:n_Sport){
   }
 }
 levelplot(missing,xlab = "Source Ports", ylab = "Destination Ports", scales=list(x=list(rot=90)),
-          main = "Missingness in Ports Matrix", col.regions=gray(0:1,1),cuts=1)
+          main = "Missingness in Port Interactions", col.regions=gray(0:1,1),cuts=1, colorkey = FALSE)
 ```
 
-The above matrix represents the missingness in the port combinations for pairings of the top 20 most used source ports and destination ports. The black cells represent missingness; of the 400 cells in the matrix, 295 (73.75%) of cells are missing observations. This single matrix slice can be extrapolated to missingness in ports throughout the entire tensor because the dataset is collected in a way such that either all four continuous features are observed, or none are observed. It is important to note that missingness is not uniform across source and destination port combinations. In the event that an entire row or column of port combinations is missing, the port at that respective index will need to be discarded from the simulation procedure because all three techniques depend on the row and column effects when simulating a value for a missing cell. 
+The above matrix represents the missingness in the port combinations for pairings of the top 20 most used source ports and destination ports. The black cells represent missingness; of the 400 cells in the matrix, 295 (73.75%) of cells are missing observations. This single matrix slice can be extrapolated to missingness in ports throughout the entire tensor because the dataset is collected in a way such that either all four continuous features are observed, or none are observed. It is important to note that missingness is not uniform across source and destination port combinations. In the event that an entire row or column of port combinations is missing, the port at that respective index will need to be discarded because all three completion techniques depend on the row and column effects when simulating a value for a missing cell. 
 
 ## Port Connections
 
@@ -98,7 +98,7 @@ plot(g,
 )
 ```
 
-The above ports network graph displays the pairings between the top twenty source ports (red circles) and the top destination ports (blue squares). When a square and circle are connected it represents that there exist observations for this particular port combination in the dataset. The size of each node reflects the number of paired observations that were observed using that particular port. Clearly, not every source port is paired with a destination port and vice versa (not every node is connected to every other node). These missing combinations reflect missing cells in the $T$ tensor, and consequently they correspond to the combinations that require values to be simulated. 
+The above ports network graph displays the pairings between the top twenty source ports (red circles) and the top destination ports (blue squares). When a square and circle are connected it indicates that there exist observations for this particular port combination in the dataset. The size of each node reflects the number of paired observations that were observed using that particular port. Clearly, not every source port is paired with every destination port and vice versa (not every node is connected to every other node). These missing combinations reflect missing cells in the $T$ tensor, and consequently they correspond to the combinations that require values to be estimated 
 
 ## Varied Sample Sizes
 
@@ -161,7 +161,7 @@ barplot(dp_col_means, las=2, xlab = "Destination Port",cex.names=0.8,
 
 The bar plots above represent the row and column means of the continuous features for each slice of the tensor. These row means and column means inform simulation techniques for the missing cells within those respective rows and columns. There exist clear outliers in the means for certain rows and columns. This outlier behavior is undoubtedly caused by outliers existing within the cells in that particular row or column. These outliers exist because each cell represents the mean of all observations that occured within a particular port combination, regardless of sample size (i.e. some cells may have a few large observations, resulting in a large mean that skews the cell's row and column mean). Thus, cells that only have a few observed observations have a disproportionately large effect on their respective row and column mean.
 
-These outliers may cause problems with simulating missing values in that row or column because the outliers will have a disproportionately large effect on the simulated value than the other observations, which are more close to the median in the missing value's row or column.  This behavior suggests that the completion techniques that take into account variances among the row and column means and the number of samples observed for each port combination will result in more accurate estimations for the missing port combinations.
+These outliers may cause problems with simulating missing values in that row or column because the outliers will have a disproportionately large effect on the simulated value than the other observations, which are more close to the median in the missing value's row or column.  This behavior suggests that the completion techniques that take into account variances among the row and column means and the number of samples observed for each port combination will result in higher quality estimations for the missing port combinations. In particular, least squares methods fail to take into account the ddiferent amounts of information available in each cell. If a cell only has one observation, it should not be treated with equal weight to a cell that is actually the mean of 1000 observations.
 
 ## Correlations
 ```{r, echo = FALSE, fig.height = 5, fig.width = 5}
@@ -189,7 +189,7 @@ levelplot(kendall_cors, main = "Kendall Correlations Between Continuous
 
 The matrix above describes the Kendall rank correlations (commonly referred to as Kendall's tau coefficent) between the four continuous features in the dataset. Intuitively, the Kendall correlation between two features will be high when observations have a similar rank (i.e. relative position label of observations within the variable: 1st, 2nd, 3rd, etc.) between the two variables, and low when observations have a dissimilar rank between the two variables. The range of correlations is [-1, 1]. Kendall correlation was selected as a measure because it evaluates ranks between observations, as opposed to Pearson, which is more susceptible to outliers in the dataset (large byte and packet observations in the continuous features skewed the Pearson measures). 
 
-It is clear there exist strong correlations between the four continuous features, DstBytes and DstPkts in particular. This behavior suggests a technique that simulates estimates for the missing cells with all four features considered at once (i.e. a technique that simulates the entire tensor as a whole rather than in slices) will also be valuable.
+It is clear there exist strong correlations between the four continuous features, DstBytes and DstPkts in particular. This behavior suggests a technique that produces estimates for the missing cells with all four features considered at once (i.e. a technique that simulates the entire tensor as a whole rather than in slices) will also be valuable.
 
 Additional data analysis, including principal component analysis of the cells and the exploration of the different scale transformations, can be found in the Appendix.
 

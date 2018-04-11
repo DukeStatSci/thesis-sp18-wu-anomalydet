@@ -1,6 +1,6 @@
-# Alternating Least Squares Applied to Two Dimensional Matrices
+# Alternating Least Squares for Matrix Completion
 
-This approach determines the best low-rank approximation for $Y$ using the Eckart-Young-Mirsky Theorem to repeatedly generate the orthonormal matrices $U$ and $V$ of the singular value decomposition of $Y$ ($Y = UDV^T$) in an alternating pattern. The technique is proven to correctly determine a low rank approximation on simulated matrices where the true rank is known. Once the optimal low rank is determined from the actual dataset the optimal low rank is used in the technique to simulate the estimates for the missing cells of $Y$. The technique's fit is assessed by comparing the fitted versus the observed values 
+This approach determines the best low-rank approximation for $Y$ using the Eckart-Young-Mirsky Theorem to repeatedly generate the orthonormal matrices $U$ and $V$ of the singular value decomposition of $Y$ ($Y = UDV^T$) in an alternating pattern. The technique is proven to correctly determine a low rank approximation on simulated matrices where the true rank is known. Once the optimal low rank is determined from the actual dataset the optimal low rank is used in the technique to generate estimates for the missing cells of $Y$. The technique's fit is assessed by comparing the fitted versus the observed values.
 
 ## Related Work
 
@@ -12,7 +12,7 @@ Network datasets can range up to billions of observations (recall this particula
 
 ## Matrix Completion Algorithm
 
-$F \in \mathbb{R}^{m \times n}$ is a sparse matrix that represents the frequencies of combinations, i.e $F[32242,12312]$ represents the number of observations for the 32242 12312 port combination $M \in \mathbb{R}^{m \times n}$ represents a boolean matrix of whether the corresponding $Y$ values are missing. $Y[M]$ represents all of the missing values in $Y$.
+Let $F \in \mathbb{R}^{m \times n}$ be a sparse matrix that represents the frequencies of combinations, i.e $F[i,j]$ represents the number of observations for the $ith$ $jth$ port combination Let $M \in \mathbb{R}^{m \times n}$ represents a boolean matrix of whether the corresponding $Y$ values are missing. $Y[!M]$ represents all of the missing values in $Y$, so $m_{ij} = 0$ if $f_{iJ} = 0$.
 
 The objective is $$\underset{r}{\text{min}} \sum_{i,j:F_{i,j} > 0} (y_{i,j} - u_iDv^T_j)^2$$ where $UDV^{(k)T}$ represents the singular value decomposition of $Y$ and $r$ is the low rank approximation for $Y$. There are multiple steps to the matrix completion process:
 
@@ -20,7 +20,7 @@ The objective is $$\underset{r}{\text{min}} \sum_{i,j:F_{i,j} > 0} (y_{i,j} - u_
 An analysis of variance (ANOVA) imputation is used to fill in the initial values for $y_{ij}$. This yields an additive model dependent upon the means of the present observations: $$y_{ij} =  a_i + b_j - \mu$$ where$\mu$ is the overall mean of $Y$, $a_i$ is the row mean, and $b_j$ is column mean of $y_{ij}$.
 
 ### Repeated Simulation
-The repeated imputation procedure solves $Y^{(s)}[M] = R_r(Y^{(s-1)})[M]$ where $R_r( ... )$ is the best rank $r$ approximation for the $s$-th step. For each step $(s)$ the singular value decomposition decomposes $$Y^{(s)} =  U^{(s)}D^{(s)}V^{T(s)}$$ where $D$ is a diagonal matrix of the singular values, $U$ is the left singular vectors of $Y$ and $V$ is the right singular vectors of $Y$. 
+The repeated imputation procedure solves $Y^{(s)}[!M] = R_r(Y^{(s-1)})[!M]$ where $R_r(\cdot)$ is the best rank $r$ approximation for the $s$-th step. For each step $(s)$ the singular value decomposition decomposes $$Y^{(s)} =  U^{(s)}D^{(s)}V^{T(s)}$$ where $D$ is a diagonal matrix of the singular values, $U$ is the left singular vectors of $Y$ and $V$ is the right singular vectors of $Y$. 
 
 The Eckart-Young-Mirsky Theorem provides the best rank $r$ approximation for the missing values in $Y^{(s+1)}$. Recall $Y[M]$ represents all of the missing values of $Y$. Applying the EYM theorem:  $$Y^{(s+1)}[M] = (U[,1:r]^{(s)}D[,1:r]^{(s)}V[,1:r]^{T(s)})[M]$$ Where $U[,1:r]$ represents the first $r$ columns of $U$ and the same for $D$ and $V$. 
 
@@ -82,9 +82,9 @@ matrix_complete = function(S = 1000, k = 2, nrows, ncols, Y, M){
 }
 ```
 
-## Best Low Rank Approximation
+## Best Rank Approximation
 
-To determine the best low rank for approximating $Y$, Leave-One-Out Cross Validation (LOOCV) is used to generate prediction errors for each possible rank. LOOCV cycles through the observed values, setting each to NA (missing), and then performing the described matrix completion process. The prediction error is then calculated as some function of the difference between the imputed value and the true value. In this case, the algorithm records root mean square error $$\sqrt{\frac{\sum (\hat y_{ij} - y_{ij})^2}{z}}$$ where $z$ is the number of observations not missing.
+To determine the best rank for approximating $Y$, Leave-One-Out Cross Validation (LOOCV) is used to generate prediction errors for each possible rank. LOOCV cycles through the observed values, setting each to NA (missing), and then performs the described matrix completion process. The prediction error is then calculated as some function of the difference between the imputed value and the true value. In this case, the algorithm records root mean square error $$\sqrt{\frac{\sum (\hat y_{ij} - y_{ij})^2}{z}}$$ where $z$ is the number of observations not missing.
 
 ```{r,include=FALSE}
 #Leave One Out Cross Validation
@@ -116,7 +116,7 @@ Before applying the algorithm on the real data it is useful to validate the algo
 
 ### Simulating a Low Rank Matrix 
 
-Taking the Kronecker product of two lower dimension matrices yields a higher dimension matrix with low rank. Explicitly, given matrix $A \in \mathbb{R}^{m \times r}$ and $B \in \mathbb{R}^{r \times n}$, $A \otimes B = C$ where $C \in \mathbb{R}^{m \times n}$ has rank $r$. Thus, when $r < m, r < n$ the matrix $C$ has an optimal low rank that minimizes the root mean square error from the leave one out cross validation procedure. To add noise to the simulated matrix, $C$, simply add an error matrix, $E \in \mathbb{R}^{m \times n}$ sampled from a normal distribution.
+Taking the matrix product of two lower dimension matrices yields a higher dimension matrix with low rank. Explicitly, given matrix $A \in \mathbb{R}^{m \times r}$ and $B \in \mathbb{R}^{r \times n}$, $A \times B = C$ where $C \in \mathbb{R}^{m \times n}$ has rank $r$. Thus, when $r < m, r < n$ the matrix $C$ has an optimal low rank that minimizes the root mean square error from the leave one out cross validation procedure. To add noise to the simulated matrix, $C$, simply add an error matrix, $E \in \mathbb{R}^{m \times n}$ sampled from a normal distribution.
 
 This procedure provides a computationally efficient way to simulate many random low rank matrices to use as inputs for the validation procedure. In the case of simulated matrices, there are no missing entries, so the leave one out cross validation procedure sequentially removes each cell in the matrix, imputes its value using the rank being investigated, and considers the individual cell error as the difference between the true value and the imputed value. The overall root mean square error for the technique is then calculated with the aggregate each of these individual cell errors.
 
@@ -189,7 +189,7 @@ plot(Ranks, Accuracy_Noise, main = "Additional Noise",
      xlab = "Rank (r)", ylab = "Accuracy")
 ```
 
-The above plots represent the accuracy of the matrix completion technique for matrices with true rank $r = 1,2,...8$. The accuracy is measured by simulating 10 random matrices (dimensions ranging from 74 to 100 values) with low rank of $r$ for each value of $r$ (80 simulated matrices total), and then running the leave one out cross validation procedure described above on the matrix $C$ to generate a root mean square error for each possible rank. The accuracy is the calculated using the number of times the rank with the lowest error matches the true simulated rank divided by 100 (the number of trials with rank $r$). Note as the true rank becomes larger, the technique performs far worse at determining the true rank. This behavior is due to the fact that LOOCV attempts to find the rank that minimizes the root mean square error, not necessarily the true low rank approximation for a matrix. Higher true ranks tend to give higher out-of-sample validation error, so LOOCV will still select a low rank approximation for simulated matrices that have relatively high true ranks. For instance, a simulated data matrix may have a true rank of 8, but it may also be very close to rank 2, which results in LOOCV selecting rank 2 as the optimal low rank approximation for minimizing error.
+The above plots represent the accuracy of the matrix completion technique for matrices with true rank $r = 1,2,...8$. The accuracy is measured by simulating 10 random matrices (dimensions ranging from 74 to 100 values) with low rank of $r$ for each value of $r$ (80 simulated matrices total), and then running the leave one out cross validation procedure described above on the matrix $C$ to generate a root mean square error for each possible rank. The accuracy is the calculated using the number of times the rank with the lowest error matches the true simulated rank divided by 10 (the number of trials with rank $r$). Note as the true rank becomes larger, the technique performs far worse at determining the true rank. This behavior is due to the fact that LOOCV attempts to find the rank that minimizes the root mean square error, not necessarily the true low rank approximation for a matrix. Higher true ranks tend to give higher out-of-sample validation error, so LOOCV will still select a low rank approximation for simulated matrices that have relatively high true ranks. For instance, a simulated data matrix may have a true rank of 8, but it may also be very close to rank 2, which results in LOOCV selecting rank 2 as the optimal low rank approximation for minimizing error.
 
 Furthermore, when noise is applied to each simulated matrix, $C$, (through the addition of a noise matrix $E$), the algorithm tends to perform worse at a majority of the attempted ranks. This is expected because the addition of noise to every cell in the matrix may obscure the true rank from the LOOCV procedure.
 
@@ -225,7 +225,7 @@ plot (seq(1,8,1), rmses, xlab = "Matrix Rank", ylab = "Root Mean Square Errors",
       main = "Leave One Out Cross Validation for Matrix Ranks")
 ```
 
-The above plot displays the root mean square errors from the leave one out cross validation process across different rank inputs into the algorithm. It's clear that rank 2 provides the best low-rank approximation for simulating missing values in $Y$ using the alternating least squares algorithm. Thus, the dataset is fitted with the algorithm using rank 2 to simulate the missing values in $Y$. 
+The above plot displays the root mean square errors from the leave one out cross validation process across different rank inputs into the algorithm. It's clear that rank 2 provides the best low-rank approximation for estimating missing values in $Y$ using the alternating least squares algorithm. Thus, the dataset is fitted with the algorithm using rank 2 to estimate the missing values in $Y$. 
 
 ```{r, echo = FALSE}
 ### version of EYM that replaces the considers the entire fitted matrix
@@ -316,7 +316,7 @@ rmses_log = c(1.444161,1.913014, 2.249744, 2.285776,
 plot (seq(1,8,1), rmses_log)
 ```
 
-Now the optimal rank from the LOOCV procedure is 1. The algorithm is run on the log transformed dataset with a low rank approximation of 1 and the fitted vereus observed values are again compared.
+Now the optimal rank from the LOOCV procedure is 1. The algorithm is run on the log transformed dataset with a low rank approximation of 1 and the fitted versus observed values are again compared.
 
 ```{r, echo = FALSE}
 Y_imputed = matrix_complete(250, 1, nrow(Y), ncol(Y), Y, M)
@@ -330,7 +330,7 @@ plot(exp_Y[!is.na(exp_Y)], exp_Y_imp[!is.na(exp_Y)],
 abline(0,1, col = "red")
 ```
 
-The values above have been retransformed (exponentiated) to the dataset's original scale after the simulation procedure was completed. The fit still appears to be quite poor and there is not much difference between the log transformed output versus the original non-transformed output.
+The values above have been retransformed (exponentiated) to the dataset's original scale after the procedure was completed. The fit still appears to be quite poor and there is not much difference between the log transformed output versus the original non-transformed output.
 
 This poor performance may largely be due to the fact the algorithm does not account for the variability in the sample size and variance in the observed interactions for each cell. Unlike the Netflix Competition, in which each cell of the matrix being completed contained only a single user rating of a movie, the matrix in this problem contains the mean of a variable number of observations corresponding to particular port combinations.
 

@@ -9,7 +9,7 @@ rmd_files: ["index.Rmd",
             "04-gibbs.Rmd",
             "05-tensor.Rmd",
             "07-conclusion.Rmd",
-            "08-appendix.Rmd",
+            #"08-appendix.Rmd",
             "99-references.Rmd"]
 download: [["thesis.pdf", "PDF"], ["thesis.epub", "EPUB"], ["thesis.docx", "Word"]]
 output_dir: "../docs"

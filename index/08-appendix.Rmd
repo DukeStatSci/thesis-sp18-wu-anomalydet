@@ -19,9 +19,6 @@ library(gridExtra)
 #argus = read.csv("data/argus-anon-20170201.csv")
 argus = readRDS("data/argus_complete.rds")
 # combinations = readRDS("/data/combinations.rds")
-```
-
-```{r,echo=FALSE}
 sapply(argus, class)
 argus = transform(argus,
                   Sport = as.factor(argus$Sport),
@@ -50,148 +47,148 @@ continuous = c("SrcPkts", "DstPkts", "SrcBytes", "DstBytes")
 <!-- element_counts(State) -->
 <!-- ``` -->
 
-### Continuous Features: Distributions and Relationships
-```{r,echo=FALSE}
-par(mfrow=c(2,2))
-hist(SrcBytes); hist(SrcPkts); hist(DstBytes); hist(DstPkts) #clearly some very large values
-largest_n = function(x, n){
-  head(sort(x, decreasing=TRUE), n)
-}
-largest_n(SrcBytes, 10)
-largest_n(SrcPkts, 10)
-largest_n(DstBytes, 10)
-largest_n(DstPkts, 10)
-```
+<!-- ### Continuous Features: Distributions and Relationships -->
+<!-- ```{r,echo=FALSE} -->
+<!-- par(mfrow=c(2,2)) -->
+<!-- hist(SrcBytes); hist(SrcPkts); hist(DstBytes); hist(DstPkts) #clearly some very large values -->
+<!-- largest_n = function(x, n){ -->
+<!--   head(sort(x, decreasing=TRUE), n) -->
+<!-- } -->
+<!-- largest_n(SrcBytes, 10) -->
+<!-- largest_n(SrcPkts, 10) -->
+<!-- largest_n(DstBytes, 10) -->
+<!-- largest_n(DstPkts, 10) -->
+<!-- ``` -->
 
-The histograms and the largest 10 values in each of the continuous variables show that there are a relatively few amount of large observations skewing the distributions. This explains the model summary containing means much larger than their medians. It's not possible to remove the large values as outliers because they may be scanner observations to detect. Also there is a high frequency (up to the first quartile) of destination bytes and packets that equal 0. 
+<!-- The histograms and the largest 10 values in each of the continuous variables show that there are a relatively few amount of large observations skewing the distributions. This explains the model summary containing means much larger than their medians. It's not possible to remove the large values as outliers because they may be scanner observations to detect. Also there is a high frequency (up to the first quartile) of destination bytes and packets that equal 0.  -->
 
-We will now try to investigate whether the largest continuous predictor values correspond to any particular addresses or ports. 
+<!-- We will now try to investigate whether the largest continuous predictor values correspond to any particular addresses or ports.  -->
 
-```{r,echo=FALSE}
-max.SrcBytes = argus[with(argus,order(-SrcBytes)),][1:20,]
-max.SrcPkts = argus[with(argus,order(-SrcPkts)),][1:20,]
-max.DstBytes = argus[with(argus,order(-DstBytes)),][1:20,]
-max.DstPkts = argus[with(argus,order(-DstPkts)),][1:20,]
-head(max.SrcBytes)
-head(max.DstBytes)
-```
+<!-- ```{r,echo=FALSE} -->
+<!-- max.SrcBytes = argus[with(argus,order(-SrcBytes)),][1:20,] -->
+<!-- max.SrcPkts = argus[with(argus,order(-SrcPkts)),][1:20,] -->
+<!-- max.DstBytes = argus[with(argus,order(-DstBytes)),][1:20,] -->
+<!-- max.DstPkts = argus[with(argus,order(-DstPkts)),][1:20,] -->
+<!-- head(max.SrcBytes) -->
+<!-- head(max.DstBytes) -->
+<!-- ``` -->
 
-Source Addresses tend to be repetitive for the largest max bytes/packets, while ports vary. The top 10 largest DstBytes all correspond to SrcAddr 197.0.1.1 and DstAddr 100.0.1.1. Also both max Src and Dst rows correspond to the "* s"" flag. The largest sizes of DstBytes tend to go to Dport 80, which is the port that expects to receive from a web client (http), while the largest SrcBytes go to 31743. The next section implements a systematic way for investigating the relationship between addresses and ports because simply looking at the max rows is difficult.
+<!-- Source Addresses tend to be repetitive for the largest max bytes/packets, while ports vary. The top 10 largest DstBytes all correspond to SrcAddr 197.0.1.1 and DstAddr 100.0.1.1. Also both max Src and Dst rows correspond to the "* s"" flag. The largest sizes of DstBytes tend to go to Dport 80, which is the port that expects to receive from a web client (http), while the largest SrcBytes go to 31743. The next section implements a systematic way for investigating the relationship between addresses and ports because simply looking at the max rows is difficult. -->
 
-## Transformations on the Data
-### Removing Quantiles 
+<!-- ## Transformations on the Data -->
+<!-- ### Removing Quantiles  -->
 
-To get a better sense of the unskewed distribution, the below plots visualize the continuous features with the largest and smallest 10% of observations removed. The removed values will be readded to the dataset when investigating for anomalies.
+<!-- To get a better sense of the unskewed distribution, the below plots visualize the continuous features with the largest and smallest 10% of observations removed. The removed values will be readded to the dataset when investigating for anomalies. -->
 
-```{r,echo=FALSE}
-remove_quantiles = function(v, lowerbound, upperbound){
-  return (v[quantile(v,lowerbound) >= v & v <= quantile(v,upperbound)])
-}
-SrcBytes.abrev = remove_quantiles(SrcBytes,0.10,0.9)
-SrcPkts.abrev = remove_quantiles(SrcPkts,0.10,0.9)
-DstBytes.abrev = remove_quantiles(DstBytes,0.10,0.9)
-DstPkts.abrev = remove_quantiles(DstPkts,0.10,0.9)
-par(mfrow=c(2,2))
-hist(SrcBytes.abrev); hist(SrcPkts.abrev); hist(DstBytes.abrev); hist(DstPkts.abrev)
-```
+<!-- ```{r,echo=FALSE} -->
+<!-- remove_quantiles = function(v, lowerbound, upperbound){ -->
+<!--   return (v[quantile(v,lowerbound) >= v & v <= quantile(v,upperbound)]) -->
+<!-- } -->
+<!-- SrcBytes.abrev = remove_quantiles(SrcBytes,0.10,0.9) -->
+<!-- SrcPkts.abrev = remove_quantiles(SrcPkts,0.10,0.9) -->
+<!-- DstBytes.abrev = remove_quantiles(DstBytes,0.10,0.9) -->
+<!-- DstPkts.abrev = remove_quantiles(DstPkts,0.10,0.9) -->
+<!-- par(mfrow=c(2,2)) -->
+<!-- hist(SrcBytes.abrev); hist(SrcPkts.abrev); hist(DstBytes.abrev); hist(DstPkts.abrev) -->
+<!-- ``` -->
 
-The continuous features are still unevenly distributed even with the 20% most extreme values removed.
+<!-- The continuous features are still unevenly distributed even with the 20% most extreme values removed. -->
 
-### Log Transformation
+<!-- ### Log Transformation -->
 
-```{r, echo=FALSE}
-par(mfrow=c(2,2))
-hist(log(SrcBytes)); hist(log(SrcPkts)); hist(log(DstBytes)); hist(log(DstPkts))
-plot(log(SrcPkts), log(SrcBytes)); plot(log(DstPkts), log(DstBytes))
-plot(log(SrcBytes), log(DstBytes)); plot(log(SrcPkts), log(DstPkts))
-```
+<!-- ```{r, echo=FALSE} -->
+<!-- par(mfrow=c(2,2)) -->
+<!-- hist(log(SrcBytes)); hist(log(SrcPkts)); hist(log(DstBytes)); hist(log(DstPkts)) -->
+<!-- plot(log(SrcPkts), log(SrcBytes)); plot(log(DstPkts), log(DstBytes)) -->
+<!-- plot(log(SrcBytes), log(DstBytes)); plot(log(SrcPkts), log(DstPkts)) -->
+<!-- ``` -->
 
-A log transformation for each of the continuous features outputs right-skewed histograms. Skewed features may affect the results of a kernel pca, so we consider other approaches for transformations.
+<!-- A log transformation for each of the continuous features outputs right-skewed histograms. Skewed features may affect the results of a kernel pca, so we consider other approaches for transformations. -->
 
-### Normal Scores Transformation
+<!-- ### Normal Scores Transformation -->
 
-```{r,echo=FALSE}
-nscore = function(x) {
-   # Takes a vector of values x and calculates their normal scores. Returns 
-   # a list with the scores and an ordered table of original values and
-   # scores, which is useful as a back-transform table. See backtr().
-   nscore = qqnorm(x, plot.it = FALSE)$x  # normal score 
-   trn.table = data.frame(x=sort(x),nscore=sort(nscore))
-   return (list(nscore=nscore, trn.table=trn.table))
-}
+<!-- ```{r,echo=FALSE} -->
+<!-- nscore = function(x) { -->
+<!--    # Takes a vector of values x and calculates their normal scores. Returns  -->
+<!--    # a list with the scores and an ordered table of original values and -->
+<!--    # scores, which is useful as a back-transform table. See backtr(). -->
+<!--    nscore = qqnorm(x, plot.it = FALSE)$x  # normal score  -->
+<!--    trn.table = data.frame(x=sort(x),nscore=sort(nscore)) -->
+<!--    return (list(nscore=nscore, trn.table=trn.table)) -->
+<!-- } -->
 
-backtr = function(scores, nscore, tails='none', draw=TRUE) {
-   # Given a vector of normal scores and a normal score object 
-   # (from nscore), the function returns a vector of back-transformed 
-   # values
-   # 'none' : No extrapolation; more extreme score values will revert 
-   # to the original min and max values. 
-   # 'equal' : Calculate magnitude in std deviations of the scores about 
-   # initial data mean. Extrapolation is linear to these deviations. 
-   # will be based upon deviations from the mean of the original 
-   # hard data - possibly quite dangerous!
-   # 'separate' :  This calculates a separate sd for values 
-   # above and below the mean.
-   if(tails=='separate') { 
-      mean.x <- mean(nscore$trn.table$x)
-      small.x <- nscore$trn.table$x < mean.x
-      large.x <- nscore$trn.table$x > mean.x
-      small.sd <- sqrt(sum((nscore$trn.table$x[small.x]-mean.x)^2)/
-                       (length(nscore$trn.table$x[small.x])-1))
-      large.sd <- sqrt(sum((nscore$trn.table$x[large.x]-mean.x)^2)/
-                       (length(nscore$trn.table$x[large.x])-1))
-      min.x <- mean(nscore$trn.table$x) + (min(scores) * small.sd)
-      max.x <- mean(nscore$trn.table$x) + (max(scores) * large.sd)
-      # check to see if these values are LESS extreme than the
-      # initial data - if so, use the initial data.
-      #print(paste('lg.sd is:',large.sd,'max.x is:',max.x,'max nsc.x
-      #     is:',max(nscore$trn.table$x)))
-      if(min.x > min(nscore$trn.table$x)) {min.x <- min(nscore$trn.table$x)}
-      if(max.x < max(nscore$trn.table$x)) {max.x <- max(nscore$trn.table$x)}
-   }
-   if(tails=='equal') { # assumes symmetric distribution around the mean
-      mean.x <- mean(nscore$trn.table$x)
-      sd.x <- sd(nscore$trn.table$x)
-      min.x <- mean(nscore$trn.table$x) + (min(scores) * sd.x)
-      max.x <- mean(nscore$trn.table$x) + (max(scores) * sd.x)
-      # check to see if these values are LESS extreme than the
-      # initial data - if so, use the initial data.
-      if(min.x > min(nscore$trn.table$x)) {min.x <- min(nscore$trn.table$x)}
-      if(max.x < max(nscore$trn.table$x)) {max.x <- max(nscore$trn.table$x)}
-   }
-   if(tails=='none') {   # No extrapolation
-      min.x <- min(nscore$trn.table$x)
-      max.x <- max(nscore$trn.table$x)
-   }
-   min.sc <- min(scores)
-   max.sc <- max(scores)
-   x <- c(min.x, nscore$trn.table$x, max.x)
-   nsc <- c(min.sc, nscore$trn.table$nscore, max.sc)
-   
-   if(draw) {plot(nsc,x, main='Transform Function')}
-   back.xf <- approxfun(nsc,x) # Develop the back transform function
-   val <- back.xf(scores)
-   return(val)
-}
+<!-- backtr = function(scores, nscore, tails='none', draw=TRUE) { -->
+<!--    # Given a vector of normal scores and a normal score object  -->
+<!--    # (from nscore), the function returns a vector of back-transformed  -->
+<!--    # values -->
+<!--    # 'none' : No extrapolation; more extreme score values will revert  -->
+<!--    # to the original min and max values.  -->
+<!--    # 'equal' : Calculate magnitude in std deviations of the scores about  -->
+<!--    # initial data mean. Extrapolation is linear to these deviations.  -->
+<!--    # will be based upon deviations from the mean of the original  -->
+<!--    # hard data - possibly quite dangerous! -->
+<!--    # 'separate' :  This calculates a separate sd for values  -->
+<!--    # above and below the mean. -->
+<!--    if(tails=='separate') {  -->
+<!--       mean.x <- mean(nscore$trn.table$x) -->
+<!--       small.x <- nscore$trn.table$x < mean.x -->
+<!--       large.x <- nscore$trn.table$x > mean.x -->
+<!--       small.sd <- sqrt(sum((nscore$trn.table$x[small.x]-mean.x)^2)/ -->
+<!--                        (length(nscore$trn.table$x[small.x])-1)) -->
+<!--       large.sd <- sqrt(sum((nscore$trn.table$x[large.x]-mean.x)^2)/ -->
+<!--                        (length(nscore$trn.table$x[large.x])-1)) -->
+<!--       min.x <- mean(nscore$trn.table$x) + (min(scores) * small.sd) -->
+<!--       max.x <- mean(nscore$trn.table$x) + (max(scores) * large.sd) -->
+<!--       # check to see if these values are LESS extreme than the -->
+<!--       # initial data - if so, use the initial data. -->
+<!--       #print(paste('lg.sd is:',large.sd,'max.x is:',max.x,'max nsc.x -->
+<!--       #     is:',max(nscore$trn.table$x))) -->
+<!--       if(min.x > min(nscore$trn.table$x)) {min.x <- min(nscore$trn.table$x)} -->
+<!--       if(max.x < max(nscore$trn.table$x)) {max.x <- max(nscore$trn.table$x)} -->
+<!--    } -->
+<!--    if(tails=='equal') { # assumes symmetric distribution around the mean -->
+<!--       mean.x <- mean(nscore$trn.table$x) -->
+<!--       sd.x <- sd(nscore$trn.table$x) -->
+<!--       min.x <- mean(nscore$trn.table$x) + (min(scores) * sd.x) -->
+<!--       max.x <- mean(nscore$trn.table$x) + (max(scores) * sd.x) -->
+<!--       # check to see if these values are LESS extreme than the -->
+<!--       # initial data - if so, use the initial data. -->
+<!--       if(min.x > min(nscore$trn.table$x)) {min.x <- min(nscore$trn.table$x)} -->
+<!--       if(max.x < max(nscore$trn.table$x)) {max.x <- max(nscore$trn.table$x)} -->
+<!--    } -->
+<!--    if(tails=='none') {   # No extrapolation -->
+<!--       min.x <- min(nscore$trn.table$x) -->
+<!--       max.x <- max(nscore$trn.table$x) -->
+<!--    } -->
+<!--    min.sc <- min(scores) -->
+<!--    max.sc <- max(scores) -->
+<!--    x <- c(min.x, nscore$trn.table$x, max.x) -->
+<!--    nsc <- c(min.sc, nscore$trn.table$nscore, max.sc) -->
 
-SrcBytes_norm = nscore(SrcBytes)$nscore
-SrcBytes_table = nscore(SrcBytes)$trn.table
+<!--    if(draw) {plot(nsc,x, main='Transform Function')} -->
+<!--    back.xf <- approxfun(nsc,x) # Develop the back transform function -->
+<!--    val <- back.xf(scores) -->
+<!--    return(val) -->
+<!-- } -->
 
-SrcPkts_norm = nscore(SrcPkts)$nscore
-SrcPkts_table = nscore(SrcPkts)$trn.table
+<!-- SrcBytes_norm = nscore(SrcBytes)$nscore -->
+<!-- SrcBytes_table = nscore(SrcBytes)$trn.table -->
 
-DstBytes_norm = nscore(DstBytes)$nscore
-DstBytes_table = nscore(DstBytes)$trn.table
+<!-- SrcPkts_norm = nscore(SrcPkts)$nscore -->
+<!-- SrcPkts_table = nscore(SrcPkts)$trn.table -->
 
-DstPkts_norm = nscore(DstPkts)$nscore
-DstPkts_table = nscore(DstPkts)$trn.table
-par(mfrow=c(2,2))
-hist(SrcBytes_norm); hist(SrcPkts_norm); hist(DstBytes_norm); hist(DstPkts_norm)
-```
+<!-- DstBytes_norm = nscore(DstBytes)$nscore -->
+<!-- DstBytes_table = nscore(DstBytes)$trn.table -->
 
-Finally, a normal scores transformation is applied to the dataset. The normal scores transformation reassigns each feature value so that it appears the overall data for that feature had arisen or been observed from a standard normal distribution. This transformation solves the issue of skewness-each value's histogram will now follow a standard gaussian density plot-, but it may cause issues with other analysis methods, particularly methods that are susceptible to ties in data. 
+<!-- DstPkts_norm = nscore(DstPkts)$nscore -->
+<!-- DstPkts_table = nscore(DstPkts)$trn.table -->
+<!-- par(mfrow=c(2,2)) -->
+<!-- hist(SrcBytes_norm); hist(SrcPkts_norm); hist(DstBytes_norm); hist(DstPkts_norm) -->
+<!-- ``` -->
 
-## Principal Component Analysis
+<!-- Finally, a normal scores transformation is applied to the dataset. The normal scores transformation reassigns each feature value so that it appears the overall data for that feature had arisen or been observed from a standard normal distribution. This transformation solves the issue of skewness-each value's histogram will now follow a standard gaussian density plot-, but it may cause issues with other analysis methods, particularly methods that are susceptible to ties in data.  -->
+
+## Principal Component Analysis 
 
 <!-- DEFINE NOTATION Let $X \in {\rm I\!R}^{m \times n}$  --> 
 

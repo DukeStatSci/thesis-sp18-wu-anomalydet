@@ -18,53 +18,58 @@
 
   All three of these scanning methods leave digital signatures in the networks they evaluate because they apply specific pings that are then stored in the host's network logs. Identifying a scanner's often many IP addresses from the set of pings available in the network's logs is thus an anomaly detection problem. In particular, because the data is unlabeled, meaning it is unclear which observations are actually scanners and which are just standard user behavior, unsupervised approaches are necessary for tackling the problem.
   
+  The goal of this paper is to devise and evaluate techniques to identify anomalies in incoming network connection data. These techniques will use existing data to inform the process of defining expected behavior between ports. New observations between port connections that are far away from the defined expected behavior may be considered anomalies and investigated for whether they are a form of network attack.
+  
 ## Network Dataset
 
-This particular dataset is from Duke University's Office of Information Technology (OIT), and it covers all observations in their network traffic during a five minute period in February 2017.
+This particular dataset is from Duke University's Office of Information Technology (OIT), and it includes 1048575 observations in their network traffic during a five minute period in February 2017.
+
+Argus is the open source network security tool that was used to collect the dataset. Argus focuses data collection on the interaction between different network ports. A network port is a number that identifies one side of a connection between two computers. Computers use port numbers to determine to which process or application a data message should be delivered. There exist 65,535 TCP (Transmission Control Protocol) ports. Using TCP, the computer sending the data connects directly to the computer it is sending data to, and stays connected for the duration of the transfer. Both computers have their own port number to identify their connection. In this dataset, the connections between two computers, known as sessions, are grouped by the IP address of the sender (the source). The bytes and packet values that are transmitted between two computers are accumulative over the set duration of the session's existence. Thus, each observation in the dataset contains data from a single session between two computers (the source address and destination address), each on their own source and destination port. Each session leaves a record with five numerical features and eight categorical features, which are described below.
 
 ### Features
 
-  The networks dataset contains 13 features, 8 categorical and 5 continuous, and the observations are unlabeled (not specified whether they are considered a scanner). The 13 features are: 
+The networks dataset contains 13 features, 8 categorical and 5 numerical. The features are: 
 
 **Continuous:**
 
-- StartTime (Start Time): the time when the observation is logged
-- SrcBytes (Source Bytes): the total number of bytes sent in the observation 
-- SrcPkts (Source Packets): the number of packets sent in the observation
-- DstBytes (Destination Bytes): the total number of bytes received in the observation
-- DstPkts (Destination Packets): the number of packets received in the observation
+- StartTime (Start Time): the time when the observation is logged.
+- SrcBytes (Source Bytes): the total number of bytes sent in the session
+- SrcPkts (Source Packets): the number of packets sent in the session
+- DstBytes (Destination Bytes): the total number of bytes received in the session
+- DstPkts (Destination Packets): the number of packets received in the session 
+
 Note, the destination packets and bytes features do not have the same values as their source counterparts because the connections are compressed and decompressed into different forms and byte sizes when sent. For instance, it is possible for the number of destination packets to be larger than source packets. It is also possible for information to be lost during the connection.
 
 **Categorical:**
 
-- Flgs (connection flag): flow state flags seen in transaction between the two addresses
+- Flgs (connection flag): flow state flags seen in transaction between the two addresses.
 - Proto (network protocol): specifies the rules used for information exchange via network addresses. Transmission Control Protocol (TCP) uses a set of rules to exchange messages with other Internet points at the information packet level, and Internet Protocol (IP) uses a set of rules to send and receive messages at the Internet address level.
-- SrcAddr (Source Address): the IP address of the connection's source 
-- DstAddr (Destination Address): the IP address of the connection's destination
-- Sport (Source Port): the network port number of the connection's source. A port numbers identifies the specific process to which a network message is forwarded when it arrives at a server. 
-- Dport (Destination Port): the network port number of the connection's destination 
-- Dir (direction): the direction of the connection 
-- State (connection state): a categorical assessment of the current phase in the transaction when the timestamp is recorded
+- SrcAddr (Source Address): the IP address of the connection's source computer.
+- DstAddr (Destination Address): the IP address of the connection's destination computer.
+- Sport (Source Port): the network port number of the connection's source computer. A port numbers identifies the specific process to which a network message is forwarded when it arrives at a server. 
+- Dport (Destination Port): the network port number of the connection's destination.
+- Dir (direction): the direction of the connection.
+- State (connection state): a categorical assessment of the current phase in the transaction when the timestamp is recorded.
 
-Note, the addresses have been anonymized for security reasons.
+The addresses have been anonymized for security reasons.
 
-### Argus
+### Removing Features
 
-  Argus is the open source network security tool applied to network transactions that collects the data for the features. The Argus wiki and the OIT manual provides key insights into the structure and nature of the data. Specifically, the sessions are clustered together by address, so the bytes and packets values are accumulative over a set duration and each session has its own start time but does not have a tracked end time. There exist 2-4 million connections on average every 5 minutes. Furthermore the protocol in this dataset is always gathered from TCP protocol and the direction will always be to the right (i.e. Source to Destination). This information supports dropping proto, StartTime, and Direction from the dataset for future analysis because they do not present any information regarding whether an observation can be considered an anomaly. Furthermore, the State feature may not be reliable because Argus occasionally resets the state data statistics during monitoring.
+   The Argus wiki and the OIT manual provide key insights into the structure and nature of the data. Each session has its own start time but does not have a recorded end time. Furthermore the protocol in this dataset is always TCP protocol and the direction is always to the right (i.e. Source to Destination). This information supports dropping "Proto", "StartTime", and "Dir" from the dataset for future analysis because they do not present any information regarding whether an observation can be considered an anomaly. Furthermore, the "State" and "Flgs" features may not be reliable because Argus occasionally resets the state data statistics and fails to assign connection flags to many connections during monitoring, so "State" and "Flgs" are also dropped. 
 
 ### Status Quo Solution
 
-  OIT's current solution for detecting scanners relies on specific domain knowledge gathered from diagnostics programs and data analysis completed on existing data. They prevent scanners by blocking IP addresses that fit certain rules they have constructed to run on every network transaction as it occurs. The specific checks in these rules are private for security reasons, but they belong to the nature of evaluating the size of transactions, repeated connections between particular ports, many pings from the same address, and combinations of these particular behaviors.
+  OIT's current solution for detecting scanners relies on specific domain knowledge gathered from diagnostics programs and data analysis completed on existing data. They prevent scanners by blocking IP addresses that violate certain rules. The specific conditional checks in these rules are private for security reasons, but they are similar to evaluating the size of transactions and detecting repeated connections between particular ports.
 
-  While this solution presents a methodical way for banning IP addresses and its method of rule checking is essentially removing what OIT considers outliers for network transactions-any observation that does not fit within the constraints specified by the rules is classified as an outlier and its source IP is blocked-it is inflexible, prone to detecting false negatives, and fails to detect  observations that may be within the parameter constraints of the rules but are anomalous with respect to other parameters or parameter constraints.
+  In this solution, any observation that does not fit within the constraints specified by the rules is classified as an anomaly and its source IP is blocked or investigated. While this solution presents a methodical way for banning IP addresses, it is inflexible, prone to detecting false negatives, and fails to detect observations that may be within the parameter constraints of the rules. The solution lacks a way to detect anomalies with respect to the parameters that are unspecified in the rules or combinations of parameters.
 
 ## Problem Formulation
 
   Preliminary data analysis indicated that there may exist patterns and regularities between different port combinations. For instance, a particular source and destination port may frequently contain large byte transactions in their connections. Devising a systematic way to identify expected or "regular" interactions between particular combinations may present outliers that can be further investigated for scanner behavior. 
 
-  This approach to the anomaly detection problem reduces the dataset to the values of the four continuous features, SrcBytes, SrcPkts, DstBytes, DstPkts, observed across different source port and destination port combinations. The data can be represented as a 3-dimensional tensor $T \in \mathbb{R}^{m \times n \times 4}$ where $m$ represents the number of source ports, $n$ represents the number of destination ports, and $4$ accounts for the four continuous features in the dataset. Each cell, $t_{ijk}$, contains the mean of all the observations observed between the source port at index $i$ and destination port at index $j$. In the cases where the combination of $i$ and $j$ is not observed in the dataset, $t_{ijk}$ is considered missing (NA). Note, the data is collected in a way where either all four continuous features are observed, or none are observed, i.e. a missing cell, $t_{ij1}$ indicates $t_{ij2}$, $t_{ij3}$, and $t_{ij4}$ are also missing.
+  This approach to the anomaly detection problem reduces the dataset to the values of the four continuous features, SrcBytes, SrcPkts, DstBytes, DstPkts, observed across different source port (SrcPort) and destination port (DstPort) combinations. The data can be represented as a 3-dimensional tensor $T \in \mathbb{R}^{m \times n \times 4}$ where $m$ represents the number of source ports, $n$ represents the number of destination ports, and $4$ accounts for the four continuous features in the dataset. Each cell, $t_{ijk}$, contains the mean of all the observations observed between the source port at index $i$ and destination port at index $j$. In the cases where the combination of $i$ and $j$ is not observed in the dataset, $t_{ijk}$ is considered missing (NA). Note, the data is collected in a way where either all four continuous features are observed, or none are observed, i.e. a missing cell, $t_{ij1}$ indicates $t_{ij2}$, $t_{ij3}$, and $t_{ij4}$ are also missing.
 
-  The goal of this paper is to devise and assess strategies for calculating a reasonable estimate for the missing cells in $T$ to create the completed tensor $T' \in \mathbb{R}^{m \times n \times 4}$. As new observations are observed for combinations of source ports at index $i$ and destination ports at index $j$, the $t'_{ijk}$ values can be interpreted as an approximation for the expected behavior for that particular port combination. Observations with continuous features that are a certain threshold away from $t'_{ijk}$ may be marked as anomalies and investigated further. 
+  The goal of this paper is to devise and assess techniques for calculating a reasonable estimate for the missing cells in $T$ to create the completed tensor $T' \in \mathbb{R}^{m \times n \times 4}$. As new observations are observed for combinations of source ports at index $i$ and destination ports at index $j$, the $t'_{ijk}$ values can be interpreted as an approximation for the expected behavior for that particular port combination. Observations with continuous features that are a certain threshold away from $t'_{ijk}$ may be marked as anomalies and investigated further. 
 
 
 ## Introduction of Methods

@@ -1,5 +1,4 @@
 # Modeling Port Relationships 
-
 ```{r, include=FALSE}
 library(lattice)
 library(reshape)
@@ -51,7 +50,7 @@ levelplot(missing,xlab = "Source Ports", ylab = "Destination Ports", scales=list
           main = "Missingness in Port Interactions", col.regions=gray(0:1,1),cuts=1, colorkey = FALSE)
 ```
 
-The above matrix represents the missingness in the port combinations for pairings of the top 20 most used source ports and destination ports. The black cells represent missingness; of the 400 cells in the matrix, 295 (73.75%) of cells are missing observations. This single matrix slice can be extrapolated to missingness in ports throughout the entire tensor because the dataset is collected in a way such that either all four continuous features are observed, or none are observed. It is important to note that missingness is not uniform across source and destination port combinations. In the event that an entire row or column of port combinations is missing, the port at that respective index will need to be discarded because all three completion techniques depend on the row and column effects when simulating a value for a missing cell. 
+The above plot represents the missingness in the port combinations for pairings of the top 20 most used source ports and destination ports. The black cells represent missingness; of the 400 cells in the matrix, 295 (73.75%) of cells are missing observations. This single matrix slice can be extrapolated to missingness in ports throughout the entire tensor because the dataset is collected in a way such that either all four continuous features are observed, or none are observed. It is important to note that missingness is not uniform across source and destination port combinations. In the event that an entire row or column of port combinations is missing, the port at that respective index will need to be discarded because all three completion techniques depend on the row and column effects when simulating a value for a missing cell. 
 
 ## Port Connections
 
@@ -191,7 +190,7 @@ The matrix above describes the Kendall rank correlations (commonly referred to a
 
 It is clear there exist strong correlations between the four continuous features, DstBytes and DstPkts in particular. This behavior suggests a technique that produces estimates for the missing cells with all four features considered at once (i.e. a technique that simulates the entire tensor as a whole rather than in slices) will also be valuable.
 
-Additional data analysis, including principal component analysis of the cells and the exploration of the different scale transformations, can be found in the Appendix.
+<!-- Additional data analysis, including principal component analysis of the cells and the exploration of the different scale transformations, can be found in the Appendix. -->
 
 <!-- ### Principal Component Analysis/Dimensionality Reduction -->
 

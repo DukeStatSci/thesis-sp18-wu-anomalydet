@@ -4,21 +4,21 @@
 
   Anomaly detection is the identification of unusual patterns or observations that do not conform to expected behavior in a dataset. Anomalies can be broadly categorized into three categories:
 
-  Point anomalies: A single instance of data is anomalous if it's too far off from the rest. For example detecting credit card fraud based on a single spending spree that represents the credit card being stolen and used.
+-Point anomalies: A single instance of data is anomalous if it's too far off from the rest. For example detecting credit card fraud based on a single spending spree that represents the credit card being stolen and used.
 
-  Contextual anomalies: The abnormality is context specific. This type of anomaly is common in time-series data. For instance, high spending on food and gifts every day during the holiday season is normal, but may be considered unusual otherwise.
+-Contextual anomalies: The abnormality is context specific. This type of anomaly is common in time-series data. For instance, high spending on food and gifts every day during the holiday season is normal, but may be considered unusual otherwise.
 
-  Collective anomalies: A set of data observations that when collectively assessed helps in detecting anomalies. For instance, repeated pings from a certain IP address to a port connection on a hosted network may be classified as a port scanner, which often preludes a network attack. 
+-Collective anomalies: A set of data observations that when collectively assessed helps in detecting anomalies. For instance, repeated pings from a certain IP address to a port connection on a hosted network may be classified as a port scanner, which often preludes a network attack. 
 
 ##Network Attacks 
 
   Network security is becoming increasingly relevant as the flow of data, bandwith of transactions, and user dependency on hosted networks increase. As entire networks grow in nodes and complexity, attackers gain easier entry points of access to the network. The most benign of attackers attempt to shutdown networks (e.g. causing a website to shutdown with repeated pings to its server), while more malicious attempts involve hijacking the server to publish the attacker's own content or stealing unsecured data from the server, thus compromising the privacy of the network's users.
 
-  Attackers follow a specific three step strategy when gathering intelligence on a network, the most important component of which is scanning. Network scanning is a procedure for identifying active hosts on a network. An attacker uses two particular types of scans, ping sweeps and port scans, to find information about the specific IP addresses that can be accessed over the Internet, their target's operating systems, system architecture, and the services running on each node/computer in the network. Another scanning method, inverse mapping, returns information about what IP addresses do not map to live hosts; this enables an attacker to make assumptions about viable addresses.
+  Network attackers follow a specific three step strategy when gathering intelligence on a network, the most important component of which is scanning. Network scanning is a procedure for identifying active hosts on a network. An attacker uses two particular types of scans, ping sweeps and port scans, to find information about the specific IP addresses that can be accessed over the Internet, their target's operating systems, system architecture, and the services running on each node/computer in the network. 
 
-  All three of these scanning methods leave digital signatures in the networks they evaluate because they apply specific pings that are then stored in the host's network logs. Identifying a scanner's often many IP addresses from the set of pings available in the network's logs is thus an anomaly detection problem. In particular, because the data is unlabeled, meaning it is unclear which observations are actually scanners and which are just standard user behavior, unsupervised approaches are necessary for tackling the problem.
+  These scanning methods leave digital signatures in the networks they evaluate because they apply specific pings that are then stored in the host's network logs. Thus, identifying a scanner or scanners from the millions of observed pings available in the network's logs is an anomaly detection problem. In particular, because the data is unlabeled, meaning it is unclear which observations are actually scanners and which are just standard user behavior, unsupervised approaches are necessary for tackling the problem.
   
-  The goal of this paper is to devise and evaluate techniques to identify anomalies in incoming network connection data. These techniques will use existing data to inform the process of defining expected behavior between ports. New observations between port connections that are far away from the defined expected behavior may be considered anomalies and investigated for whether they are a form of network attack.
+  The goal of this paper is to devise and evaluate techniques that use existing data to define expected behavior between ports. New observations between port connections that are far away from the defined expected behavior may be considered anomalies and investigated for whether they are a form of network attack.
   
 ## Network Dataset
 

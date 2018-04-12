@@ -12,7 +12,7 @@ Bayesian methods are becoming increasingly popular as a matrix completion techni
 
 The following statistical model is defined for the cells in $Y$: $$y_{ij} = u_i^Tv_j + \frac{\sigma_i \tau_j}{\sqrt{s_{ij}}}\epsilon_{ij}$$ where $u_i$ represents the row factors, $v_j$ represents the column factors, $\sigma_i$ represents the standard deviation of each row in the matrix, $\tau_j$ represents the standard deviations of each column in the matrix, $s_{ij}$ represents the sample size of observations observed for source port $i$ and destination port $j$, and $\epsilon_{ij} \sim N(0,1)$. Fixing the $j$ values in the analysis (i.e. $v_j$ and $\tau_j$ are known) enables the model to be rewritten in the form of a weighted least squares model for estimating $u_i$ and $\sigma_i$. Similarly, when $i$ is fixed, the model can be rewritten to estimate $v_j$ and $\tau_j$. To demonstrate this property, the procedure for estimating $u_i$ and $\tau_j$ given known values for $v_j$ and $\tau_j$ is described below. The same procedure is possible for $v_j$ and $\tau_j$ when $u_i$ and $\sigma_i$ are known.
 
-## General Model for Simulating Row and Column Factors
+## General Linear Model for Simulating Row and Column Factors
 
 Varying $j = 1 ... n$ the model above yields the following cell values: 
 $$y_{i1} = u_i^Tv_1 + \frac{\sigma_i \tau_1}{\sqrt{s_{i1}}}\epsilon_{i1}$$ 
@@ -94,7 +94,7 @@ Set $\phi^{(s+1)} = \{\beta^{(s+1)}, \sigma^{2(k+1)}\}$
 
 This Gibbs sampler serves as a general technique that can be used to simulate both the values of $u_i$ and $\sigma_i$ or $v_j$ and $\tau_j$ depending on the inputs it is given because the formulation of both models are identical; they only differ by the the inputs, $X$ and $W$, which are calculated, and $y$ which is sliced directly from $Y$. In the context of the problem, this function can first be called repeatedly to simulate all of the rows in the matrix $Y$, then called repeatedly with updated inputs to simulate all of the columns of the matrix. 
 
-### Validation Simulated Data
+### Validation on Simulated Data
 
 Before using the general Gibbs sampler function in the overall procedure for simulating missing values in $Y$, it is necessary to validate the procedure's effectiveness on simulated data where the ground truth is known. As the algorithm runs, it stores a matrix of $\beta$ vectors and a vector of $\sigma^2$ scalars. Thus, if $S = 50$, i.e. the algorithm samples 50 $\beta$ and 50 $\sigma$, the final returned output will be 
 $$\beta =
@@ -128,7 +128,8 @@ abline(0,1)
 
 In particular, the posterior mean of $\sigma^2$ is calculated by taking the mean of the function's output of $\sigma^2$. This posterior mean is compared to the original $\sigma *$ used to generate $\vec{y}$. Repeatedly performing this procedure reveals the posterior mean only differs from the ground truth value by 1-2% in almost every single trial.
 
-Recovering the original $\beta *$ provides a much more defined procedure for evaluating the performance of the Gibbs Sampler. First, the Bayes estimator (the posterior mean of generated $\beta$s) should be close to the GLS estimator and theoretical results state the GLS estimator serves as a good approximation for the true value. Furthermore, the variance matrix of the GLS estimator around the true value is $$Var(\hat{\beta}_{GLS}) = \mathbb{E}[(\hat{\beta}_{GLS}-\beta * )(\hat{\beta}_{GLS}-\beta *)^T]=(X^T W^{-1}X/\sigma^2 )^{-1}$$.  Thus, after simulating many data sets and solving for the posterior mean estimator, $\hat{\beta}$, the variance of these simulated posterior means, $Var(\hat{\beta})$ should be close to $(X^T W^{-1}X/\sigma^2 )^{-1}$. Moreover, the standard errors are calculated $$SE(\hat{\beta}_{GLS}) = \sqrt{diag((X^T W^{-1}X/\sigma^2 )^{-1})}$$ This provides a nominal 95% confidence interval for which to assess the performance of the model for recovering the original $\beta *$. 
+Recovering the original $\beta *$ provides a much more defined procedure for evaluating the performance of the Gibbs Sampler. First, the Bayes estimator (the posterior mean of generated $\beta$s) should be close to the GLS estimator and theoretical results state the GLS estimator serves as a good approximation for the true value. Furthermore, the variance matrix of the GLS estimator around the true value is $$Var(\hat{\beta}_{GLS}) = \mathbb{E}[(\hat{\beta}_{GLS}-\beta * )(\hat{\beta}_{GLS}-\beta *)^T]=(X^T W^{-1}X/\sigma^2 )^{-1}$$
+Thus, after simulating many data sets and solving for the posterior mean estimator, $\hat{\beta}$, the variance of these simulated posterior means, $Var(\hat{\beta})$ should be close to $(X^T W^{-1}X/\sigma^2 )^{-1}$. Moreover, the standard errors are calculated $$SE(\hat{\beta}_{GLS}) = \sqrt{diag((X^T W^{-1}X/\sigma^2 )^{-1})}$$ This provides a nominal 95% confidence interval for which to assess the performance of the model for recovering the original $\beta *$. 
 <!-- The simulation procedure was able to recover a large percentage of the $\beta *$ values that resulted -->
 
 <!-- run the algorithm more than 10 times, check that the beta posterior mean (column means of the beta matrix object) -->
@@ -152,11 +153,32 @@ Repeat the following:
 
 The dimension of the latent factors, $p$, is used to define the dimension of $\beta \in \mathbb{R}^{p \times 1}$ and consequently defines the dimensions of the row and column factor matrices $U$ and $V$. Selecting $p$ is a model selection choice similar to determining the optimal low rank approximation $r$ in the previous section. Once again, Leave One Out Cross Validation may be used to detemine the optimal $p$ given the observed data. In this technique, it is more computationally expensive than the previous technique to perform Leave One Out Cross Validation on the entire dataset, so K-Fold cross validation or randomly selecting a set number of observed cells to set to missing for determining $p$ is also valid.
 
-### Validation on Simulated Data
+<!-- ### Validation on Simulated Data -->
 
-Again it is necessary to validate the effectiveness of the overall sampling procedure with simulated data where the ground truth is known. Simulate matrices $U$ and $V$ such that $\Theta = UV^T$ is truly low rank. The same procedure for generating low rank matrices used in the previous chapter can be applied here. Using $\Theta$ there are two possible tests for determining the validity of the sampling procedure. First, the simulated data is used to recover the true values for $UV^T$ from the model. This is considered an idealized case for testing the procedure. Second, some cells are set to missing and again the procedure is used to obtain an estimate for $UV^T$ from the model. This output is compared to the previous case's output to evaluate the performance depending on whether the cells have data or do not. 
+<!-- Again it is necessary to validate the effectiveness of the overall sampling procedure with simulated data where the ground truth is known. Simulate matrices $U$ and $V$ such that $\Theta = UV^T$ is truly low rank. The same procedure for generating low rank matrices used in the previous chapter can be applied here. Using $\Theta$ there are two possible tests for determining the validity of the sampling procedure. First, the simulated data is used to recover the true values for $UV^T$ from the model. This is considered an idealized case for testing the procedure. Second, some cells are set to missing and again the procedure is used to obtain an estimate for $UV^T$ from the model. This output is compared to the previous case's output to evaluate the performance depending on whether the cells have data or do not.  -->
 
-<!-- ## Results on the Real Data -->
+## Results on Real Data
 
+```{r,echo=FALSE,fig.width = 7,fig.height=3}
+Y = readRDS("data/means_SB.rds")
+Y_imputed = readRDS("data/Y_imputed.rds")
+Y_imputed[Y_imputed < 0] = 0
+# Y_cap = Y
+# Y_cap[Y > 600000] = 600000
+# Y_cap_imputed = Y_imputed
+# Y_cap_imputed[Y_imputed > 600000] = 600000
+# logY_imputed = log(Y_imputed)
+# logY_imputed[logY_imputed < 0] = 0
+g1 = levelplot(Y,col.regions = heat.colors(16)[length(heat.colors(16)):1],
+               scales=list(x=list(at=NULL),y=list(at=NULL)),
+               main="SrcByte Means",xlab="SrcPorts",ylab="DstPorts"
+               )
+g2 = levelplot(Y_imputed,col.regions = heat.colors(16)[length(heat.colors(16)):1],
+               scales=list(x=list(at=NULL),y=list(at=NULL)),
+               main="Estimated SrcByte Means",xlab="SrcPorts",ylab="DstPorts")
+grid.arrange(g1,g2,ncol=2)
+```
 
+The above plots show the original matrix (left) and the completed matrix (right) using the full estimation procedure. The estimated means all fall within the range of the existing means (approximately 50000-400000). There exist several apparent patterns in the rows and columns of the estimated matrix, but these patterns are most likely the result of the full estimation procedure estimating $U$ (matrix of row factors), $V$ (matrix of column factors), then the missing values of $Y$. In terms of the networks data domain, it makes sense for certain ports to have more traffic (so the entire row/column is darker in the estimated matrix).
 
+The fit still stands to improve using improved model selection, but in this case achieving the optimal sampling procedure is limited by available computational resources. For instance, using cross validation to select the optimal dimension of latent factors, $p$, would likely improve the fit of the model. However, running LOOCV using the sampling technique is computationally expensive. Moreover, increasing the overall number of iterations of the full estimation procedure (it is currently at $S = 100$) may also improve the model fit. Work done by Raftery and Lewis (1992) suggests that "reasonable accuracy [with a Gibbs Sampler] may often be achieved with 5,000 iterations or less; this can frequently be reduced to less than 1,000 if the posterior tails are known to be light." 

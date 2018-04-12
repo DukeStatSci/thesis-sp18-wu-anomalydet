@@ -91,7 +91,7 @@ M = readRDS("data/freqs.rds")
 m = nrow(Y)
 n = ncol(Y)
 
-S = 10 #number of iterations
+S = 50 #number of iterations
 ##Set initial Values
 mu = mean(Y, na.rm = TRUE) #overall mean
 psi = sd(Y, na.rm = TRUE) #overall sd
@@ -131,7 +131,7 @@ for (s in 1:S){
       }
     }
     y = Y[i,]
-    S_U = 3
+    S_U = 2
     PHI  = gibbs_sampler(V, y, W, SIGMA[i], S_U)
     U[i,] = PHI$BETAs[S_U,]
     SIGMA[i] = sqrt(PHI$INV_SIGMA2s[S_U])
@@ -146,7 +146,7 @@ for (s in 1:S){
       }
     }
     y = Y[,j]
-    S_V = 3
+    S_V = 2
     PHI  = gibbs_sampler(U, y, W, SIGMA[j], S_V)
     V[j,] = PHI$BETAs[S_V,]
     TAU[j] = sqrt(PHI$INV_SIGMA2s[S_V])
@@ -154,18 +154,13 @@ for (s in 1:S){
   #impute y
   for (i in 1:m){
     for (j in 1:n){
-      # if (M[i,j] == 0){
-      #   u_i = U[i,]
-      #   v_j = V[j,]
-      #   sigma_i = SIGMA[i]
-      #   tau_j = TAU[j]
-      #   Y[i,j] = rnorm(1, t(u_i) * v_j, sigma_i * tau_j) ##how does u_i and v_j become scalar????
-      # }
-      u_i = U[i,]
-      v_j = V[j,]
-      sigma_i = SIGMA[i]
-      tau_j = TAU[j]
-      Y[i,j] = rnorm(1, t(u_i) * v_j, sigma_i * tau_j) ##how does u_i and v_j become scalar????
+      if (M[i,j] == 0){
+        u_i = U[i,]
+        v_j = V[j,]
+        sigma_i = SIGMA[i]
+        tau_j = TAU[j]
+        Y[i,j] = rnorm(1, t(u_i) %*% v_j, sigma_i * tau_j)
+      }
     }
   }
 }
@@ -181,9 +176,9 @@ for (s in 1:S){
 #matrix Theta is truly low rank, that is, Theta=UV' for
 #some tall skinny matrices U and V
 
-U = matrix(rnorm(m * p, mean=mu, sd=psi), m, p) 
-V = matrix(rnorm(n * p, mean=0, sd=psi), n, p)
-THETA = U %*% t(V)
+# U = matrix(rnorm(m * p, mean=mu, sd=psi), m, p) 
+# V = matrix(rnorm(n * p, mean=0, sd=psi), n, p)
+# THETA = U %*% t(V)
 
 # (a) Try to recover UV' from a full data set using your
 # Gibbs sampler. This is the idealized case.
@@ -193,5 +188,29 @@ THETA = U %*% t(V)
 # UV' in this case. How much worse do you do than
 # in (a)? Do you do better for the cells for which
 # you have data, than for the cells where you don't have data?
+
+
+library(gridExtra)
+Y = readRDS("data/means_SB.rds")
+Y_imputed = readRDS("data/Y_imputed.rds")
+Y_imputed[Y_imputed < 0] = 0
+# Y_cap = Y
+# Y_cap[Y > 600000] = 600000
+# Y_cap_imputed = Y_imputed
+# Y_cap_imputed[Y_imputed > 600000] = 600000
+logY_imputed = log(Y_imputed)
+logY_imputed[logY_imputed < 0] = 0
+g1 = levelplot(log(Y),col.regions = heat.colors(16)[length(heat.colors(16)):1],
+               scales=list(x=list(at=NULL),y=list(at=NULL)),
+               main="SrcByte Means (log scale)",xlab="SrcPorts",ylab="DstPorts")
+g2 = levelplot(logY_imputed,col.regions = heat.colors(16)[length(heat.colors(16)):1],
+               scales=list(x=list(at=NULL),y=list(at=NULL)),
+               main="Estimated SrcByte Means (log scale)",xlab="SrcPorts",ylab="DstPorts")
+grid.arrange(g1,g2,ncol=2)
+Var = readRDS("data/vars_SB.rds")
+SIGMA2 = SIGMA^2
+TAU2 = TAU^2
+VAR_EST = SIGMA %o% TAU #outer product
+
 
 

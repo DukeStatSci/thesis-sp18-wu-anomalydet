@@ -31,7 +31,7 @@ The following section describes the way techniques in the previous sections may 
 
 ## PARAFAC Decomposition
 
-The PARAFAC decomposition expresses the tensor as: $$T = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r$$ where $r$ represents the rank approximation, $\cdotp$ denotes the outer product of tensors, and $U \in \mathbb{R}^{m \times r}$, $V \in \mathbb{R}^{n \times r}$, and $W \in \mathbb{R}^{4 \times r}$. Each individual cell is expressed: $$t_{ijk} = \sum_{r=1}^RU_{ri} \cdotp V_{ri} \cdotp W_{ri}$$ Applying this decomposition yields the objective $$\underset{T'} {\text{min}}\|T-T'\|$$ where $$T' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)$$ and $\lambda_r$ is the regularization penalty.
+The PARAFAC decomposition expresses the tensor as: $$T = \sum_{r=1}^Ru_r \cdotp v_r \cdotp w_r$$ where $r$ represents the rank approximation, $\cdotp$ denotes the outer product of tensors, and $U \in \mathbb{R}^{m \times r}$, $V \in \mathbb{R}^{n \times r}$, and $W \in \mathbb{R}^{4 \times r}$. Each individual cell is expressed: $$t_{ijk} = \sum_{r=1}^RU_{ri} \cdotp V_{rj} \cdotp W_{rk}$$ Applying this decomposition yields the objective $$\underset{T'} {\text{min}}\|T-T'\|$$ where $$T' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)$$ and $\lambda_r$ is the regularization penalty.
 
 The PARAFAC Decomposition also operates under several limiting assumptions. PARAFAC assumes the low rank matrix slices of the tensor are multiples of one another, which puts strong constraints on the similarity between the slices. There exists more flexibility with the model in chapter 4 because  each matrix can be a different rank.
 
@@ -75,4 +75,5 @@ Future work will use the PARAFAC decomposition and the Gaussian statistical mode
 
 
 
+$$T \in \mathbb{R}^{m \times n \times l}, Q \in \mathbb{R}^{m \times n \times l}$$
 

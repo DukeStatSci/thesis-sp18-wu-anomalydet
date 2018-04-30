@@ -313,7 +313,8 @@ Y = readRDS("data/log_src_byte_Y.rds")
 # [1] 3.541428
 rmses_log = c(1.444161,1.913014, 2.249744, 2.285776, 
               2.483833, 2.72687,3.167227, 3.541428)
-plot (seq(1,8,1), rmses_log)
+plot (seq(1,8,1), rmses_log,xlab = "Matrix Rank", ylab = "Root Mean Square Errors",
+      main = "Leave One Out Cross Validation for Matrix Ranks")
 ```
 
 Now the optimal rank from the LOOCV procedure is 1. The algorithm is run on the log transformed dataset with a low rank approximation of 1 and the fitted versus observed values are again compared.
@@ -323,10 +324,12 @@ Y_imputed = matrix_complete(250, 1, nrow(Y), ncol(Y), Y, M)
 par(mfrow = c(1,2))
 exp_Y = exp(Y)
 exp_Y_imp = exp(Y_imputed)
-plot(exp_Y[!is.na(exp_Y)], exp_Y_imp[!is.na(exp_Y)])
+plot(exp_Y[!is.na(exp_Y)], exp_Y_imp[!is.na(exp_Y)], xlab = "Observed Values of Y", 
+     ylab = "Fitted Values of Y", main = "Observed vs Fitted Values Y")
 abline(0,1, col = "red")
 plot(exp_Y[!is.na(exp_Y)], exp_Y_imp[!is.na(exp_Y)], 
-     xlim = c(0,1000), ylim = c(0,1000))
+     xlim = c(0,1000), ylim = c(0,1000), xlab = "Observed Values of Y (max 1000)", ylab = "Fitted Values of Y (max 1000)", 
+     main = "Observed vs Fitted Values Y")
 abline(0,1, col = "red")
 ```
 

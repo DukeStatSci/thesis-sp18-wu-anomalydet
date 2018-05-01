@@ -1140,17 +1140,41 @@ set to missing for determining \(p\) is also valid.
 \section{Results on Real Data}\label{results-on-real-data-1}
 
 \includegraphics{thesis_files/figure-latex/unnamed-chunk-17-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-18-1.pdf}
 
 The above plots show the original matrix (left) and the completed matrix
-(right) using the full estimation procedure. The estimated means all
-fall within the range of the existing means (approximately
-50000-400000). There exist several apparent patterns in the rows and
-columns of the estimated matrix, but these patterns are most likely the
-result of the full estimation procedure estimating \(U\) (matrix of row
-factors), \(V\) (matrix of column factors), then the missing values of
-\(Y\). In terms of the networks data domain, it makes sense for certain
-ports to have more traffic (so the entire row/column is darker in the
-estimated matrix).
+(right) using the full estimation procedure. The white cells in the left
+plot indicate missingness. The estimated means all fall within the range
+of the existing means (approximately 50000-400000). There exist several
+apparent patterns in the rows and columns of the estimated matrix, but
+these patterns are most likely the result of the full estimation
+procedure estimating \(U\) (matrix of row factors), \(V\) (matrix of
+column factors), then the missing values of \(Y\). Because the model is
+made up of the product row and column effects, a large row effect is
+propagated throughout all entries in a row and similarly for column
+effects, resulting in the checkerboard pattern displayed. In terms of
+the networks data domain, it makes sense for certain ports to have more
+traffic (so the entire row/column is darker in the estimated matrix).
+
+\subsection{Scale Transformations}\label{scale-transformations-1}
+
+Like in ALS, large outlier values in the row and column means may skew
+the row effects and column effects for this Gibbs sampling procedure, so
+the entire procedure is performed again with the initial values in the
+dataset log transformed. The below plots represent the results of
+feeding the log transformed dataset into the full estimation procedure
+and then exponentiating the completed matrix to return it to the same
+scale as the original data.
+
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-19-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-20-1.pdf}
+
+Taking the log transform reduces the effects of the large row and column
+means on the estimation procedure for the row and column effects. Thus,
+the row and column effects are less pronounced, resulting in the
+checkerboard pattern being muted in the results on the right. The
+sampled once again fall within a reasonable range of the existing means
+(approximately 50000-400000).
 
 The fit still stands to improve using improved model selection, but in
 this case achieving the optimal sampling procedure is limited by
@@ -1170,7 +1194,7 @@ known to be light.''
 Recall the analysis of correlations between the continuous features in
 \(T\) in chapter 2.
 
-\includegraphics{thesis_files/figure-latex/unnamed-chunk-18-1.pdf}
+\includegraphics{thesis_files/figure-latex/unnamed-chunk-21-1.pdf}
 
 The strong correlations between the individual continuous features
 suggests imputing the tensor \(T\) all at once may yield closer
@@ -1189,7 +1213,7 @@ The PARAFAC decomposition expresses the tensor as:
 rank approximation, \(\cdotp\) denotes the outer product of tensors, and
 \(U \in \mathbb{R}^{m \times r}\), \(V \in \mathbb{R}^{n \times r}\),
 and \(W \in \mathbb{R}^{4 \times r}\). Each individual cell is
-expressed: \[t_{ijk} = \sum_{r=1}^RU_{ri} \cdotp V_{ri} \cdotp W_{ri}\]
+expressed: \[t_{ijk} = \sum_{r=1}^RU_{ri} \cdotp V_{rj} \cdotp W_{rk}\]
 Applying this decomposition yields the objective
 \[\underset{T'} {\text{min}}\|T-T'\|\] where
 \[T' = \sum_{r=1}^R\lambda_r(u_r \cdotp v_r \cdotp w_r)\] and
@@ -1246,6 +1270,8 @@ respective standard deviations described in the model. Like the previous
 techniques, each of these technique's validity will first be tested on
 simulated data where the ground truth is known before being applied to
 the real dataset.
+
+\[T \in \mathbb{R}^{m \times n \times l}, Q \in \mathbb{R}^{m \times n \times l}\]
 
 \chapter*{Discussion}\label{discussion}
 \addcontentsline{toc}{chapter}{Discussion}

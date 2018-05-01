@@ -159,7 +159,7 @@ The dimension of the latent factors, $p$, is used to define the dimension of $\b
 
 ## Results on Real Data
 
-```{r,echo=FALSE,fig.width = 7,fig.height=3}
+```{r,echo=FALSE}
 Y = readRDS("data/means_SB.rds")
 Y_imputed = readRDS("data/Y_imputed.rds")
 Y_imputed[Y_imputed < 0] = 0
@@ -169,16 +169,39 @@ Y_imputed[Y_imputed < 0] = 0
 # Y_cap_imputed[Y_imputed > 600000] = 600000
 # logY_imputed = log(Y_imputed)
 # logY_imputed[logY_imputed < 0] = 0
-g1 = levelplot(Y,col.regions = heat.colors(16)[length(heat.colors(16)):1],
-               scales=list(x=list(at=NULL),y=list(at=NULL)),
-               main="SrcByte Means",xlab="SrcPorts",ylab="DstPorts"
-               )
-g2 = levelplot(Y_imputed,col.regions = heat.colors(16)[length(heat.colors(16)):1],
-               scales=list(x=list(at=NULL),y=list(at=NULL)),
+levelplot(Y,scales=list(x=list(at=NULL),y=list(at=NULL)),
+               main="SrcByte Means",xlab="SrcPorts",ylab="DstPorts")
+```
+```{r,echo=FALSE}
+levelplot(Y_imputed, scales=list(x=list(at=NULL),y=list(at=NULL)),
                main="Estimated SrcByte Means",xlab="SrcPorts",ylab="DstPorts")
-grid.arrange(g1,g2,ncol=2)
 ```
 
-The above plots show the original matrix (left) and the completed matrix (right) using the full estimation procedure. The estimated means all fall within the range of the existing means (approximately 50000-400000). There exist several apparent patterns in the rows and columns of the estimated matrix, but these patterns are most likely the result of the full estimation procedure estimating $U$ (matrix of row factors), $V$ (matrix of column factors), then the missing values of $Y$. In terms of the networks data domain, it makes sense for certain ports to have more traffic (so the entire row/column is darker in the estimated matrix).
+The above plots show the original matrix (left) and the completed matrix (right) using the full estimation procedure. The white cells in the left plot indicate missingness. The estimated means all fall within the range of the existing means (approximately 50000-400000). There exist several apparent patterns in the rows and columns of the estimated matrix, but these patterns are most likely the result of the full estimation procedure estimating $U$ (matrix of row factors), $V$ (matrix of column factors), then the missing values of $Y$. Because the model is made up of the product row and column effects, a large row effect is propagated throughout all entries in a row and similarly for column effects, resulting in the checkerboard pattern displayed. In terms of the networks data domain, it makes sense for certain ports to have more traffic (so the entire row/column is darker in the estimated matrix).
+
+### Scale Transformations
+
+Like in ALS, large outlier values in the row and column means may skew the row effects and column effects for this Gibbs sampling procedure, so the entire procedure is performed again with the initial values in the dataset log transformed. The below plots represent the results of feeding the log transformed dataset into the full estimation procedure and then exponentiating the  completed matrix to return it to the same scale as the original data.
+
+```{r,echo=FALSE}
+Y = readRDS("data/means_SB.rds")
+Y_imputed = readRDS("data/exp_Y_imputed.rds")
+# Y_cap = Y
+# Y_cap[Y > 600000] = 600000
+# Y_cap_imputed = Y_imputed
+# Y_cap_imputed[Y_imputed > 600000] = 600000
+# logY_imputed = log(Y_imputed)
+# logY_imputed[logY_imputed < 0] = 0
+levelplot(Y,scales=list(x=list(at=NULL),y=list(at=NULL)),
+               main="SrcByte Means",xlab="SrcPorts",ylab="DstPorts")
+```
+```{r,echo=FALSE}
+levelplot(Y_imputed, scales=list(x=list(at=NULL),y=list(at=NULL)),
+               main="Estimated SrcByte Means (Log Transformed)",xlab="SrcPorts",ylab="DstPorts")
+
+```
+
+Taking the log transform reduces the effects of the large row and column means on the estimation procedure for the row and column effects. Thus, the row and column effects are less pronounced, resulting in the checkerboard pattern being muted in the results on the right. The sampled once again fall within a reasonable range of the existing means (approximately 50000-400000). 
 
 The fit still stands to improve using improved model selection, but in this case achieving the optimal sampling procedure is limited by available computational resources. For instance, using cross validation to select the optimal dimension of latent factors, $p$, would likely improve the fit of the model. However, running LOOCV using the sampling technique is computationally expensive. Moreover, increasing the overall number of iterations of the full estimation procedure (it is currently at $S = 100$) may also improve the model fit. Work done by Raftery and Lewis (1992) suggests that "reasonable accuracy [with a Gibbs Sampler] may often be achieved with 5,000 iterations or less; this can frequently be reduced to less than 1,000 if the posterior tails are known to be light." 
+
